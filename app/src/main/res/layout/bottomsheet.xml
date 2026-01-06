@@ -27,6 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/add_notes"
+            android:tint="@color/black"
             />
 
         <TextView
@@ -35,6 +36,7 @@
             android:text="add text"
             android:layout_marginLeft="30dp"
             android:textSize="16sp"
+            android:textColor="@color/black"
             />
     </LinearLayout>
 
@@ -49,6 +51,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/link"
+            android:tint="@color/black"
             />
 
         <TextView
@@ -57,6 +60,7 @@
             android:text="import from url"
             android:layout_marginLeft="30dp"
             android:textSize="16sp"
+            android:textColor="@color/black"
             />
     </LinearLayout>
 
@@ -71,6 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/upload_file"
+            android:tint="@color/black"
             />
 
         <TextView
@@ -79,6 +84,7 @@
             android:text="import from pdf"
             android:layout_marginLeft="30dp"
             android:textSize="16sp"
+            android:textColor="@color/black"
             />
     </LinearLayout>
 

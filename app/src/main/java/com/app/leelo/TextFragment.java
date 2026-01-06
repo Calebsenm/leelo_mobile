@@ -60,8 +60,8 @@ public class TextFragment extends Fragment {
         dialog.setContentView(R.layout.bottomsheet);
 
         LinearLayout addTextLayout = dialog.findViewById(R.id.layout_add_text);
-        LinearLayout addTextPdfLayout = dialog.findViewById(R.id.layout_add_text_url);
-        LinearLayout addTextUrlLayout = dialog.findViewById(R.id.layout_add_text_pdf);
+        LinearLayout addTextUrlLayout = dialog.findViewById(R.id.layout_add_text_url);
+        LinearLayout  addTextPdfLayout = dialog.findViewById(R.id.layout_add_text_pdf);
 
         addTextLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,7 +70,30 @@ public class TextFragment extends Fragment {
 
                 MainActivity activity = (MainActivity) getActivity();
                 if (activity != null) {
-                    activity.replaceFragment(new PracticeFragment());
+                   activity.replaceFragment(new AddTextFragment());
+                }
+            }
+        });
+
+        addTextUrlLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null) {
+                    activity.replaceFragment(new ImportUrlTextFragment());
+                }
+            }
+        });
+
+        addTextPdfLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+                MainActivity activity = (MainActivity) getActivity();
+                if (activity != null) {
+                    activity.replaceFragment(new ImportPdfTextFragment());
                 }
             }
         });
