@@ -4,10 +4,10 @@ import java.time.LocalDate;
 
 public class Text {
 
-    private  Long idText;
-    private  String tittle;
+private  Long idText;
+    private  String title;
     private  String text;
-    private LocalDate creationWordDate;
+    private LocalDate creationDate;
 
     public  Text(){
 
@@ -19,11 +19,11 @@ public class Text {
     public void setIdText(Long idText) {
         this.idText = idText;
     }
-    public String getTittle() {
-        return tittle;
+public String getTitle() {
+        return title;
     }
-    public void setTittle(String tittle) {
-        this.tittle = tittle;
+    public void setTitle(String title) {
+        this.title = title;
     }
     public String getText() {
         return text;
@@ -31,11 +31,11 @@ public class Text {
     public void setText(String text) {
         this.text = text;
     }
-    public LocalDate getCreationDate() {
-        return creationWordDate;
+public LocalDate getCreationDate() {
+        return creationDate;
     }
     public void setCreationDate(LocalDate creationDate) {
-        this.creationWordDate = creationDate;
+        this.creationDate = creationDate;
     }
 
 
