@@ -1,4 +1,4 @@
-package com.app.leelo;
+package com.app.leelo.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,8 +10,8 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.app.leelo.R;
 import com.app.leelo.model.Text;
-import com.app.leelo.data.repository.TextRepository;
 import com.app.leelo.data.repository.TextRepository;
 
 public class AddTextFragment extends Fragment {
@@ -38,7 +38,7 @@ public class AddTextFragment extends Fragment {
 
         titleEditText = view.findViewById(R.id.inputTittle);
         contentEditText = view.findViewById(R.id.inputText);
-        Button saveButton = view.findViewById(R.id.SaveTextButtonText);
+        Button saveButton = view.findViewById(R.id.save_text_button);
 
         Bundle args = getArguments();
         if (args != null) {
@@ -63,7 +63,7 @@ private void saveText() {
         }
 
         Text text = new Text();
-        text.setTittle(title);
+        text.setTitle(title);
         text.setText(content);
         
         if (isEditMode) {

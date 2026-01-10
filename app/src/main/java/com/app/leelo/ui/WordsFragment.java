@@ -1,4 +1,4 @@
-package com.app.leelo;
+package com.app.leelo.ui;
 
 import android.os.Bundle;
 
@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.app.leelo.R;
 
 /**
  * A simple {@link Fragment} subclass.
