@@ -12,6 +12,9 @@ import com.app.leelo.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding binding;
+    
+    // Static data storage for text updates
+    public static Bundle textUpdateData = new Bundle();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
