@@ -1,4 +1,4 @@
-package com.app.leelo;
+package com.app.leelo.ui;
 
 import android.os.Bundle;
 
@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.app.leelo.R;
 import com.app.leelo.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {

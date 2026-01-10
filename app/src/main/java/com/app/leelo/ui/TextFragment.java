@@ -1,4 +1,4 @@
-package com.app.leelo;
+package com.app.leelo.ui;
 
 import android.app.Dialog;
 import android.graphics.Color;
@@ -14,12 +14,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.Button;
 
+import com.app.leelo.R;
 import com.app.leelo.model.Text;
 import com.app.leelo.data.repository.TextRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import android.app.Dialog;
+
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -31,7 +31,6 @@ import java.util.List;
 
 public class TextFragment extends Fragment {
 
-    Text text;
     List<Text> texts = new ArrayList<>();
     private TextRepository textRepository;
 
@@ -159,7 +158,7 @@ public class TextFragment extends Fragment {
         textLayout.setPadding(dp(16), 0, dp(16), 0);
 
         TextView title = new TextView(requireContext());
-        title.setText(t.getTittle());
+        title.setText(t.getTitle());
         title.setTextSize(16);
         title.setTypeface(null, Typeface.BOLD);
 
@@ -235,7 +234,7 @@ public class TextFragment extends Fragment {
                     getActivity().runOnUiThread(() -> {
                         if (success) {
                             Toast.makeText(requireContext(),
-                                "Texto eliminado: " + book.getTittle(),
+                                "Texto eliminado: " + book.getTitle(),
                                 Toast.LENGTH_SHORT).show();
                             refreshTexts(); // Recargar desde BD
                         } else {
@@ -251,7 +250,7 @@ public class TextFragment extends Fragment {
 
     private void openReadingScreen(Text book) {
         Intent intent = new Intent(requireContext(), ReadingActivity.class);
-        intent.putExtra("title", book.getTittle());
+        intent.putExtra("title", book.getTitle());
         intent.putExtra("text", book.getText());
         startActivity(intent);
     }
@@ -260,7 +259,7 @@ public class TextFragment extends Fragment {
         AddTextFragment editFragment = new AddTextFragment();
         
         Bundle args = new Bundle();
-        args.putString("title", book.getTittle());
+        args.putString("title", book.getTitle());
         args.putString("content", book.getText());
         args.putLong("id", book.getIdText());
         editFragment.setArguments(args);
@@ -271,7 +270,7 @@ public class TextFragment extends Fragment {
         }
         
         Toast.makeText(requireContext(),
-                "Editando: " + book.getTittle(),
+                "Editando: " + book.getTitle(),
                 Toast.LENGTH_SHORT).show();
     }
 
@@ -285,7 +284,7 @@ public class TextFragment extends Fragment {
             // Update in database
             Text updateText = new Text();
             updateText.setIdText(updateId);
-            updateText.setTittle(updateTitle);
+            updateText.setTitle(updateTitle);
             updateText.setText(updateContent);
             
             textRepository.updateText(updateText, new TextRepository.OnUpdateCallback() {
@@ -315,7 +314,7 @@ public class TextFragment extends Fragment {
             String newContent = MainActivity.textUpdateData.getString("new_content");
             
             Text newText = new Text();
-            newText.setTittle(newTitle);
+            newText.setTitle(newTitle);
             newText.setText(newContent);
             
             textRepository.insertText(newText, new TextRepository.OnInsertCallback() {
