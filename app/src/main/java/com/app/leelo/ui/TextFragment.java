@@ -1,7 +1,5 @@
 package com.app.leelo;
 
-
-
 import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -19,6 +17,7 @@ import android.view.Window;
 import android.widget.Button;
 
 import com.app.leelo.model.Text;
+import com.app.leelo.data.repository.TextRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import android.app.Dialog;
 import android.widget.LinearLayout;
@@ -34,9 +33,18 @@ public class TextFragment extends Fragment {
 
     Text text;
     List<Text> texts = new ArrayList<>();
+    private TextRepository textRepository;
 
     public TextFragment() {
-
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh texts when fragment becomes visible
+        if (textRepository != null) {
+            refreshTexts();
+        }
     }
 
     @Override
@@ -45,22 +53,25 @@ public class TextFragment extends Fragment {
 
         View thisFragmentView = inflater.inflate(R.layout.fragment_text, container, false);
 
+        // Inicializar el repository
+        textRepository = TextRepository.getInstance(requireContext());
+        
+        // Cargar textos desde la base de datos
+        loadTextsFromDatabase();
+        
         // Check for updates from AddTextFragment immediately
         checkForUpdates();
 
         FloatingActionButton practiceButton = thisFragmentView.findViewById(R.id.practice_button);
         FloatingActionButton addTextButton = thisFragmentView.findViewById(R.id.add_text_button);
 
-
         practiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 MainActivity activity = (MainActivity) getActivity();
                 if (activity != null) {
                     activity.replaceFragment(new PracticeFragment());
                 }
-
             }
         });
         addTextButton.setOnClickListener(new View.OnClickListener() {
@@ -70,28 +81,6 @@ public class TextFragment extends Fragment {
             }
         });
 
-
-
-
-        //Creation text example:
-        text = new Text();
-        text.setIdText(10000L);
-        text.setTittle("Mango is a fruit");
-        text.setText("Mango is a fruir from america. mango is yellow ");
-
-        Text text1 = new Text();
-        text1.setIdText(20000L);
-        text1.setTittle("Mango is a fruit");
-        text1.setText("Mango is a fruit from America. Mango is yellow.");
-
-        Text text2 = new Text();
-        text2.setIdText(30000L);
-        text2.setTittle("Apple is a fruit");
-        text2.setText("Apple is red or green.");
-
-        texts.add(text1);
-        texts.add(text2);
-
         // Post to ensure view is fully created
         thisFragmentView.post(() -> {
             checkForUpdates();
@@ -99,6 +88,37 @@ public class TextFragment extends Fragment {
         });
 
         return thisFragmentView;
+    }
+    
+    /**
+     * Load texts from database using Room
+     */
+    private void loadTextsFromDatabase() {
+        textRepository.getAllTexts(new TextRepository.OnGetAllCallback() {
+            @Override
+            public void onGetAllComplete(List<Text> loadedTexts) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        texts.clear();
+                        texts.addAll(loadedTexts);
+                        renderTexts();
+                        
+                        if (texts.isEmpty()) {
+                            Toast.makeText(getContext(), 
+                                "No hay textos guardados. ¡Agrega tu primero!", 
+                                Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
+    }
+    
+    /**
+     * Refrescar textos desde la base de datos
+     */
+    private void refreshTexts() {
+        loadTextsFromDatabase();
     }
 
     private View createTextItem(Text t) {
@@ -201,11 +221,32 @@ public class TextFragment extends Fragment {
     }
 
     private void deleteText(Text book) {
-        texts.remove(book);
-        renderTexts();
-        Toast.makeText(requireContext(),
-                "Texto eliminado: " + book.getTittle(),
+        if (book.getIdText() == null) {
+            Toast.makeText(requireContext(),
+                "Error: Texto sin ID no se puede eliminar",
                 Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        textRepository.deleteText(book.getIdText(), new TextRepository.OnDeleteCallback() {
+            @Override
+            public void onDeleteComplete(boolean success) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (success) {
+                            Toast.makeText(requireContext(),
+                                "Texto eliminado: " + book.getTittle(),
+                                Toast.LENGTH_SHORT).show();
+                            refreshTexts(); // Recargar desde BD
+                        } else {
+                            Toast.makeText(requireContext(),
+                                "Error al eliminar texto",
+                                Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+        });
     }
 
     private void openReadingScreen(Text book) {
@@ -235,34 +276,63 @@ public class TextFragment extends Fragment {
     }
 
     private void checkForUpdates() {
-        // Check for updated text
+        // Check for updated text (legacy support)
         if (MainActivity.textUpdateData.containsKey("update_id")) {
             long updateId = MainActivity.textUpdateData.getLong("update_id", -1);
             String updateTitle = MainActivity.textUpdateData.getString("update_title");
             String updateContent = MainActivity.textUpdateData.getString("update_content");
             
-            for (Text text : texts) {
-                if (text.getIdText() == updateId) {
-                    text.setTittle(updateTitle);
-                    text.setText(updateContent);
-                    Toast.makeText(requireContext(), "Texto actualizado", Toast.LENGTH_SHORT).show();
-                    break;
+            // Update in database
+            Text updateText = new Text();
+            updateText.setIdText(updateId);
+            updateText.setTittle(updateTitle);
+            updateText.setText(updateContent);
+            
+            textRepository.updateText(updateText, new TextRepository.OnUpdateCallback() {
+                @Override
+                public void onUpdateComplete(boolean success) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            if (success) {
+                                Toast.makeText(requireContext(), "Texto actualizado", Toast.LENGTH_SHORT).show();
+                                refreshTexts(); // Reload from database
+                            } else {
+                                Toast.makeText(requireContext(), "Error al actualizar texto", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
                 }
-            }
+            });
             
             MainActivity.textUpdateData.remove("update_id");
             MainActivity.textUpdateData.remove("update_title");
             MainActivity.textUpdateData.remove("update_content");
         }
         
-        // Check for new text
+        // Check for new text (legacy support)
         if (MainActivity.textUpdateData.containsKey("new_id")) {
+            String newTitle = MainActivity.textUpdateData.getString("new_title");
+            String newContent = MainActivity.textUpdateData.getString("new_content");
+            
             Text newText = new Text();
-            newText.setIdText(MainActivity.textUpdateData.getLong("new_id", -1));
-            newText.setTittle(MainActivity.textUpdateData.getString("new_title"));
-            newText.setText(MainActivity.textUpdateData.getString("new_content"));
-            texts.add(newText);
-            Toast.makeText(requireContext(), "Texto agregado", Toast.LENGTH_SHORT).show();
+            newText.setTittle(newTitle);
+            newText.setText(newContent);
+            
+            textRepository.insertText(newText, new TextRepository.OnInsertCallback() {
+                @Override
+                public void onInsertComplete(boolean success, long id) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            if (success) {
+                                Toast.makeText(requireContext(), "Texto agregado", Toast.LENGTH_SHORT).show();
+                                refreshTexts(); // Reload from database
+                            } else {
+                                Toast.makeText(requireContext(), "Error al guardar texto", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+            });
             
             MainActivity.textUpdateData.remove("new_id");
             MainActivity.textUpdateData.remove("new_title");
@@ -271,7 +341,6 @@ public class TextFragment extends Fragment {
     }
 
     private void showDialog() {
-
         final Dialog dialog = new Dialog(requireContext());
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.bottomsheet);
@@ -315,15 +384,12 @@ public class TextFragment extends Fragment {
             }
         });
 
-
         dialog.show();
         dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
         dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
         dialog.getWindow().setGravity(Gravity.BOTTOM);
-
     }
-
 
     private void showEditDialog(Text book) {
         final Dialog dialog = new Dialog(requireContext());
@@ -349,5 +415,4 @@ public class TextFragment extends Fragment {
         dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
         dialog.getWindow().setGravity(Gravity.BOTTOM);
     }
-
 }
