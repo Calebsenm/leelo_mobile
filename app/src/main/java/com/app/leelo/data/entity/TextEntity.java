@@ -6,10 +6,7 @@ import androidx.room.ColumnInfo;
 
 import java.time.LocalDate;
 
-/**
- * Entity = Tabla de la base de datos
- * ROOM creará esta tabla automáticamente
- */
+
 @Entity(tableName = "texts")
 public class TextEntity {
 
@@ -29,10 +26,8 @@ public class TextEntity {
     @ColumnInfo(name = "modification_date")
     public Long modificationDate;
 
-    // Constructor vacío que ROOM necesita
     public TextEntity() {}
 
-    // Constructor para crear nuevos textos
     public TextEntity(String title, String content) {
         this.title = title;
         this.content = content;
@@ -41,14 +36,12 @@ public class TextEntity {
         this.modificationDate = now;
     }
 
-    // Convertir timestamp a LocalDate para el UI
     public LocalDate getCreationDateAsLocalDate() {
         if (creationDate == null) return null;
         return new java.util.Date(creationDate).toInstant()
                 .atZone(java.time.ZoneId.systemDefault()).toLocalDate();
     }
 
-    // Para debugear
     @Override
     public String toString() {
         return "TextEntity{" +

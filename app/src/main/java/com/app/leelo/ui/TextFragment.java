@@ -40,7 +40,6 @@ public class TextFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh texts when fragment becomes visible
         if (textRepository != null) {
             refreshTexts();
         }
@@ -52,13 +51,10 @@ public class TextFragment extends Fragment {
 
         View thisFragmentView = inflater.inflate(R.layout.fragment_text, container, false);
 
-        // Inicializar el repository
         textRepository = TextRepository.getInstance(requireContext());
-        
-        // Cargar textos desde la base de datos
+
         loadTextsFromDatabase();
-        
-        // Check for updates from AddTextFragment immediately
+
         checkForUpdates();
 
         FloatingActionButton practiceButton = thisFragmentView.findViewById(R.id.practice_button);
@@ -80,7 +76,6 @@ public class TextFragment extends Fragment {
             }
         });
 
-        // Post to ensure view is fully created
         thisFragmentView.post(() -> {
             checkForUpdates();
             renderTexts();
@@ -88,10 +83,7 @@ public class TextFragment extends Fragment {
 
         return thisFragmentView;
     }
-    
-    /**
-     * Load texts from database using Room
-     */
+
     private void loadTextsFromDatabase() {
         textRepository.getAllTexts(new TextRepository.OnGetAllCallback() {
             @Override
@@ -113,9 +105,7 @@ public class TextFragment extends Fragment {
         });
     }
     
-    /**
-     * Refrescar textos desde la base de datos
-     */
+
     private void refreshTexts() {
         loadTextsFromDatabase();
     }

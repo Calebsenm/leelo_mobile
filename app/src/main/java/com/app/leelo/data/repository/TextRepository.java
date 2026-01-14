@@ -13,20 +13,14 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Repository = El cerebro que conecta todo
- * La UI habla con esto, esto habla con la base de datos
- * Convierte Entity (BD) <-> Model (UI)
- */
 public class TextRepository {
     
     private static final String TAG = "TextRepository";
     private static TextRepository instance;
     
     private final TextDao textDao;
-    private final ExecutorService executor; // Para no bloquear el UI
-    
-    // Singleton: solo una instancia en toda la app
+    private final ExecutorService executor;
+
     private TextRepository(Context context) {
         AppDatabase database = AppDatabase.getInstance(context);
         this.textDao = database.textDao();
@@ -39,35 +33,45 @@ public class TextRepository {
         }
         return instance;
     }
-    
-    // ========== OPERACIONES PRINCIPALES ==========
-    
-    /**
-     * Guardar un nuevo texto
-     */
+
     public void insertText(Text text, OnInsertCallback callback) {
         executor.execute(() -> {
             try {
-                TextEntity entity = modelToEntity(text);
-                long id = textDao.insert(entity);
-                
-                if (callback != null) {
-                    callback.onInsertComplete(id != -1, id);
+
+                if (text.getTitle() == null || text.getTitle().trim().isEmpty()) {
+                    Log.e(TAG, "Error: Título vacío");
+                    if (callback != null) callback.onInsertComplete(false, -1);
+                    return;
                 }
                 
-                Log.d(TAG, "Texto guardado con ID: " + id);
+                if (text.getText() == null || text.getText().trim().isEmpty()) {
+                    Log.e(TAG, "Error: Contenido vacío");
+                    if (callback != null) callback.onInsertComplete(false, -1);
+                    return;
+                }
+                
+                TextEntity entity = modelToEntity(text);
+                Log.d(TAG, "Guardando texto: " + entity.title + " (longitud: " + (entity.content != null ? entity.content.length() : 0) + ")");
+                
+                long id = textDao.insert(entity);
+                
+                boolean success = id != -1;
+                Log.d(TAG, "Texto guardado: " + (success ? "OK con ID " + id : "ERROR"));
+                
+                if (callback != null) {
+                    callback.onInsertComplete(success, id);
+                }
+                
             } catch (Exception e) {
                 Log.e(TAG, "Error guardando texto", e);
+                e.printStackTrace(); // Mostrar stack trace completo
                 if (callback != null) {
                     callback.onInsertComplete(false, -1);
                 }
             }
         });
     }
-    
-    /**
-     * Obtener todos los textos
-     */
+
     public void getAllTexts(OnGetAllCallback callback) {
         executor.execute(() -> {
             try {
@@ -91,10 +95,7 @@ public class TextRepository {
             }
         });
     }
-    
-    /**
-     * Actualizar un texto existente
-     */
+
     public void updateText(Text text, OnUpdateCallback callback) {
         executor.execute(() -> {
             try {
@@ -114,10 +115,7 @@ public class TextRepository {
             }
         });
     }
-    
-    /**
-     * Eliminar un texto
-     */
+
     public void deleteText(long id, OnDeleteCallback callback) {
         executor.execute(() -> {
             try {
@@ -136,10 +134,7 @@ public class TextRepository {
             }
         });
     }
-    
-    /**
-     * Buscar textos por título
-     */
+
     public void searchTexts(String query, OnSearchCallback callback) {
         executor.execute(() -> {
             try {
@@ -163,39 +158,48 @@ public class TextRepository {
             }
         });
     }
-    
-    // ========== CONVERSIONES ==========
-    
-    /**
-     * Convertir Model (UI) a Entity (BD)
-     */
+
     private TextEntity modelToEntity(Text model) {
         TextEntity entity = new TextEntity();
         
         if (model.getIdText() != null) {
             entity.id = model.getIdText();
         }
+
+
+        String title = model.getTitle();
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("El título no puede estar vacío");
+        }
+        entity.title = title.trim();
+
+        String content = model.getText();
+        if (content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("El contenido no puede estar vacío");
+        }
+        entity.content = content.trim();
         
-        entity.title = model.getTitle();
-        entity.content = model.getText();
-        
-        // Si el modelo no tiene fecha de creación, usa ahora
+
         if (model.getCreationDate() != null) {
-            entity.creationDate = java.sql.Timestamp.valueOf(
-                model.getCreationDate().atStartOfDay().toString()
-            ).getTime();
+            try {
+                entity.creationDate = java.sql.Timestamp.valueOf(
+                    model.getCreationDate().atStartOfDay().toString()
+                ).getTime();
+            } catch (Exception e) {
+                Log.e(TAG, "Error convirtiendo fecha, usando fecha actual", e);
+                entity.creationDate = System.currentTimeMillis();
+            }
         } else {
             entity.creationDate = System.currentTimeMillis();
         }
         
         entity.modificationDate = System.currentTimeMillis();
         
+        Log.d(TAG, "TextEntity creada: " + entity.title + " (ID: " + entity.id + ")");
         return entity;
     }
     
-    /**
-     * Convertir Entity (BD) a Model (UI)
-     */
+
     private Text entityToModel(TextEntity entity) {
         Text model = new Text();
         
@@ -206,8 +210,7 @@ public class TextRepository {
         
         return model;
     }
-    
-    // ========== INTERFACES PARA CALLBACKS ==========
+
     
     public interface OnInsertCallback {
         void onInsertComplete(boolean success, long id);
@@ -228,10 +231,7 @@ public class TextRepository {
     public interface OnSearchCallback {
         void onSearchComplete(List<Text> texts);
     }
-    
-    /**
-     * Cerrar el executor cuando se cierra la app
-     */
+
     public void shutdown() {
         if (executor != null && !executor.isShutdown()) {
             executor.shutdown();
