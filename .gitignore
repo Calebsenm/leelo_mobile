@@ -13,3 +13,12 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Gradle
+gradle/
+# Local configuration
+local.properties
+.idea/
+# Build outputs
+build/
+.gradle/
+captures/
