@@ -1,32 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.ImportPdfTextFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
         android:orientation="vertical"
-        android:padding="24dp"
-        android:gravity="center_horizontal">
-
-        <!-- Botón para seleccionar PDF -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSelectPdf"
-            android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:layout_marginBottom="16dp"
-            android:text="Seleccionar PDF"
-            android:textColor="@android:color/black"
-            android:textSize="18sp"
-            app:backgroundTint="@color/white"
-            app:cornerRadius="12dp"
-            app:strokeColor="@android:color/black"
-            app:strokeWidth="2dp" />
+        android:padding="24dp">
 
         <!-- Estado de carga -->
         <LinearLayout
@@ -35,8 +20,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:visibility="gone"
-            android:layout_marginBottom="16dp">
+            android:visibility="gone">
 
             <ProgressBar
                 android:id="@+id/progressBar"
@@ -57,7 +41,7 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPdfListo"
             android:layout_width="match_parent"
-            android:layout_height="180dp"
+            android:layout_height="200dp"
             android:layout_marginBottom="16dp"
             android:text="PDF LISTO"
             android:textColor="@android:color/white"
@@ -67,36 +51,45 @@
             app:backgroundTint="@android:color/holo_green_dark"
             app:cornerRadius="16dp" />
 
-        <!-- Botón para guardar texto -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSelectPdf"
+            android:layout_width="match_parent"
+            android:layout_height="167dp"
+            android:layout_marginBottom="16dp"
+            android:text="Seleccionar PDF"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            app:backgroundTint="@color/white"
+            app:cornerRadius="12dp"
+            app:strokeColor="@android:color/black"
+            app:strokeWidth="2dp" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/SaveTextButtonTextPdf"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Guardar Texto Extraído"
+            android:text="Guardar"
             android:textColor="@android:color/black"
             android:paddingVertical="14dp"
             android:visibility="gone"
-            android:layout_marginBottom="16dp"
             app:backgroundTint="@color/gold"
             app:strokeColor="@android:color/black"
             app:strokeWidth="2dp"
             app:cornerRadius="8dp" />
 
-        <!-- Texto extraído -->
-        <TextView
-            android:id="@+id/textPdfExtracted"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:padding="16dp"
-            android:background="@color/white"
-            android:text="Aquí irá el texto extraído..."
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            android:visibility="gone"
-            android:scrollbars="vertical"
-            android:maxHeight="300dp" />
-
     </LinearLayout>
 
-</ScrollView>
+    <TextView
+        android:id="@+id/textPdfExtracted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:padding="16dp"
+        android:background="@color/white"
+        android:text="Aquí irá el texto extraído"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:visibility="gone"
+        android:scrollbars="vertical" />
+
+</FrameLayout>
