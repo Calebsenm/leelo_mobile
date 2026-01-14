@@ -29,7 +29,6 @@ public class ReadingActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private TextView pageIndicator;
     private TextView textTitle;
-    private FloatingActionButton btnPrevious, btnNext;
     
     private List<String> pages = new ArrayList<>();
     private PageAdapter adapter;
@@ -49,7 +48,6 @@ public class ReadingActivity extends AppCompatActivity {
         setupToolbar(title);
         divideTextIntoPages(fullText);
         setupViewPager();
-        setupControls();
         updatePageIndicator(0);
     }
 
@@ -58,8 +56,6 @@ public class ReadingActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         pageIndicator = findViewById(R.id.pageIndicator);
         textTitle = findViewById(R.id.textTitle);
-        btnPrevious = findViewById(R.id.btnPrevious);
-        btnNext = findViewById(R.id.btnNext);
     }
 
     private void setupToolbar(String title) {
@@ -84,7 +80,7 @@ public class ReadingActivity extends AppCompatActivity {
         int pageWidth = getResources().getDisplayMetrics().widthPixels - 
                        (int) (32 * getResources().getDisplayMetrics().density); // 16dp each side
         int pageHeight = getResources().getDisplayMetrics().heightPixels - 
-                        (int) (200 * getResources().getDisplayMetrics().density); // toolbar + padding + FABs
+                        (int) (120 * getResources().getDisplayMetrics().density); // toolbar + padding
 
         TextPaint paint = new TextPaint();
         paint.setTextSize(16 * getResources().getDisplayMetrics().scaledDensity); // 16sp
@@ -142,23 +138,17 @@ public class ReadingActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 updatePageIndicator(position);
+                // Hide title after first page
+                if (position > 0) {
+                    textTitle.setVisibility(View.GONE);
+                } else {
+                    textTitle.setVisibility(View.VISIBLE);
+                }
             }
         });
     }
 
-    private void setupControls() {
-        btnPrevious.setOnClickListener(v -> {
-            if (viewPager.getCurrentItem() > 0) {
-                viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
-            }
-        });
 
-        btnNext.setOnClickListener(v -> {
-            if (viewPager.getCurrentItem() < pages.size() - 1) {
-                viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
-            }
-        });
-    }
 
     private void updatePageIndicator(int position) {
         int currentPage = position + 1;
@@ -170,10 +160,6 @@ public class ReadingActivity extends AppCompatActivity {
             int progress = (currentPage * 100) / totalPages;
             progressBar.setProgress(progress);
         }
-
-        // Update button states
-        btnPrevious.setEnabled(currentPage > 1);
-        btnNext.setEnabled(currentPage < totalPages);
     }
 
     // PageAdapter for ViewPager2
