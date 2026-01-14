@@ -49,7 +49,34 @@
                 android:textSize="16sp"
                 android:textColor="@android:color/black" />
 
-        </LinearLayout>
+        <!-- Botón grande cuando PDF está listo -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPdfListo"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginBottom="16dp"
+            android:text="PDF LISTO"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:visibility="gone"
+            app:backgroundTint="@android:color/holo_green_dark"
+            app:cornerRadius="16dp" />
+
+        <!-- Botón para guardar texto -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/SaveTextButtonTextPdf"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Guardar Texto"
+            android:textColor="@android:color/black"
+            android:paddingVertical="14dp"
+            android:visibility="gone"
+            app:backgroundTint="@color/gold"
+            app:strokeColor="@android:color/black"
+            app:strokeWidth="2dp"
+            app:cornerRadius="8dp" />
+
     </LinearLayout>
 
     <TextView
