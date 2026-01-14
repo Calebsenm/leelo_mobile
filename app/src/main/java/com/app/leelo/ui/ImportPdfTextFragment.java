@@ -139,21 +139,34 @@ public class ImportPdfTextFragment extends Fragment {
 
             // Extraer texto en segundo plano
             new Thread(() -> {
+                InputStream inputStream = null;
                 try {
+                    // Validar contexto
                     if (getContext() == null) {
-                        throw new Exception("Contexto nulo");
+                        throw new Exception("Contexto no disponible");
                     }
 
-                    InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+                    // Validar URI
+                    if (uri == null) {
+                        throw new Exception("URI del archivo es nula");
+                    }
+
+                    Log.d("EXTRACT_START", "Extrayendo texto de: " + uri.toString());
+
+                    inputStream = getContext().getContentResolver().openInputStream(uri);
                     if (inputStream == null) {
-                        throw new Exception("No se puede leer el archivo");
+                        throw new Exception("No se puede leer el archivo PDF");
                     }
 
                     // Extraer texto real del PDF
                     extractedText = extractRealTextFromPdf(inputStream);
-                    if (extractedText.trim().isEmpty()) {
-                        extractedText = "No se pudo extraer texto del PDF: " + uri.getLastPathSegment();
+                    
+                    // Validar resultado
+                    if (extractedText == null || extractedText.trim().isEmpty()) {
+                        throw new Exception("El PDF no contiene texto legible");
                     }
+                    
+                    Log.d("EXTRACT_SUCCESS", "Texto extraído: " + extractedText.length() + " caracteres");
                     
                     inputStream.close();
 
@@ -194,55 +207,173 @@ public class ImportPdfTextFragment extends Fragment {
     }
 
     private String extractRealTextFromPdf(InputStream inputStream) {
+        com.tom_roush.pdfbox.pdmodel.PDDocument document = null;
+        
         try {
-            // Usar PDFBox para extraer texto real
-            com.tom_roush.pdfbox.pdmodel.PDDocument document = com.tom_roush.pdfbox.pdmodel.PDDocument.load(inputStream);
-            com.tom_roush.pdfbox.text.PDFTextStripper stripper = new com.tom_roush.pdfbox.text.PDFTextStripper();
-            String text = stripper.getText(document);
-            document.close();
+            Log.d("PDF_EXTRACTION", "Iniciando extracción de PDF");
             
+            // Verificar que el inputStream no sea nulo
+            if (inputStream == null) {
+                throw new Exception("InputStream es nulo");
+            }
+            
+            // Cargar documento con manejo de errores
+            document = com.tom_roush.pdfbox.pdmodel.PDDocument.load(inputStream);
+            
+            if (document.getNumberOfPages() == 0) {
+                throw new Exception("El PDF no tiene páginas");
+            }
+            
+            // Extraer texto
+            com.tom_roush.pdfbox.text.PDFTextStripper stripper = new com.tom_roush.pdfbox.text.PDFTextStripper();
+            stripper.setSortByPosition(true); // Mejor ordenamiento del texto
+            
+            String text = stripper.getText(document);
+            
+            if (text == null || text.trim().isEmpty()) {
+                Log.w("PDF_EXTRACTION", "PDF sin texto extraíble");
+                return "Este PDF no contiene texto legible (puede ser solo imágenes)";
+            }
+            
+            // Limitar tamaño para evitar problemas de memoria
+            if (text.length() > 500000) { // 500KB límite
+                text = text.substring(0, 500000) + "\n\n[Texto truncado por tamaño]";
+                Log.w("PDF_EXTRACTION", "Texto truncado por tamaño excesivo");
+            }
+            
+            Log.d("PDF_EXTRACTION", "Texto extraído exitosamente: " + text.length() + " caracteres");
             return text;
             
+        } catch (OutOfMemoryError e) {
+            Log.e("PDF_EXTRACT_ERROR", "Error de memoria procesando PDF: " + e.getMessage());
+            return "PDF demasiado grande para procesar. Intenta con un archivo más pequeño.";
         } catch (Exception e) {
             Log.e("PDF_EXTRACT_ERROR", "Error extrayendo texto: " + e.getMessage());
-            return "Error al extraer texto del PDF: " + e.getMessage();
+            e.printStackTrace();
+            
+            // Dar mensajes más específicos según el error
+            String errorMsg = e.getMessage();
+            if (errorMsg != null) {
+                if (errorMsg.contains("encrypted") || errorMsg.contains("password")) {
+                    return "Este PDF está protegido con contraseña y no puede ser procesado.";
+                } else if (errorMsg.contains("corrupted") || errorMsg.contains("damaged")) {
+                    return "El archivo PDF está dañado o corrupto.";
+                } else if (errorMsg.contains("parse")) {
+                    return "El formato del PDF no es válido o está corrupto.";
+                }
+            }
+            
+            return "Error al procesar PDF: " + (errorMsg != null && errorMsg.length() < 100 ? errorMsg : "Error desconocido");
+        } finally {
+            // Asegurar cerrar el documento siempre
+            try {
+                if (document != null) {
+                    document.close();
+                }
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+            } catch (Exception e) {
+                Log.e("PDF_CLOSE_ERROR", "Error cerrando recursos: " + e.getMessage());
+            }
         }
     }
 
     private void saveTextToDatabase() {
-        String fileName = selectedPdfUri != null ? selectedPdfUri.getLastPathSegment() : "PDF Desconocido";
-        if (fileName != null && fileName.contains("/")) {
-            fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
-        }
-        if (fileName == null || fileName.trim().isEmpty()) {
-            fileName = "PDF Extraído";
-        }
-        
-        // Remover extensión .pdf si existe
-        if (fileName.toLowerCase().endsWith(".pdf")) {
-            fileName = fileName.substring(0, fileName.length() - 4);
-        }
-        
-        Text text = new Text();
-        text.setTitle(fileName);
-        text.setText(extractedText);
-        text.setCreationDate(LocalDate.now());
-
-        textRepository.insertText(text, new TextRepository.OnInsertCallback() {
-            @Override
-            public void onInsertComplete(boolean success, long id) {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        if (success) {
-                            Toast.makeText(getContext(), "✅ Texto guardado exitosamente", Toast.LENGTH_LONG).show();
-                            Log.d("SAVE_SUCCESS", "Texto guardado con ID: " + id);
-                        } else {
-                            Toast.makeText(getContext(), "❌ Error al guardar texto", Toast.LENGTH_LONG).show();
-                            Log.e("SAVE_ERROR", "No se pudo guardar el texto");
-                        }
-                    });
-                }
+        try {
+            Log.d("SAVE_START", "Iniciando guardado de texto a base de datos");
+            
+            // Validaciones básicas
+            if (textRepository == null) {
+                throw new Exception("Repositorio no inicializado");
             }
-        });
+            
+            if (extractedText == null || extractedText.trim().isEmpty()) {
+                throw new Exception("No hay texto para guardar");
+            }
+            
+            // Generar nombre de archivo seguro
+            String fileName = generateSafeFileName();
+            
+            // Crear objeto Text con validaciones
+            Text text = new Text();
+            text.setTitle(fileName);
+            text.setText(extractedText);
+            text.setCreationDate(LocalDate.now());
+            
+            Log.d("SAVE_TEXT", "Guardando texto: " + fileName + " (longitud: " + extractedText.length() + ")");
+            
+            // Guardar en base de datos
+            textRepository.insertText(text, new TextRepository.OnInsertCallback() {
+                @Override
+                public void onInsertComplete(boolean success, long id) {
+                    if (getActivity() != null) {
+                        getActivity().runOnUiThread(() -> {
+                            try {
+                                if (success) {
+                                    Toast.makeText(getContext(), "✅ Texto guardado exitosamente", Toast.LENGTH_LONG).show();
+                                    Log.d("SAVE_SUCCESS", "Texto guardado con ID: " + id);
+                                } else {
+                                    Toast.makeText(getContext(), "❌ Error al guardar texto", Toast.LENGTH_LONG).show();
+                                    Log.e("SAVE_ERROR", "No se pudo guardar el texto (callback false)");
+                                }
+                            } catch (Exception e) {
+                                Log.e("SAVE_UI_ERROR", "Error actualizando UI después de guardar: " + e.getMessage());
+                            }
+                        });
+                    }
+                }
+            });
+            
+        } catch (Exception e) {
+            Log.e("SAVE_INIT_ERROR", "Error iniciando guardado: " + e.getMessage());
+            e.printStackTrace();
+            
+            try {
+                Toast.makeText(getContext(), "Error al guardar: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            } catch (Exception toastError) {
+                Log.e("TOAST_ERROR", "Error mostrando toast: " + toastError.getMessage());
+            }
+        }
+    }
+    
+    private String generateSafeFileName() {
+        try {
+            String fileName = selectedPdfUri != null ? selectedPdfUri.getLastPathSegment() : "PDF Extraído";
+            
+            if (fileName == null) {
+                fileName = "PDF Extraído";
+            }
+            
+            // Extraer solo el nombre del archivo (sin ruta)
+            if (fileName.contains("/")) {
+                fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+            }
+            
+            // Remover extensión .pdf si existe
+            if (fileName.toLowerCase().endsWith(".pdf")) {
+                fileName = fileName.substring(0, fileName.length() - 4);
+            }
+            
+            // Limpiar caracteres inválidos
+            fileName = fileName.replaceAll("[^a-zA-Z0-9\\s\\-_]", "").trim();
+            
+            // Asegurar que no esté vacío
+            if (fileName.trim().isEmpty()) {
+                fileName = "PDF Extraído";
+            }
+            
+            // Limitar longitud
+            if (fileName.length() > 50) {
+                fileName = fileName.substring(0, 50);
+            }
+            
+            Log.d("FILENAME", "Nombre generado: " + fileName);
+            return fileName;
+            
+        } catch (Exception e) {
+            Log.e("FILENAME_ERROR", "Error generando nombre de archivo: " + e.getMessage());
+            return "PDF Extraído";
+        }
     }
 }
