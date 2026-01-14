@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-
+        <!-- Botón para seleccionar PDF -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSelectPdf"
             android:layout_width="match_parent"
@@ -27,19 +27,41 @@
             app:strokeColor="@android:color/black"
             app:strokeWidth="2dp" />
 
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/SaveTextButtonTextPdf"
+        <!-- Estado de carga -->
+        <LinearLayout
+            android:id="@+id/loadingLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Guardar"
-            android:textColor="@android:color/black"
-            android:paddingVertical="14dp"
-            app:backgroundTint="@color/gold"
-            app:strokeColor="@android:color/black"
-            app:strokeWidth="2dp"
-            app:cornerRadius="8dp" />
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
 
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Procesando PDF..."
+                android:textSize="16sp"
+                android:textColor="@android:color/black" />
+
+        </LinearLayout>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/textPdfExtracted"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:padding="16dp"
+        android:background="@color/white"
+        android:text="Aquí irá el texto extraído"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:visibility="gone"
+        android:scrollbars="vertical" />
 </FrameLayout>
