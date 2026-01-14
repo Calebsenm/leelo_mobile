@@ -14,9 +14,12 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
 import com.app.leelo.R;
+import com.app.leelo.data.repository.TextRepository;
+import com.app.leelo.model.Text;
 import com.google.android.material.button.MaterialButton;
 
 import java.io.InputStream;
+import java.time.LocalDate;
 
 public class ImportPdfTextFragment extends Fragment {
 
@@ -27,6 +30,7 @@ public class ImportPdfTextFragment extends Fragment {
     private View loadingLayout;
     private Uri selectedPdfUri = null;
     private String extractedText = "";
+    private TextRepository textRepository;
 
     private final ActivityResultLauncher<String[]> pickPdfLauncher = registerForActivityResult(
         new ActivityResultContracts.OpenDocument(), 
@@ -40,6 +44,11 @@ public class ImportPdfTextFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        
+        // Inicializar repositorio
+        if (getContext() != null) {
+            textRepository = TextRepository.getInstance(getContext());
+        }
         
         View view = inflater.inflate(R.layout.fragment_import_pdf_text, container, false);
         
@@ -103,9 +112,8 @@ public class ImportPdfTextFragment extends Fragment {
             if (saveButton != null) {
                 saveButton.setOnClickListener(v -> {
                     try {
-                        if (!extractedText.isEmpty()) {
-                            // Aquí iría el guardado real
-                            Toast.makeText(getContext(), "Texto guardado", Toast.LENGTH_SHORT).show();
+                        if (!extractedText.isEmpty() && textRepository != null) {
+                            saveTextToDatabase();
                         } else {
                             Toast.makeText(getContext(), "No hay texto para guardar", Toast.LENGTH_SHORT).show();
                         }
@@ -141,12 +149,11 @@ public class ImportPdfTextFragment extends Fragment {
                         throw new Exception("No se puede leer el archivo");
                     }
 
-                    // Simulación - reemplazar con extracción real de PDF
-                    Thread.sleep(1500); // Simular procesamiento
-                    
-                    extractedText = "Texto extraído del PDF: " + uri.getLastPathSegment() + "\n\n" +
-                                   "Aquí aparecerá el texto real del PDF cuando se implemente " +
-                                   "la extracción con PDFBox correctamente.";
+                    // Extraer texto real del PDF
+                    extractedText = extractRealTextFromPdf(inputStream);
+                    if (extractedText.trim().isEmpty()) {
+                        extractedText = "No se pudo extraer texto del PDF: " + uri.getLastPathSegment();
+                    }
                     
                     inputStream.close();
 
@@ -184,5 +191,58 @@ public class ImportPdfTextFragment extends Fragment {
             Log.e("EXTRACT_START_ERROR", e.getMessage());
             Toast.makeText(getContext(), "Error al iniciar extracción", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private String extractRealTextFromPdf(InputStream inputStream) {
+        try {
+            // Usar PDFBox para extraer texto real
+            com.tom_roush.pdfbox.pdmodel.PDDocument document = com.tom_roush.pdfbox.pdmodel.PDDocument.load(inputStream);
+            com.tom_roush.pdfbox.text.PDFTextStripper stripper = new com.tom_roush.pdfbox.text.PDFTextStripper();
+            String text = stripper.getText(document);
+            document.close();
+            
+            return text;
+            
+        } catch (Exception e) {
+            Log.e("PDF_EXTRACT_ERROR", "Error extrayendo texto: " + e.getMessage());
+            return "Error al extraer texto del PDF: " + e.getMessage();
+        }
+    }
+
+    private void saveTextToDatabase() {
+        String fileName = selectedPdfUri != null ? selectedPdfUri.getLastPathSegment() : "PDF Desconocido";
+        if (fileName != null && fileName.contains("/")) {
+            fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
+        }
+        if (fileName == null || fileName.trim().isEmpty()) {
+            fileName = "PDF Extraído";
+        }
+        
+        // Remover extensión .pdf si existe
+        if (fileName.toLowerCase().endsWith(".pdf")) {
+            fileName = fileName.substring(0, fileName.length() - 4);
+        }
+        
+        Text text = new Text();
+        text.setTitle(fileName);
+        text.setText(extractedText);
+        text.setCreationDate(LocalDate.now());
+
+        textRepository.insertText(text, new TextRepository.OnInsertCallback() {
+            @Override
+            public void onInsertComplete(boolean success, long id) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (success) {
+                            Toast.makeText(getContext(), "✅ Texto guardado exitosamente", Toast.LENGTH_LONG).show();
+                            Log.d("SAVE_SUCCESS", "Texto guardado con ID: " + id);
+                        } else {
+                            Toast.makeText(getContext(), "❌ Error al guardar texto", Toast.LENGTH_LONG).show();
+                            Log.e("SAVE_ERROR", "No se pudo guardar el texto");
+                        }
+                    });
+                }
+            }
+        });
     }
 }
