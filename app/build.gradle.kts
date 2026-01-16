@@ -50,6 +50,10 @@ dependencies {
     
     // Jsoup for HTML parsing
     implementation("org.jsoup:jsoup:1.17.2")
+
+    // pdf library
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
+
     
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
