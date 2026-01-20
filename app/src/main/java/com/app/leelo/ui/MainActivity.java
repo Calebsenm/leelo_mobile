@@ -1,6 +1,10 @@
 package com.app.leelo.ui;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.os.Bundle;
+
+import com.app.leelo.ui.text.TextFragment;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -48,6 +52,14 @@ public class MainActivity extends AppCompatActivity {
         //fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
 
+    }
+
+    public void editText(long textId) {
+        AddTextFragment fragment = new AddTextFragment();
+        Bundle bundle = new Bundle();
+        bundle.putLong("id", textId);
+        fragment.setArguments(bundle);
+        replaceFragment(fragment);
     }
 }
 

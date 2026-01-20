@@ -13,11 +13,13 @@ import androidx.fragment.app.Fragment;
 import com.app.leelo.R;
 import com.app.leelo.model.Text;
 import com.app.leelo.data.repository.TextRepository;
+import com.app.leelo.ui.text.TextFragment;
 
 public class AddTextFragment extends Fragment {
 
     private EditText titleEditText;
     private EditText contentEditText;
+    private Button saveButton;
     private boolean isEditMode = false;
     private long editId = -1;
     private TextRepository textRepository;
@@ -38,14 +40,14 @@ public class AddTextFragment extends Fragment {
 
         titleEditText = view.findViewById(R.id.inputTittle);
         contentEditText = view.findViewById(R.id.inputText);
-        Button saveButton = view.findViewById(R.id.save_text_button);
+        saveButton = view.findViewById(R.id.save_text_button);
 
         Bundle args = getArguments();
-        if (args != null) {
+        if (args != null && args.containsKey("id")) {
             isEditMode = true;
             editId = args.getLong("id", -1);
-            titleEditText.setText(args.getString("title", ""));
-            contentEditText.setText(args.getString("content", ""));
+            showLoadingState(true);
+            loadTextForEditing(editId);
         }
 
         saveButton.setOnClickListener(v -> saveText());
@@ -110,6 +112,42 @@ private void saveText() {
         });
     }
     
+    private void loadTextForEditing(long id) {
+        textRepository.getTextById(id, new TextRepository.OnGetTextCallback() {
+            @Override
+            public void onGetTextComplete(Text text) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        showLoadingState(false);
+                        if (text != null) {
+                            titleEditText.setText(text.getTitle());
+                            contentEditText.setText(text.getText());
+                        } else {
+                            Toast.makeText(getContext(), "Texto no encontrado", Toast.LENGTH_SHORT).show();
+                            navigateBack();
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    private void showLoadingState(boolean show) {
+        if (show) {
+            titleEditText.setText("Cargando...");
+            titleEditText.setEnabled(false);
+            contentEditText.setText("Cargando texto...");
+            contentEditText.setEnabled(false);
+            saveButton.setEnabled(false);
+            saveButton.setText("Cargando...");
+        } else {
+            titleEditText.setEnabled(true);
+            contentEditText.setEnabled(true);
+            saveButton.setEnabled(true);
+            saveButton.setText("Guardar");
+        }
+    }
+
     private void navigateBack() {
         MainActivity activity = (MainActivity) getActivity();
         if (activity != null) {
