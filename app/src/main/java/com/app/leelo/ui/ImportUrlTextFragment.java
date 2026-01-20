@@ -110,9 +110,6 @@ public class ImportUrlTextFragment extends Fragment {
         });
     }
 
-    /**
-     * MÉTODO SIMPLE Y EFECTIVO
-     */
     private String extractText(Document doc) {
 
         // Limpiar basura

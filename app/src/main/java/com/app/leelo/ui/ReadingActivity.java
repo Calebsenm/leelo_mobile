@@ -17,7 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.app.leelo.R;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.app.leelo.data.repository.TextRepository;
+import com.app.leelo.model.Text;
+import com.app.leelo.utils.TextPaginationUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.ArrayList;
@@ -32,23 +34,78 @@ public class ReadingActivity extends AppCompatActivity {
     
     private List<String> pages = new ArrayList<>();
     private PageAdapter adapter;
+    private TextRepository textRepository;
+    private long textId;
+    private String title;
+    private boolean isDataLoaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reading);
 
-        // Get text data from intent
-        String fullText = getIntent().getStringExtra("text");
-        String title = getIntent().getStringExtra("title");
-        
-        if (fullText == null) fullText = "This is sample text for reading. ".repeat(50);
+        textRepository = TextRepository.getInstance(this);
+
+        textId = getIntent().getLongExtra("text_id", -1);
+        title = getIntent().getStringExtra("title");
 
         initViews();
         setupToolbar(title);
-        divideTextIntoPages(fullText);
+        
+        if (textId != -1) {
+            loadTextData();
+        } else {
+            showErrorAndFinish();
+        }
+    }
+
+    private void loadTextData() {
+        showLoading(true);
+        textRepository.getTextById(textId, new TextRepository.OnGetTextCallback() {
+            @Override
+            public void onGetTextComplete(Text text) {
+                runOnUiThread(() -> {
+                    showLoading(false);
+                    if (text != null && text.getText() != null) {
+                        if (title == null) {
+                            title = text.getTitle();
+                            setupToolbar(title);
+                        }
+                        processTextInChunks(text.getText());
+                    } else {
+                        showErrorAndFinish();
+                    }
+                });
+            }
+        });
+    }
+
+    private void processTextInChunks(String fullText) {
+        TextPaginationUtils.PageMetrics metrics = TextPaginationUtils.calculatePageMetrics(
+            getResources().getDisplayMetrics()
+        );
+        pages = TextPaginationUtils.paginateText(fullText, metrics);
         setupViewPager();
         updatePageIndicator(0);
+        isDataLoaded = true;
+        // Ensure progress bar is visible for reading progress
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void showLoading(boolean show) {
+        if (progressBar != null) {
+            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
+        // Keep progress bar visible after loading for reading progress
+        if (!show && isDataLoaded) {
+            progressBar.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void showErrorAndFinish() {
+        finish();
     }
 
     private void initViews() {
