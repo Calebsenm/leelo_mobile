@@ -16,7 +16,9 @@ import android.view.ViewGroup;
 import android.view.Window;
 
 import com.app.leelo.R;
+import com.app.leelo.data.entity.TextEntity;
 import com.app.leelo.model.Text;
+import com.app.leelo.model.TextInfo;
 import com.app.leelo.data.repository.TextRepository;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -31,7 +33,7 @@ import java.util.List;
 
 public class TextFragment extends Fragment {
 
-    List<Text> texts = new ArrayList<>();
+    List<TextInfo> texts = new ArrayList<>();
     private TextRepository textRepository;
 
     public TextFragment() {
@@ -57,18 +59,10 @@ public class TextFragment extends Fragment {
 
         checkForUpdates();
 
-        FloatingActionButton practiceButton = thisFragmentView.findViewById(R.id.practice_button);
+
         FloatingActionButton addTextButton = thisFragmentView.findViewById(R.id.add_text_button);
 
-        practiceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MainActivity activity = (MainActivity) getActivity();
-                if (activity != null) {
-                    activity.replaceFragment(new PracticeFragment());
-                }
-            }
-        });
+
         addTextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,32 +79,24 @@ public class TextFragment extends Fragment {
     }
 
     private void loadTextsFromDatabase() {
-        textRepository.getAllTexts(new TextRepository.OnGetAllCallback() {
+        textRepository.getAllTextInfoAsync(new TextRepository.OnGetAllTextInfoCallback() {
             @Override
-            public void onGetAllComplete(List<Text> loadedTexts) {
+            public void onGetAllTextInfoComplete(List<TextInfo> entities) {
+                texts.clear();
+                texts.addAll(entities);
                 if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        texts.clear();
-                        texts.addAll(loadedTexts);
-                        renderTexts();
-                        
-                        if (texts.isEmpty()) {
-                            Toast.makeText(getContext(), 
-                                "No hay textos guardados. ¡Agrega tu primero!", 
-                                Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                    getActivity().runOnUiThread(() -> renderTexts());
                 }
             }
         });
     }
-    
+
 
     private void refreshTexts() {
         loadTextsFromDatabase();
     }
 
-    private View createTextItem(Text t) {
+    private View createTextItem(TextInfo t) {
         LinearLayout parent = new LinearLayout(requireContext());
         parent.setOrientation(LinearLayout.VERTICAL);
         parent.setPadding(dp(16), dp(16), dp(16), dp(16));
@@ -136,7 +122,7 @@ public class TextFragment extends Fragment {
                 ContextCompat.getColorStateList(requireContext(), android.R.color.black)
         );
         fabBook.setOnClickListener(v -> {
-            openReadingScreen(t);
+            openReadingScreen(t.id);
         });
 
         LinearLayout textLayout = new LinearLayout(requireContext());
@@ -148,7 +134,7 @@ public class TextFragment extends Fragment {
         textLayout.setPadding(dp(16), 0, dp(16), 0);
 
         TextView title = new TextView(requireContext());
-        title.setText(t.getTitle());
+        title.setText(t.titulo);
         title.setTextSize(16);
         title.setTypeface(null, Typeface.BOLD);
 
@@ -172,8 +158,15 @@ public class TextFragment extends Fragment {
         );
 
         fabMore.setOnClickListener(v -> {
-            Text book = (Text) v.getTag();
-            showEditDialog(book);
+            TextInfo textInfo = (TextInfo) v.getTag();
+            textRepository.getTextById(textInfo.id, new TextRepository.OnGetTextCallback() {
+                @Override
+                public void onGetTextComplete(Text book) {
+                    if (book != null) {
+                        showEditDialog(book);
+                    }
+                }
+            });
         });
 
         textLayout.addView(title);
@@ -202,7 +195,7 @@ public class TextFragment extends Fragment {
             if (containerID != null) {
                 containerID.removeAllViews();
                 
-                for (Text t : texts) {
+                for (TextInfo t : texts) {
                     containerID.addView(createTextItem(t));
                 }
             }
@@ -238,10 +231,9 @@ public class TextFragment extends Fragment {
         });
     }
 
-    private void openReadingScreen(Text book) {
+    private void openReadingScreen(long textId) {
         Intent intent = new Intent(requireContext(), ReadingActivity.class);
-        intent.putExtra("title", book.getTitle());
-        intent.putExtra("text", book.getText());
+        intent.putExtra("text_id", textId);
         startActivity(intent);
     }
 
