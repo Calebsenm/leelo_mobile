@@ -8,6 +8,7 @@ import androidx.room.Query;
 import androidx.room.OnConflictStrategy;
 
 import com.app.leelo.data.entity.TextEntity;
+import com.app.leelo.model.TextInfo;
 
 import java.util.List;
 
@@ -29,6 +30,9 @@ public interface TextDao {
     @Query("SELECT * FROM texts ORDER BY creation_date DESC")
     List<TextEntity> getAll();
 
+    @Query("SELECT id, title FROM texts")
+    List<TextInfo> getAllTextsInfo();
+
     @Query("SELECT * FROM texts WHERE id = :id")
     TextEntity getById(long id);
 
@@ -48,4 +52,13 @@ public interface TextDao {
 
     @Query("DELETE FROM texts")
     void deleteAll();
+
+    @Query("SELECT SUBSTR(content, :offset, :length) FROM texts WHERE id = :id")
+    String getTextChunk(long id, int offset, int length);
+
+    @Query("SELECT LENGTH(content) FROM texts WHERE id = :id")
+    int getTextLength(long id);
+
+    @Query("SELECT SUBSTR(content, :start, :end - :start + 1) FROM texts WHERE id = :id")
+    String getTextSegment(long id, int start, int end);
 }

@@ -3,6 +3,7 @@ package com.app.leelo.data.entity;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.ColumnInfo;
+import androidx.room.Ignore;
 
 import java.time.LocalDate;
 
@@ -28,6 +29,7 @@ public class TextEntity {
 
     public TextEntity() {}
 
+    @Ignore
     public TextEntity(String title, String content) {
         this.title = title;
         this.content = content;
