@@ -27,7 +27,16 @@ public class TextEntity {
     @ColumnInfo(name = "modification_date")
     public Long modificationDate;
 
-    public TextEntity() {}
+    @ColumnInfo(name = "current_page")
+    public int currentPage;
+
+    @ColumnInfo(name = "total_pages")
+    public int totalPages;
+
+    public TextEntity() {
+        this.currentPage = 0;
+        this.totalPages = 0;
+    }
 
     @Ignore
     public TextEntity(String title, String content) {
@@ -36,6 +45,8 @@ public class TextEntity {
         long now = System.currentTimeMillis();
         this.creationDate = now;
         this.modificationDate = now;
+        this.currentPage = 0;
+        this.totalPages = 0;
     }
 
     public LocalDate getCreationDateAsLocalDate() {
@@ -51,6 +62,7 @@ public class TextEntity {
                 ", title='" + title + '\'' +
                 ", content='" + (content != null ? content.substring(0, Math.min(50, content.length())) + "..." : "null") + '\'' +
                 ", creationDate=" + creationDate +
+                ", currentPage=" + currentPage +
                 '}';
     }
 }
