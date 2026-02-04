@@ -3,7 +3,6 @@ package com.app.leelo.viewmodel;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.app.leelo.data.repository.TextRepository;
 
 public class ViewModelFactory implements ViewModelProvider.Factory {

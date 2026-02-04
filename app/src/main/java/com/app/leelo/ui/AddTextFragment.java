@@ -7,13 +7,10 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.fragment.app.Fragment;
-
 import com.app.leelo.R;
 import com.app.leelo.model.Text;
 import com.app.leelo.data.repository.TextRepository;
-import com.app.leelo.ui.text.TextFragment;
 
 public class AddTextFragment extends Fragment {
 
@@ -55,7 +52,7 @@ public class AddTextFragment extends Fragment {
         return view;
     }
 
-private void saveText() {
+    private void saveText() {
         String title = titleEditText.getText().toString().trim();
         String content = contentEditText.getText().toString().trim();
 

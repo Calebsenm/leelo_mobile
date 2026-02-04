@@ -21,9 +21,6 @@ public interface TextDao {
     @Update
     int update(TextEntity text);
 
-    @Delete
-    int delete(TextEntity text);
-
     @Query("DELETE FROM texts WHERE id = :id")
     int deleteById(long id);
 
@@ -38,20 +35,6 @@ public interface TextDao {
 
     @Query("SELECT * FROM texts WHERE title LIKE '%' || :query || '%' ORDER BY creation_date DESC")
     List<TextEntity> searchByTitle(String query);
-
-    @Query("SELECT COUNT(*) FROM texts")
-    int getCount();
-
-    @Query("SELECT COUNT(*) FROM texts WHERE title = :title")
-    int existsByTitle(String title);
-
-
-    @Query("SELECT * FROM texts ORDER BY creation_date DESC LIMIT 10")
-    List<TextEntity> getRecent();
-
-
-    @Query("DELETE FROM texts")
-    void deleteAll();
 
     @Query("SELECT SUBSTR(content, :offset, :length) FROM texts WHERE id = :id")
     String getTextChunk(long id, int offset, int length);

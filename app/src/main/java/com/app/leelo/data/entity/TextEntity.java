@@ -38,17 +38,6 @@ public class TextEntity {
         this.totalPages = 0;
     }
 
-    @Ignore
-    public TextEntity(String title, String content) {
-        this.title = title;
-        this.content = content;
-        long now = System.currentTimeMillis();
-        this.creationDate = now;
-        this.modificationDate = now;
-        this.currentPage = 0;
-        this.totalPages = 0;
-    }
-
     public LocalDate getCreationDateAsLocalDate() {
         if (creationDate == null) return null;
         return new java.util.Date(creationDate).toInstant()

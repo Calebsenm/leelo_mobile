@@ -4,21 +4,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
-import com.app.leelo.ui.text.TextFragment;
-
-import androidx.appcompat.app.AppCompatActivity;
+//import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-
 import com.app.leelo.R;
 import com.app.leelo.databinding.ActivityMainBinding;
 
 public class MainActivity extends AppCompatActivity {
 
     ActivityMainBinding binding;
-
-    public static Bundle textUpdateData = new Bundle();
+    // public static Bundle textUpdateData = new Bundle();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,19 +43,12 @@ public class MainActivity extends AppCompatActivity {
     public void replaceFragment(Fragment fragment) {
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction= fragmentManager.beginTransaction();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame_layout, fragment);
         //fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
 
     }
 
-    public void editText(long textId) {
-        AddTextFragment fragment = new AddTextFragment();
-        Bundle bundle = new Bundle();
-        bundle.putLong("id", textId);
-        fragment.setArguments(bundle);
-        replaceFragment(fragment);
-    }
 }
 

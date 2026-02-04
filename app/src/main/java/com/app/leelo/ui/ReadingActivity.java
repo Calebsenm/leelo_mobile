@@ -10,18 +10,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.ProgressBar;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
-
 import com.app.leelo.R;
 import com.app.leelo.data.repository.TextRepository;
 import com.app.leelo.model.Text;
 import com.app.leelo.utils.TextPaginationUtils;
 import com.google.android.material.appbar.MaterialToolbar;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +28,6 @@ public class ReadingActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private TextView pageIndicator;
     private TextView textTitle;
-    
     private List<String> pages = new ArrayList<>();
     private PageAdapter adapter;
     private TextRepository textRepository;
