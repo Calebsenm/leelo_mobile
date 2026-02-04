@@ -10,7 +10,6 @@ public class Text {
     private LocalDate creationDate;
 
     public  Text(){
-
     }
 
     public Long getIdText() {

@@ -34,6 +34,26 @@ public class TextRepository {
         return instance;
     }
 
+    public interface OnInsertCallback {
+        void onInsertComplete(boolean success, long id);
+    }
+
+    public interface OnUpdateCallback {
+        void onUpdateComplete(boolean success);
+    }
+
+    public interface OnDeleteCallback {
+        void onDeleteComplete(boolean success);
+    }
+
+    public interface OnGetTextCallback {
+        void onGetTextComplete(Text text);
+    }
+
+    public interface OnGetAllTextInfoCallback {
+        void onGetAllTextInfoComplete(List<TextInfo> texts);
+    }
+
     public void insertText(Text text, OnInsertCallback callback) {
         executor.execute(() -> {
             try {
@@ -70,35 +90,6 @@ public class TextRepository {
                 }
             }
         });
-    }
-
-    public void getAllTexts(OnGetAllCallback callback) {
-        executor.execute(() -> {
-            try {
-                List<TextEntity> entities = textDao.getAll();
-                List<Text> texts = new ArrayList<>();
-                
-                for (TextEntity entity : entities) {
-                    texts.add(entityToModel(entity));
-                }
-                
-                if (callback != null) {
-                    callback.onGetAllComplete(texts);
-                }
-                
-                Log.d(TAG, "Se cargaron " + texts.size() + " textos");
-            } catch (Exception e) {
-                Log.e(TAG, "Error obteniendo textos", e);
-                if (callback != null) {
-                    callback.onGetAllComplete(new ArrayList<>());
-                }
-            }
-        });
-    }
-
-    public List<TextInfo>  getAllTextInfo(){
-        List<TextInfo> entities = textDao.getAllTextsInfo();
-        return  entities;
     }
 
     public void getAllTextInfoAsync(OnGetAllTextInfoCallback callback) {
@@ -156,30 +147,6 @@ public class TextRepository {
         });
     }
 
-    public void searchTexts(String query, OnSearchCallback callback) {
-        executor.execute(() -> {
-            try {
-                List<TextEntity> entities = textDao.searchByTitle(query);
-                List<Text> texts = new ArrayList<>();
-                
-                for (TextEntity entity : entities) {
-                    texts.add(entityToModel(entity));
-                }
-                
-                if (callback != null) {
-                    callback.onSearchComplete(texts);
-                }
-                
-                Log.d(TAG, "Búsqueda '" + query + "' encontró " + texts.size() + " resultados");
-            } catch (Exception e) {
-                Log.e(TAG, "Error buscando textos", e);
-                if (callback != null) {
-                    callback.onSearchComplete(new ArrayList<>());
-                }
-            }
-        });
-    }
-
     private TextEntity modelToEntity(Text model) {
         TextEntity entity = new TextEntity();
         
@@ -219,7 +186,6 @@ public class TextRepository {
         Log.d(TAG, "TextEntity creada: " + entity.title + " (ID: " + entity.id + ")");
         return entity;
     }
-    
 
     private Text entityToModel(TextEntity entity) {
         Text model = new Text();
@@ -230,27 +196,6 @@ public class TextRepository {
         model.setCreationDate(entity.getCreationDateAsLocalDate());
         
         return model;
-    }
-
-    
-    public interface OnInsertCallback {
-        void onInsertComplete(boolean success, long id);
-    }
-    
-    public interface OnGetAllCallback {
-        void onGetAllComplete(List<Text> texts);
-    }
-    
-    public interface OnUpdateCallback {
-        void onUpdateComplete(boolean success);
-    }
-    
-    public interface OnDeleteCallback {
-        void onDeleteComplete(boolean success);
-    }
-    
-    public interface OnSearchCallback {
-        void onSearchComplete(List<Text> texts);
     }
 
     public void getTextById(long id, OnGetTextCallback callback) {
@@ -271,80 +216,4 @@ public class TextRepository {
         });
     }
 
-    public void getTextChunk(long id, int offset, int length, OnGetTextChunkCallback callback) {
-        executor.execute(() -> {
-            try {
-                String chunk = textDao.getTextChunk(id, offset, length);
-
-                if (callback != null) {
-                    callback.onGetTextChunkComplete(chunk);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error obteniendo chunk de texto", e);
-                if (callback != null) {
-                    callback.onGetTextChunkComplete(null);
-                }
-            }
-        });
-    }
-
-    public void getTextLength(long id, OnGetTextLengthCallback callback) {
-        executor.execute(() -> {
-            try {
-                int length = textDao.getTextLength(id);
-
-                if (callback != null) {
-                    callback.onGetTextLengthComplete(length);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error obteniendo longitud de texto", e);
-                if (callback != null) {
-                    callback.onGetTextLengthComplete(0);
-                }
-            }
-        });
-    }
-
-    public void getTextSegment(long id, int start, int end, OnGetTextSegmentCallback callback) {
-        executor.execute(() -> {
-            try {
-                String segment = textDao.getTextSegment(id, start, end);
-
-                if (callback != null) {
-                    callback.onGetTextSegmentComplete(segment);
-                }
-            } catch (Exception e) {
-                Log.e(TAG, "Error obteniendo segmento de texto", e);
-                if (callback != null) {
-                    callback.onGetTextSegmentComplete(null);
-                }
-            }
-        });
-    }
-
-    public interface OnGetTextCallback {
-        void onGetTextComplete(Text text);
-    }
-
-    public interface OnGetTextChunkCallback {
-        void onGetTextChunkComplete(String chunk);
-    }
-
-    public interface OnGetTextLengthCallback {
-        void onGetTextLengthComplete(int length);
-    }
-
-    public interface OnGetTextSegmentCallback {
-        void onGetTextSegmentComplete(String segment);
-    }
-
-    public interface OnGetAllTextInfoCallback {
-        void onGetAllTextInfoComplete(List<TextInfo> texts);
-    }
-
-    public void shutdown() {
-        if (executor != null && !executor.isShutdown()) {
-            executor.shutdown();
-        }
-    }
 }
