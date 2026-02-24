@@ -6,12 +6,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.app.leelo.R;
@@ -24,171 +24,174 @@ import com.tom_roush.pdfbox.text.PDFTextStripper;
 
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ImportPdfTextFragment extends Fragment {
 
-    private MaterialButton saveButton;
+    private static final String TAG = "ImportPdfFragment";
+
+    private LinearLayout selectLayout;
+    private LinearLayout loadingLayout;
+    private LinearLayout readyLayout;
     private MaterialButton selectButton;
-    private MaterialButton btnPdfListo;
-    private TextView extractedTextView;
-    private View loadingLayout;
+    private MaterialButton saveButton;
 
-    private Uri selectedPdfUri = null;
-    private String extractedText = "";
-
-    private TextRepository textRepository;
+    private Uri selectedPdfUri;
+    private String extractedText;
+    private TextRepository repository;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private static boolean pdfBoxInitialized = false;
 
-    private final ActivityResultLauncher<String[]> pickPdfLauncher =
-            registerForActivityResult(
-                    new ActivityResultContracts.OpenDocument(),
-                    uri -> {
-                        if (uri != null) {
-                            selectedPdfUri = uri;
-                            extractTextFromPdf(uri);
-                        }
-                    });
+    private final ActivityResultLauncher<String[]> pickPdfLauncher = registerForActivityResult(
+            new ActivityResultContracts.OpenDocument(),
+            uri -> {
+                if (uri != null) {
+                    selectedPdfUri = uri;
+                    processPdf(uri);
+                }
+            }
+    );
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (!pdfBoxInitialized) {
-            PDFBoxResourceLoader.init(requireContext().getApplicationContext());
-            pdfBoxInitialized = true;
-            Log.d("PDFBOX", "PDFBox inicializado correctamente");
-        }
+        initPdfBox();
     }
 
     @Override
-    public View onCreateView(
-            LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-
-        if (getContext() != null) {
-            textRepository = TextRepository.RepositoryProvider.getInstance(getContext());
-        }
-
-        View view = inflater.inflate(
-                R.layout.fragment_import_pdf_text, container, false);
-
-        selectButton = view.findViewById(R.id.btnSelectPdf);
-        saveButton = view.findViewById(R.id.SaveTextButtonTextPdf);
-        btnPdfListo = view.findViewById(R.id.btnPdfListo);
-        extractedTextView = view.findViewById(R.id.textPdfExtracted);
-        loadingLayout = view.findViewById(R.id.loadingLayout);
-
-
-        selectButton.setVisibility(View.VISIBLE);
-        saveButton.setVisibility(View.GONE);
-        btnPdfListo.setVisibility(View.GONE);
-        loadingLayout.setVisibility(View.GONE);
-        extractedTextView.setVisibility(View.GONE);
-
-
-        selectButton.setOnClickListener(v ->
-                pickPdfLauncher.launch(new String[]{"application/pdf"})
-        );
-
-
-        btnPdfListo.setOnClickListener(v -> {
-            if (!extractedText.isEmpty()) {
-                extractedTextView.setText(extractedText);
-                extractedTextView.setVisibility(View.VISIBLE);
-                saveButton.setVisibility(View.VISIBLE);
-                Toast.makeText(requireContext(), "Texto disponible", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        saveButton.setOnClickListener(v -> {
-            if (!extractedText.isEmpty() && textRepository != null) {
-                saveTextToDatabase();
-            } else {
-                Toast.makeText(requireContext(), "No hay texto para guardar", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_import_pdf_text, container, false);
+        initViews(view);
+        initRepository();
+        setupListeners();
         return view;
     }
 
-    private void extractTextFromPdf(Uri uri) {
-        selectButton.setVisibility(View.GONE);
-        loadingLayout.setVisibility(View.VISIBLE);
-
-        new Thread(() -> {
-            InputStream inputStream = null;
-            try {
-                if (getContext() == null) throw new Exception("Contexto no disponible");
-
-                inputStream = requireContext()
-                        .getContentResolver().openInputStream(uri);
-
-                if (inputStream == null) throw new Exception("No se puede leer el archivo PDF");
-
-                String text = extractRealTextFromPdf(inputStream);
-
-                if (text.trim().isEmpty()) throw new Exception("Este PDF no contiene texto legible");
-
-                extractedText = text;
-
-                requireActivity().runOnUiThread(() -> {
-                    loadingLayout.setVisibility(View.GONE);
-                    btnPdfListo.setVisibility(View.VISIBLE);
-                    Toast.makeText(requireContext(), "PDF procesado", Toast.LENGTH_SHORT).show();
-                });
-
-            } catch (Exception e) {
-                Log.e("EXTRACT_ERROR", e.getMessage());
-                requireActivity().runOnUiThread(() -> {
-                    loadingLayout.setVisibility(View.GONE);
-                    selectButton.setVisibility(View.VISIBLE);
-                    Toast.makeText(requireContext(),
-                            e.getMessage(), Toast.LENGTH_LONG).show();
-                });
-            } finally {
-                try {
-                    if (inputStream != null) inputStream.close();
-                } catch (Exception e) {
-                    Log.e("STREAM_CLOSE_ERROR", e.getMessage());
-                }
-            }
-        }).start();
-    }
-
-    private String extractRealTextFromPdf(InputStream is) {
-        try (PDDocument document = PDDocument.load(is)) {
-            PDFTextStripper stripper = new PDFTextStripper();
-            return stripper.getText(document).trim();
-        } catch (Exception e) {
-            Log.e("PDF_EXTRACTION_ERROR", e.getMessage());
-            return "";
+    private void initPdfBox() {
+        if (!pdfBoxInitialized && getContext() != null) {
+            PDFBoxResourceLoader.init(requireContext().getApplicationContext());
+            pdfBoxInitialized = true;
         }
     }
 
-    private void saveTextToDatabase() {
-        String fileName = generateSafeFileName();
+    private void initViews(View view) {
+        selectLayout = view.findViewById(R.id.selectLayout);
+        loadingLayout = view.findViewById(R.id.loadingLayout);
+        readyLayout = view.findViewById(R.id.readyLayout);
+        selectButton = view.findViewById(R.id.btnSelectPdf);
+        saveButton = view.findViewById(R.id.saveButton);
+    }
+
+    private void initRepository() {
+        if (getContext() != null) {
+            repository = TextRepository.RepositoryProvider.getInstance(getContext());
+        }
+    }
+
+    private void setupListeners() {
+        selectButton.setOnClickListener(v -> openPdfPicker());
+        saveButton.setOnClickListener(v -> saveText());
+    }
+
+    private void openPdfPicker() {
+        pickPdfLauncher.launch(new String[]{"application/pdf"});
+    }
+
+    private void processPdf(Uri uri) {
+        showState(State.PROCESSING);
+
+        executor.execute(() -> {
+            try (InputStream inputStream = requireContext().getContentResolver().openInputStream(uri)) {
+                if (inputStream == null) {
+                    throw new Exception("No se puede leer el archivo");
+                }
+
+                extractedText = extractTextFromPdf(inputStream);
+
+                if (extractedText == null || extractedText.trim().isEmpty()) {
+                    throw new Exception("El PDF no contiene texto legible");
+                }
+
+                requireActivity().runOnUiThread(this::onPdfProcessed);
+
+            } catch (Exception e) {
+                Log.e(TAG, "Error procesando PDF", e);
+                requireActivity().runOnUiThread(() -> onError(e.getMessage()));
+            }
+        });
+    }
+
+    private String extractTextFromPdf(InputStream inputStream) {
+        try (PDDocument document = PDDocument.load(inputStream)) {
+            PDFTextStripper stripper = new PDFTextStripper();
+            return stripper.getText(document).trim();
+        } catch (Exception e) {
+            Log.e(TAG, "Error extrayendo texto", e);
+            return null;
+        }
+    }
+
+    private void onPdfProcessed() {
+        showState(State.READY);
+    }
+
+    private void onError(String message) {
+        showState(State.SELECT);
+        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show();
+    }
+
+    private void saveText() {
+        if (extractedText == null || extractedText.isEmpty()) {
+            Toast.makeText(requireContext(), "No hay texto para guardar", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         Text text = new Text();
-        text.setTitle(fileName);
+        text.setTitle(generateFileName());
         text.setContent(extractedText);
         text.setCreationDate(LocalDate.now());
 
-        textRepository.insertText(text,
-                (success, id) -> requireActivity().runOnUiThread(() -> {
-                    String msg = success ?
-                            "✅ Texto guardado exitosamente" :
-                            "❌ Error al guardar texto";
-                    Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
-                }));
+        repository.insertText(text, (success, id) -> requireActivity().runOnUiThread(() -> {
+            if (success) {
+                Toast.makeText(requireContext(), "Texto guardado", Toast.LENGTH_SHORT).show();
+                navigateToHome();
+            } else {
+                Toast.makeText(requireContext(), "Error al guardar", Toast.LENGTH_SHORT).show();
+            }
+        }));
     }
 
-    private String generateSafeFileName() {
-        String name = (selectedPdfUri != null ?
-                selectedPdfUri.getLastPathSegment() : "PDF Extraído");
+    private String generateFileName() {
+        String name = selectedPdfUri != null ? selectedPdfUri.getLastPathSegment() : "PDF Extraído";
         if (name != null && name.contains("/")) {
             name = name.substring(name.lastIndexOf("/") + 1);
         }
         if (name == null) name = "PDF Extraído";
-        name = name.replaceAll("[^a-zA-Z0-9\\s\\-_]", "").trim();
-        return name.isEmpty() ? "PDF Extraído" : name;
+        return name.replaceAll("[^a-zA-Z0-9\\s\\-_]", "").trim().isEmpty() 
+                ? "PDF Extraído" 
+                : name.replaceAll("[^a-zA-Z0-9\\s\\-_]", "").trim();
+    }
+
+    private void navigateToHome() {
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).replaceFragment(new TextFragment());
+        }
+    }
+
+    private void showState(State state) {
+        selectLayout.setVisibility(state == State.SELECT ? View.VISIBLE : View.GONE);
+        loadingLayout.setVisibility(state == State.PROCESSING ? View.VISIBLE : View.GONE);
+        readyLayout.setVisibility(state == State.READY ? View.VISIBLE : View.GONE);
+    }
+
+    private enum State {
+        SELECT, PROCESSING, READY
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        executor.shutdown();
     }
 }
