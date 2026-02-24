@@ -14,9 +14,10 @@
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/reading_menu"
         app:navigationIcon="@drawable/arrow_back"
+        app:navigationIconTint="?attr/colorOnSurface"
         app:titleTextColor="?attr/colorOnSurface"
+        app:iconTint="?attr/colorOnSurface"
         android:background="?attr/colorSurface" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
