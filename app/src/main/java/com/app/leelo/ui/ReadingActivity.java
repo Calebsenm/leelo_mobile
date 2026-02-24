@@ -1,6 +1,7 @@
 package com.app.leelo.ui;
 
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import com.app.leelo.R;
 import com.app.leelo.domain.repository.TextRepository;
+import com.app.leelo.util.ReadingPreferences;
 import com.app.leelo.utils.TextPaginationUtils;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.slider.Slider;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +33,9 @@ public class ReadingActivity extends AppCompatActivity {
     private long textId;
     private String title;
     private boolean isDataLoaded = false;
+    private float currentTextSize = 16f;
+    private TextView previewText;
+    private ReadingPreferences readingPrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +43,8 @@ public class ReadingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_reading);
 
         textRepository = TextRepository.RepositoryProvider.getInstance(this);
+        readingPrefs = ReadingPreferences.getInstance(this);
+        currentTextSize = readingPrefs.getTextSize();
 
         textId = getIntent().getLongExtra("text_id", -1);
         title = getIntent().getStringExtra("title");
@@ -74,7 +83,6 @@ public class ReadingActivity extends AppCompatActivity {
         setupViewPager();
         updatePageIndicator(0);
         isDataLoaded = true;
-        // Ensure progress bar is visible for reading progress
         if (progressBar != null) {
             progressBar.setVisibility(View.VISIBLE);
         }
@@ -84,7 +92,6 @@ public class ReadingActivity extends AppCompatActivity {
         if (progressBar != null) {
             progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         }
-        // Keep progress bar visible after loading for reading progress
         if (!show && isDataLoaded) {
             progressBar.setVisibility(View.VISIBLE);
         }
@@ -103,30 +110,60 @@ public class ReadingActivity extends AppCompatActivity {
 
     private void setupToolbar(String title) {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
         
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(""); // Remove title from toolbar
-        }
+        toolbar.inflateMenu(R.menu.reading_menu);
         
-        // Set title in the dedicated TextView
+        toolbar.setNavigationOnClickListener(v -> finish());
+        
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_settings) {
+                showReadingSettingsDialog();
+                return true;
+            }
+            return false;
+        });
+        
         if (textTitle != null && title != null) {
             textTitle.setText(title);
         }
+    }
+
+    private void showReadingSettingsDialog() {
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_reading_settings, null);
         
-        toolbar.setNavigationOnClickListener(v -> finish());
+        Slider fontSizeSlider = dialogView.findViewById(R.id.fontSizeSlider);
+        previewText = dialogView.findViewById(R.id.previewText);
+        
+        fontSizeSlider.setValue(currentTextSize);
+        
+        fontSizeSlider.addOnChangeListener((slider, value, fromUser) -> {
+            currentTextSize = value;
+            previewText.setTextSize(TypedValue.COMPLEX_UNIT_SP, value);
+        });
+        
+        new MaterialAlertDialogBuilder(this)
+            .setTitle("Configuración de lectura")
+            .setView(dialogView)
+            .setPositiveButton("Aplicar", (dialog, which) -> applyTextSizeToAllPages())
+            .setNegativeButton("Cancelar", null)
+            .show();
+    }
+
+    private void applyTextSizeToAllPages() {
+        readingPrefs.setTextSize(currentTextSize);
+        if (adapter != null) {
+            adapter.setTextSize(currentTextSize);
+        }
     }
 
     private void setupViewPager() {
-        adapter = new PageAdapter(pages);
+        adapter = new PageAdapter(pages, currentTextSize);
         viewPager.setAdapter(adapter);
 
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
             public void onPageSelected(int position) {
                 updatePageIndicator(position);
-                // Hide title after first page
                 if (position > 0) {
                     textTitle.setVisibility(View.GONE);
                 } else {
@@ -135,8 +172,6 @@ public class ReadingActivity extends AppCompatActivity {
             }
         });
     }
-
-
 
     private void updatePageIndicator(int position) {
         int currentPage = position + 1;
@@ -150,13 +185,19 @@ public class ReadingActivity extends AppCompatActivity {
         }
     }
 
-    // PageAdapter for ViewPager2
     private static class PageAdapter extends RecyclerView.Adapter<PageAdapter.PageViewHolder> {
 
         private final List<String> pages;
+        private float textSize;
 
-        public PageAdapter(List<String> pages) {
+        public PageAdapter(List<String> pages, float textSize) {
             this.pages = pages;
+            this.textSize = textSize;
+        }
+
+        public void setTextSize(float textSize) {
+            this.textSize = textSize;
+            notifyDataSetChanged();
         }
 
         @NonNull
@@ -169,7 +210,7 @@ public class ReadingActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull PageViewHolder holder, int position) {
-            holder.bind(pages.get(position));
+            holder.bind(pages.get(position), textSize);
         }
 
         @Override
@@ -185,8 +226,9 @@ public class ReadingActivity extends AppCompatActivity {
                 pageText = itemView.findViewById(R.id.pageText);
             }
 
-            public void bind(String text) {
+            public void bind(String text, float textSize) {
                 pageText.setText(text);
+                pageText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
             }
         }
     }
