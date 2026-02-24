@@ -7,95 +7,93 @@
     tools:context=".ui.ImportPdfTextFragment">
 
     <LinearLayout
-        android:orientation="vertical"
+        android:id="@+id/selectLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
+        android:orientation="vertical"
         android:padding="24dp">
-
-        <LinearLayout
-            android:id="@+id/loadingLayout"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone">
-
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Procesando PDF..."
-                android:textSize="16sp"
-                android:textColor="@android:color/black" />
-        </LinearLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPdfListo"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginBottom="16dp"
-            android:text="PDF LISTO"
-            android:textColor="@android:color/white"
-            android:textSize="24sp"
-            android:visibility="gone"
-            app:backgroundTint="@android:color/holo_green_dark"
-            app:cornerRadius="16dp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSelectPdf"
-            android:layout_width="match_parent"
-            android:layout_height="160dp"
-            android:layout_marginBottom="16dp"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
             android:text="Seleccionar PDF"
             android:textColor="@android:color/black"
-            android:textSize="18sp"
+            android:textSize="14sp"
+            android:paddingVertical="14dp"
             app:backgroundTint="@color/white"
-            app:cornerRadius="12dp"
-            app:strokeColor="@android:color/black"
-            app:strokeWidth="2dp"
             app:icon="@drawable/file_open_pdf"
-            app:iconTint="@color/black"
             app:iconGravity="textStart"
-            app:iconPadding="12dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/SaveTextButtonTextPdf"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Guardar"
-            android:textSize="16sp"
-            android:textColor="@android:color/black"
-            android:visibility="gone"
-            app:backgroundTint="@color/gold"
-            app:cornerRadius="8dp"
+            app:iconPadding="8dp"
+            app:iconTint="@android:color/black"
             app:strokeColor="@android:color/black"
             app:strokeWidth="2dp"
+            app:cornerRadius="8dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/loadingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginBottom="16dp" />
 
-        <ScrollView
-            android:id="@+id/scrollTextPdfExtracted"
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="gone">
+            android:text="Procesando PDF..."
+            android:textSize="16sp"
+            android:textColor="@android:color/black" />
 
-            <TextView
-                android:id="@+id/textPdfExtracted"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="16dp"
-                android:background="@color/white"
-                android:text="Aquí irá el texto extraído"
-                android:textColor="@android:color/black"
-                android:textSize="14sp" />
+    </LinearLayout>
 
-        </ScrollView>
+    <LinearLayout
+        android:id="@+id/readyLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="✓"
+            android:textSize="64sp"
+            android:textColor="@android:color/holo_green_dark"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Texto listo para guardar"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="24dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/saveButton"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Guardar"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:paddingVertical="14dp"
+            app:backgroundTint="@color/gold"
+            app:strokeColor="@android:color/black"
+            app:strokeWidth="2dp"
+            app:cornerRadius="8dp" />
 
     </LinearLayout>
 
