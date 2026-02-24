@@ -4,17 +4,32 @@ import androidx.room.ColumnInfo;
 import androidx.room.Ignore;
 
 public class TextInfo {
-    public Long id;
+    private Long id;
 
     @ColumnInfo(name = "title")
-    public String titulo;
+    private String title;
 
     public TextInfo() {}
 
     @Ignore
-    public TextInfo(Long id, String titulo) {
+    public TextInfo(Long id, String title) {
         this.id = id;
-        this.titulo = titulo;
+        this.title = title;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 }

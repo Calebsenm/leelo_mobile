@@ -1,11 +1,11 @@
 package com.app.leelo.data.dao;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
-import androidx.room.Update;
-import androidx.room.Delete;
-import androidx.room.Query;
 import androidx.room.OnConflictStrategy;
+import androidx.room.Query;
+import androidx.room.Update;
 
 import com.app.leelo.data.entity.TextEntity;
 import com.app.leelo.model.TextInfo;
@@ -15,33 +15,21 @@ import java.util.List;
 @Dao
 public interface TextDao {
 
+    @Query("SELECT id, title FROM texts ORDER BY modification_date DESC")
+    LiveData<List<TextInfo>> getAllTextsInfo();
+
+    @Query("SELECT * FROM texts WHERE id = :id")
+    LiveData<TextEntity> getById(long id);
+
+    @Query("SELECT id, title FROM texts WHERE title LIKE :query OR content LIKE :query ORDER BY modification_date DESC")
+    LiveData<List<TextInfo>> searchText(String query);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    long insert(TextEntity text);
+    long insert(TextEntity entity);
 
     @Update
-    int update(TextEntity text);
+    int update(TextEntity entity);
 
     @Query("DELETE FROM texts WHERE id = :id")
     int deleteById(long id);
-
-    @Query("SELECT * FROM texts ORDER BY creation_date DESC")
-    List<TextEntity> getAll();
-
-    @Query("SELECT id, title FROM texts")
-    List<TextInfo> getAllTextsInfo();
-
-    @Query("SELECT * FROM texts WHERE id = :id")
-    TextEntity getById(long id);
-
-    @Query("SELECT * FROM texts WHERE title LIKE '%' || :query || '%' ORDER BY creation_date DESC")
-    List<TextEntity> searchByTitle(String query);
-
-    @Query("SELECT SUBSTR(content, :offset, :length) FROM texts WHERE id = :id")
-    String getTextChunk(long id, int offset, int length);
-
-    @Query("SELECT LENGTH(content) FROM texts WHERE id = :id")
-    int getTextLength(long id);
-
-    @Query("SELECT SUBSTR(content, :start, :end - :start + 1) FROM texts WHERE id = :id")
-    String getTextSegment(long id, int start, int end);
 }

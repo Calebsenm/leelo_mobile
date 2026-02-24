@@ -1,22 +1,13 @@
 package com.app.leelo.ui;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import androidx.fragment.app.Fragment;
 import com.app.leelo.R;
 
-
 public class WordsFragment extends Fragment {
-
-    public WordsFragment() {
-
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

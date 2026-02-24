@@ -15,17 +15,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.app.leelo.R;
 import com.app.leelo.model.TextInfo;
-import com.app.leelo.viewmodel.TextViewModel;
-import com.app.leelo.viewmodel.ViewModelFactory;
-import com.app.leelo.data.repository.TextRepository;
+import com.app.leelo.presentation.viewmodel.TextViewModel;
+import com.app.leelo.presentation.viewmodel.ViewModelFactory;
+import com.app.leelo.domain.repository.TextRepository;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import java.util.ArrayList;
+
 import java.util.List;
 
 public class TextFragment extends Fragment {
 
-    private TextViewModel viewModel;
+    private RecyclerView recyclerView;
+    private TextView emptyView;
     private TextAdapter adapter;
+    private TextViewModel viewModel;
 
     @Override
     public View onCreateView(
@@ -36,32 +38,65 @@ public class TextFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_text, container, false);
 
-        RecyclerView recycler = view.findViewById(R.id.recyclerText);
-        recycler.setLayoutManager(new LinearLayoutManager(requireContext()));
+        recyclerView = view.findViewById(R.id.recyclerText);
+        emptyView = view.findViewById(R.id.emptyView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        adapter = new TextAdapter();
-        recycler.setAdapter(adapter);
+        adapter = new TextAdapter(new TextAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(TextInfo textInfo) {
+                Intent i = new Intent(requireContext(), ReadingActivity.class);
+                i.putExtra("text_id", textInfo.getId());
+                i.putExtra("title", textInfo.getTitle());
+                startActivity(i);
+            }
 
-        TextRepository repo = TextRepository.getInstance(requireContext());
-        ViewModelFactory factory = new ViewModelFactory(repo);
+            @Override
+            public void onMenuClick(TextInfo textInfo) {
+                showOptionsMenu(textInfo);
+            }
+        }, recyclerView, emptyView);
 
-        viewModel = new ViewModelProvider(this, factory).get(TextViewModel.class);
-        viewModel.getTexts().observe(getViewLifecycleOwner(), adapter::setItems);
-        viewModel.loadTexts();
+        recyclerView.setAdapter(adapter);
+
+        TextRepository repo = TextRepository.RepositoryProvider.getInstance(requireContext());
+        viewModel = new ViewModelProvider(this, new ViewModelFactory(repo))
+                .get(TextViewModel.class);
+
+        viewModel.getTexts().observe(getViewLifecycleOwner(), adapter::submitList);
+        viewModel.getIsLoading().observe(getViewLifecycleOwner(), loading -> {
+            // Manejar estado de carga si es necesario
+        });
 
         view.findViewById(R.id.add_text_button).setOnClickListener(v -> showAddTextOptions());
 
         return view;
     }
 
+    private static class TextAdapter extends RecyclerView.Adapter<TextAdapter.VH> {
 
-    private class TextAdapter extends RecyclerView.Adapter<TextAdapter.VH> {
+        private List<TextInfo> texts;
+        private final OnItemClickListener listener;
+        private final RecyclerView recyclerView;
+        private final TextView emptyView;
 
-        private final List<TextInfo> items = new ArrayList<>();
-        void setItems(List<TextInfo> texts) {
-            items.clear();
-            items.addAll(texts);
+        public TextAdapter(OnItemClickListener listener, RecyclerView recyclerView, TextView emptyView) {
+            this.listener = listener;
+            this.texts = null;
+            this.recyclerView = recyclerView;
+            this.emptyView = emptyView;
+        }
+
+        public void submitList(List<TextInfo> texts) {
+            this.texts = texts;
             notifyDataSetChanged();
+            if (texts == null || texts.isEmpty()) {
+                recyclerView.setVisibility(View.GONE);
+                emptyView.setVisibility(View.VISIBLE);
+            } else {
+                recyclerView.setVisibility(View.VISIBLE);
+                emptyView.setVisibility(View.GONE);
+            }
         }
 
         @NonNull
@@ -74,26 +109,22 @@ public class TextFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull VH h, int pos) {
-            TextInfo info = items.get(pos);
-            h.title.setText(info.titulo);
-            h.progress.setProgress(0);
+            if (texts != null) {
+                TextInfo info = texts.get(pos);
+                h.title.setText(info.getTitle());
+                h.progress.setProgress(0);
 
-            h.itemView.setOnClickListener(v -> {
-                Intent i = new Intent(requireContext(), ReadingActivity.class);
-                i.putExtra("text_id", info.id);
-                i.putExtra("title", info.titulo);
-                startActivity(i);
-            });
-
-            h.menu.setOnClickListener(v -> showOptionsMenu(info));
+                h.itemView.setOnClickListener(v -> listener.onItemClick(info));
+                h.menu.setOnClickListener(v -> listener.onMenuClick(info));
+            }
         }
 
         @Override
         public int getItemCount() {
-            return items.size();
+            return texts != null ? texts.size() : 0;
         }
 
-        class VH extends RecyclerView.ViewHolder {
+        static class VH extends RecyclerView.ViewHolder {
             TextView title;
             ImageButton menu;
             ProgressBar progress;
@@ -104,6 +135,11 @@ public class TextFragment extends Fragment {
                 menu = v.findViewById(R.id.menuButton);
                 progress = v.findViewById(R.id.readingProgress);
             }
+        }
+
+        interface OnItemClickListener {
+            void onItemClick(TextInfo textInfo);
+            void onMenuClick(TextInfo textInfo);
         }
     }
 
@@ -121,12 +157,12 @@ public class TextFragment extends Fragment {
 
         edit.setOnClickListener(v -> {
             dialog.dismiss();
-            editText(info.id);
+            editText(info.getId());
         });
 
         delete.setOnClickListener(v -> {
             dialog.dismiss();
-            viewModel.deleteText(info.id);
+            viewModel.deleteText(info.getId());
         });
 
         dialog.show();

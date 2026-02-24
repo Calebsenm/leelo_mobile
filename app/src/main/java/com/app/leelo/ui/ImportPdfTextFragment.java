@@ -15,7 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
 import com.app.leelo.R;
-import com.app.leelo.data.repository.TextRepository;
+import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.model.Text;
 import com.google.android.material.button.MaterialButton;
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
@@ -66,7 +66,7 @@ public class ImportPdfTextFragment extends Fragment {
             Bundle savedInstanceState) {
 
         if (getContext() != null) {
-            textRepository = TextRepository.getInstance(getContext());
+            textRepository = TextRepository.RepositoryProvider.getInstance(getContext());
         }
 
         View view = inflater.inflate(
@@ -169,7 +169,7 @@ public class ImportPdfTextFragment extends Fragment {
         String fileName = generateSafeFileName();
         Text text = new Text();
         text.setTitle(fileName);
-        text.setText(extractedText);
+        text.setContent(extractedText);
         text.setCreationDate(LocalDate.now());
 
         textRepository.insertText(text,
