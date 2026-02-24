@@ -1,8 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Colores base -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="gold">#FFF9C4</color>
     <color name="light_gray">#F5F5F5</color>
     <color name="gray">#808080</color>
+    
+    <!-- Modo Claro -->
+    <color name="background_light">#FFFFFF</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="on_background_light">#1C1B1F</color>
+    <color name="on_surface_light">#1C1B1F</color>
+    <color name="card_light">#F5F5F5</color>
+    
+    <!-- Modo Oscuro -->
+    <color name="background_dark">#121212</color>
+    <color name="surface_dark">#1E1E1E</color>
+    <color name="on_background_dark">#E6E1E5</color>
+    <color name="on_surface_dark">#E6E1E5</color>
+    <color name="card_dark">#2D2D2D</color>
 </resources>
