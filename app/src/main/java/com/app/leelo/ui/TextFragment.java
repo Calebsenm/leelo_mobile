@@ -9,6 +9,7 @@ import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SearchView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -26,8 +27,11 @@ public class TextFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private TextView emptyView;
+    private TextView emptySearchView;
+    private SearchView searchView;
     private TextAdapter adapter;
     private TextViewModel viewModel;
+    private boolean isSearching = false;
 
     @Override
     public View onCreateView(
@@ -40,6 +44,9 @@ public class TextFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recyclerText);
         emptyView = view.findViewById(R.id.emptyView);
+        emptySearchView = view.findViewById(R.id.emptySearchView);
+        searchView = view.findViewById(R.id.searchView);
+        
         recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         adapter = new TextAdapter(new TextAdapter.OnItemClickListener() {
@@ -55,7 +62,7 @@ public class TextFragment extends Fragment {
             public void onMenuClick(TextInfo textInfo) {
                 showOptionsMenu(textInfo);
             }
-        }, recyclerView, emptyView);
+        }, recyclerView, emptyView, emptySearchView);
 
         recyclerView.setAdapter(adapter);
 
@@ -63,7 +70,24 @@ public class TextFragment extends Fragment {
         viewModel = new ViewModelProvider(this, new ViewModelFactory(repo))
                 .get(TextViewModel.class);
 
-        viewModel.getTexts().observe(getViewLifecycleOwner(), adapter::submitList);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                isSearching = !newText.trim().isEmpty();
+                viewModel.search(newText);
+                return true;
+            }
+        });
+
+        viewModel.getSearchResults().observe(getViewLifecycleOwner(), texts -> {
+            adapter.submitList(texts, isSearching);
+        });
+
         viewModel.getIsLoading().observe(getViewLifecycleOwner(), loading -> {
             // Manejar estado de carga si es necesario
         });
@@ -79,23 +103,33 @@ public class TextFragment extends Fragment {
         private final OnItemClickListener listener;
         private final RecyclerView recyclerView;
         private final TextView emptyView;
+        private final TextView emptySearchView;
 
-        public TextAdapter(OnItemClickListener listener, RecyclerView recyclerView, TextView emptyView) {
+        public TextAdapter(OnItemClickListener listener, RecyclerView recyclerView, TextView emptyView, TextView emptySearchView) {
             this.listener = listener;
             this.texts = null;
             this.recyclerView = recyclerView;
             this.emptyView = emptyView;
+            this.emptySearchView = emptySearchView;
         }
 
-        public void submitList(List<TextInfo> texts) {
+        public void submitList(List<TextInfo> texts, boolean isSearching) {
             this.texts = texts;
             notifyDataSetChanged();
+            
             if (texts == null || texts.isEmpty()) {
                 recyclerView.setVisibility(View.GONE);
-                emptyView.setVisibility(View.VISIBLE);
+                if (isSearching) {
+                    emptyView.setVisibility(View.GONE);
+                    emptySearchView.setVisibility(View.VISIBLE);
+                } else {
+                    emptyView.setVisibility(View.VISIBLE);
+                    emptySearchView.setVisibility(View.GONE);
+                }
             } else {
                 recyclerView.setVisibility(View.VISIBLE);
                 emptyView.setVisibility(View.GONE);
+                emptySearchView.setVisibility(View.GONE);
             }
         }
 
