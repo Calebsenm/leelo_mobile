@@ -1,23 +1,26 @@
 package com.app.leelo.model;
 
+import androidx.room.Ignore;
 import java.time.LocalDate;
 
 public class Text {
 
-    private  Long idText;
-    private  String title;
-    private  String text;
+    private Long id;
+    private String title;
+    private String content;
+
+    @Ignore
     private LocalDate creationDate;
 
-    public  Text(){
+    public Text() {
     }
 
-    public Long getIdText() {
-        return idText;
+    public Long getId() {
+        return id;
     }
 
-    public void setIdText(Long idText) {
-        this.idText = idText;
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -28,12 +31,12 @@ public class Text {
         this.title = title;
     }
 
-    public String getText() {
-        return text;
+    public String getContent() {
+        return content;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public LocalDate getCreationDate() {
@@ -43,5 +46,4 @@ public class Text {
     public void setCreationDate(LocalDate creationDate) {
         this.creationDate = creationDate;
     }
-
 }

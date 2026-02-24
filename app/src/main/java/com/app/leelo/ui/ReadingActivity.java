@@ -1,10 +1,6 @@
 package com.app.leelo.ui;
 
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.Layout;
-import android.text.StaticLayout;
-import android.text.TextPaint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 import com.app.leelo.R;
-import com.app.leelo.data.repository.TextRepository;
-import com.app.leelo.model.Text;
+import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.utils.TextPaginationUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 import java.util.ArrayList;
@@ -40,7 +35,7 @@ public class ReadingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reading);
 
-        textRepository = TextRepository.getInstance(this);
+        textRepository = TextRepository.RepositoryProvider.getInstance(this);
 
         textId = getIntent().getLongExtra("text_id", -1);
         title = getIntent().getStringExtra("title");
@@ -57,21 +52,16 @@ public class ReadingActivity extends AppCompatActivity {
 
     private void loadTextData() {
         showLoading(true);
-        textRepository.getTextById(textId, new TextRepository.OnGetTextCallback() {
-            @Override
-            public void onGetTextComplete(Text text) {
-                runOnUiThread(() -> {
-                    showLoading(false);
-                    if (text != null && text.getText() != null) {
-                        if (title == null) {
-                            title = text.getTitle();
-                            setupToolbar(title);
-                        }
-                        processTextInChunks(text.getText());
-                    } else {
-                        showErrorAndFinish();
-                    }
-                });
+        textRepository.getTextById(textId).observe(this, text -> {
+            showLoading(false);
+            if (text != null && text.content != null) {
+                if (title == null) {
+                    title = text.title;
+                    setupToolbar(title);
+                }
+                processTextInChunks(text.content);
+            } else {
+                showErrorAndFinish();
             }
         });
     }
@@ -126,61 +116,6 @@ public class ReadingActivity extends AppCompatActivity {
         }
         
         toolbar.setNavigationOnClickListener(v -> finish());
-    }
-
-    private void divideTextIntoPages(String fullText) {
-        // Calculate page dimensions (subtracting padding)
-        int pageWidth = getResources().getDisplayMetrics().widthPixels - 
-                       (int) (32 * getResources().getDisplayMetrics().density); // 16dp each side
-        int pageHeight = getResources().getDisplayMetrics().heightPixels - 
-                        (int) (120 * getResources().getDisplayMetrics().density); // toolbar + padding
-
-        TextPaint paint = new TextPaint();
-        paint.setTextSize(16 * getResources().getDisplayMetrics().scaledDensity); // 16sp
-        paint.setTypeface(Typeface.DEFAULT);
-
-        int availableHeight = pageHeight;
-
-        // Use StaticLayout to measure text
-        StaticLayout layout = StaticLayout.Builder
-                .obtain(fullText, 0, fullText.length(), paint, pageWidth)
-                .setAlignment(Layout.Alignment.ALIGN_NORMAL)
-                .setLineSpacing(0, 1.2f) // 1.2 line spacing
-                .build();
-
-        int start = 0;
-        int totalLines = layout.getLineCount();
-
-        while (start < totalLines) {
-            int endLine = start;
-            int currentHeight = 0;
-
-            // Find how many lines fit in this page
-            while (endLine < totalLines && currentHeight < availableHeight) {
-                currentHeight += layout.getLineBottom(endLine) - layout.getLineTop(endLine);
-                if (currentHeight >= availableHeight) {
-                    endLine--; // Remove the line that overflowed
-                    break;
-                }
-                endLine++;
-            }
-
-            if (endLine >= totalLines) {
-                endLine = totalLines - 1;
-            }
-
-            int pageStart = layout.getLineStart(start);
-            int pageEnd = layout.getLineEnd(endLine);
-
-            String pageText = fullText.substring(pageStart, pageEnd).trim();
-            pages.add(pageText);
-
-            start = endLine + 1;
-        }
-
-        if (pages.isEmpty()) {
-            pages.add(fullText);
-        }
     }
 
     private void setupViewPager() {

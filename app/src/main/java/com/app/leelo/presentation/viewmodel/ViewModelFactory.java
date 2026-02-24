@@ -1,9 +1,9 @@
-package com.app.leelo.viewmodel;
+package com.app.leelo.presentation.viewmodel;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import com.app.leelo.data.repository.TextRepository;
+import com.app.leelo.domain.repository.TextRepository;
 
 public class ViewModelFactory implements ViewModelProvider.Factory {
 
@@ -19,6 +19,6 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(TextViewModel.class)) {
             return (T) new TextViewModel(repository);
         }
-        throw new IllegalArgumentException("Unknown ViewModel class");
+        throw new IllegalArgumentException("Unknown ViewModel class: " + modelClass.getName());
     }
 }

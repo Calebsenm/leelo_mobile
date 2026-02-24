@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import com.app.leelo.R;
-import com.app.leelo.data.repository.TextRepository;
+import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.model.Text;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -36,7 +36,7 @@ public class ImportUrlTextFragment extends Fragment {
         inputUrl = view.findViewById(R.id.inputTextUrl);
         saveButton = view.findViewById(R.id.SaveTextButtonTextUrl);
 
-        textRepository = TextRepository.getInstance(requireContext());
+        textRepository = TextRepository.RepositoryProvider.getInstance(requireContext());
         executor = Executors.newSingleThreadExecutor();
 
         saveButton.setOnClickListener(v -> validateAndExtract());
@@ -87,7 +87,7 @@ public class ImportUrlTextFragment extends Fragment {
 
                 Text text = new Text();
                 text.setTitle(title);
-                text.setText(content);
+                text.setContent(content);
                 text.setCreationDate(LocalDate.now());
 
                 textRepository.insertText(text, (success, id) -> requireActivity().runOnUiThread(() -> {
