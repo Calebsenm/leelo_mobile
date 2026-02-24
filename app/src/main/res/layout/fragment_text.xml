@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.TextFragment">
 
-
     <LinearLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
@@ -14,6 +13,14 @@
         android:orientation="vertical"
         android:padding="16dp"
         android:layout_marginBottom="80dp">
+
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            app:queryHint="Buscar por título..."
+            app:iconifiedByDefault="false" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerText"
@@ -33,6 +40,14 @@
         android:textSize="18sp"
         android:visibility="gone" />
 
+    <TextView
+        android:id="@+id/emptySearchView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="No se encontraron resultados"
+        android:textSize="18sp"
+        android:visibility="gone" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_text_button"
