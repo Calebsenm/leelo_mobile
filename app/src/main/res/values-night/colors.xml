@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Estados de Palabras - Modo Oscuro -->
+    <color name="word_new">#FF5252</color>
+    <color name="word_learning">#4DD0E1</color>
+    <color name="word_learned">#B0BEC5</color>
+</resources>
