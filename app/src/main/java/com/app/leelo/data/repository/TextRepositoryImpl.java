@@ -50,7 +50,9 @@ public class TextRepositoryImpl implements TextRepository {
 
     @Override
     public LiveData<List<TextInfo>> searchText(String query) {
-        return textDao.searchText(query);
+        // Add wildcards for partial matching
+        String searchPattern = "%" + query + "%";
+        return textDao.searchText(searchPattern);
     }
 
     @Override

@@ -4,11 +4,18 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.ColumnInfo;
 import androidx.room.Ignore;
+import androidx.room.Index;
 
 import java.time.LocalDate;
 
 
-@Entity(tableName = "texts")
+@Entity(
+    tableName = "texts",
+    indices = {
+        @Index(value = "title"),
+        @Index(value = "modification_date")
+    }
+)
 public class TextEntity {
 
     @PrimaryKey(autoGenerate = true)

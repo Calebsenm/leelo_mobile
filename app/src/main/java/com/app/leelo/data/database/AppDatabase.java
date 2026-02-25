@@ -10,7 +10,7 @@ import com.app.leelo.data.dao.TextDao;
 
 @Database(
     entities = {TextEntity.class},
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 public abstract class AppDatabase extends RoomDatabase {

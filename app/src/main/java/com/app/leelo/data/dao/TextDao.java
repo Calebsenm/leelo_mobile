@@ -21,7 +21,7 @@ public interface TextDao {
     @Query("SELECT * FROM texts WHERE id = :id")
     LiveData<TextEntity> getById(long id);
 
-    @Query("SELECT id, title FROM texts WHERE title LIKE :query OR content LIKE :query ORDER BY modification_date DESC")
+    @Query("SELECT id, title FROM texts WHERE title LIKE :query ORDER BY modification_date DESC")
     LiveData<List<TextInfo>> searchText(String query);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
