@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import com.app.leelo.R;
 import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.model.Text;
+import com.app.leelo.util.FragmentUiUtils;
 import com.google.android.material.button.MaterialButton;
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
@@ -90,12 +91,8 @@ public class ImportPdfTextFragment extends Fragment {
     }
 
     private void setupListeners() {
-        selectButton.setOnClickListener(v -> openPdfPicker());
+        selectButton.setOnClickListener(v -> pickPdfLauncher.launch(new String[]{"application/pdf"}));
         saveButton.setOnClickListener(v -> saveText());
-    }
-
-    private void openPdfPicker() {
-        pickPdfLauncher.launch(new String[]{"application/pdf"});
     }
 
     private void processPdf(Uri uri) {
@@ -108,16 +105,14 @@ public class ImportPdfTextFragment extends Fragment {
                 }
 
                 extractedText = extractTextFromPdf(inputStream);
-
                 if (extractedText == null || extractedText.trim().isEmpty()) {
                     throw new Exception("El PDF no contiene texto legible");
                 }
 
-                requireActivity().runOnUiThread(this::onPdfProcessed);
-
+                FragmentUiUtils.postToUiIfAdded(this, this::onPdfProcessed);
             } catch (Exception e) {
                 Log.e(TAG, "Error procesando PDF", e);
-                requireActivity().runOnUiThread(() -> onError(e.getMessage()));
+                FragmentUiUtils.postToUiIfAdded(this, () -> onError(e.getMessage()));
             }
         });
     }
@@ -152,10 +147,10 @@ public class ImportPdfTextFragment extends Fragment {
         text.setContent(extractedText);
         text.setCreationDate(LocalDate.now());
 
-        repository.insertText(text, (success, id) -> requireActivity().runOnUiThread(() -> {
+        repository.insertText(text, (success, id) -> FragmentUiUtils.postToUiIfAdded(this, () -> {
             if (success) {
                 Toast.makeText(requireContext(), "Texto guardado", Toast.LENGTH_SHORT).show();
-                navigateToHome();
+                FragmentUiUtils.navigateToTexts(this);
             } else {
                 Toast.makeText(requireContext(), "Error al guardar", Toast.LENGTH_SHORT).show();
             }
@@ -163,20 +158,16 @@ public class ImportPdfTextFragment extends Fragment {
     }
 
     private String generateFileName() {
-        String name = selectedPdfUri != null ? selectedPdfUri.getLastPathSegment() : "PDF Extraído";
+        String name = selectedPdfUri != null ? selectedPdfUri.getLastPathSegment() : "PDF Extraido";
         if (name != null && name.contains("/")) {
             name = name.substring(name.lastIndexOf("/") + 1);
         }
-        if (name == null) name = "PDF Extraído";
-        return name.replaceAll("[^a-zA-Z0-9\\s\\-_]", "").trim().isEmpty() 
-                ? "PDF Extraído" 
-                : name.replaceAll("[^a-zA-Z0-9\\s\\-_]", "").trim();
-    }
-
-    private void navigateToHome() {
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).replaceFragment(new TextFragment());
+        if (name == null) {
+            name = "PDF Extraido";
         }
+
+        String sanitized = name.replaceAll("[^a-zA-Z0-9\\s\\-_]", "").trim();
+        return sanitized.isEmpty() ? "PDF Extraido" : sanitized;
     }
 
     private void showState(State state) {

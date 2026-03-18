@@ -2,6 +2,7 @@ package com.app.leelo.presentation.viewmodel;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
@@ -91,16 +92,23 @@ public class WordViewModel extends ViewModel {
 
     public void updateWordState(long id, Word.State newState) {
         isLoading.setValue(true);
-        
-        getWordByIdLive(id).observeForever(word -> {
+
+        LiveData<Word> source = getWordByIdLive(id);
+        final Observer<Word>[] observerRef = new Observer[1];
+        observerRef[0] = word -> {
+            source.removeObserver(observerRef[0]);
             if (word != null) {
                 word.setState(newState);
                 repository.updateWord(word, (success, id1) -> {
                     isLoading.postValue(false);
                     if (!success) error.postValue("Error al actualizar el estado");
                 });
+            } else {
+                isLoading.postValue(false);
+                error.postValue("No se encontró la palabra");
             }
-        });
+        };
+        source.observeForever(observerRef[0]);
     }
 
     private LiveData<Word> getWordByIdLive(long id) {

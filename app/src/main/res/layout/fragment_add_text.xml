@@ -1,63 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="?android:attr/colorBackground"
+    android:fillViewport="true"
     tools:context=".ui.AddTextFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="center"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="24dp">
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Agregar texto"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="20dp"
+            android:text="Escribe o pega un texto para leerlo despues."
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="14sp"
+            android:alpha="0.75" />
+
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:layout_marginBottom="12dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputTittle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Title"
-                android:inputType="text" />
+                android:hint="Titulo"
+                android:inputType="textCapSentences" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
-
         <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+            android:layout_marginBottom="20dp">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputText"
                 android:layout_width="match_parent"
-                android:layout_height="150dp"
-                android:inputType="textMultiLine"
-                android:gravity="top|start" />
+                android:layout_height="220dp"
+                android:gravity="top|start"
+                android:hint="Contenido"
+                android:inputType="textMultiLine|textCapSentences"
+                android:minLines="8" />
 
         </com.google.android.material.textfield.TextInputLayout>
-
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/save_text_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:paddingVertical="14dp"
             android:text="Guardar"
             android:textColor="@android:color/black"
-            android:paddingVertical="14dp"
             app:backgroundTint="@color/gold"
-            app:strokeColor="@android:color/black"
-            app:strokeWidth="2dp"
-            app:cornerRadius="8dp" />
+            app:cornerRadius="10dp" />
 
     </LinearLayout>
 
-
-</FrameLayout>
+</ScrollView>

@@ -29,13 +29,17 @@ public class TextPaginationUtils {
     }
 
     public static PageMetrics calculatePageMetrics(DisplayMetrics displayMetrics) {
+        return calculatePageMetrics(displayMetrics, DEFAULT_TEXT_SIZE_SP);
+    }
+
+    public static PageMetrics calculatePageMetrics(DisplayMetrics displayMetrics, float textSizeSp) {
         int pageWidth = displayMetrics.widthPixels - 
                         (int) (DEFAULT_PAGE_PADDING_DP * displayMetrics.density);
         int pageHeight = displayMetrics.heightPixels - 
                         (int) (DEFAULT_VERTICAL_PADDING_DP * displayMetrics.density);
 
         TextPaint paint = new TextPaint();
-        paint.setTextSize(DEFAULT_TEXT_SIZE_SP * displayMetrics.scaledDensity);
+        paint.setTextSize(textSizeSp * displayMetrics.scaledDensity);
         paint.setTypeface(Typeface.DEFAULT);
 
         return new PageMetrics(pageWidth, pageHeight, paint);

@@ -13,6 +13,7 @@ import com.app.leelo.data.database.AppDatabase;
 import com.app.leelo.data.entity.WordEntity;
 import com.app.leelo.domain.repository.WordRepository;
 import com.app.leelo.model.Word;
+import com.app.leelo.util.WordTextUtils;
 import com.app.leelo.utils.AppExecutors;
 
 import java.util.ArrayList;
@@ -119,7 +120,7 @@ public class WordRepositoryImpl implements WordRepository {
 
     @Override
     public boolean wordExistsSync(String word) {
-        return wordDao.wordExists(word.toLowerCase().trim().replaceAll("[^a-zA-ZáéíóúñÁÉÍÓÚÑ]", ""));
+        return wordDao.wordExists(WordTextUtils.normalizeWord(word));
     }
 
     private WordEntity wordToEntity(Word word) {
@@ -127,7 +128,7 @@ public class WordRepositoryImpl implements WordRepository {
         if (word.getId() != null) {
             entity.id = word.getId();
         }
-        entity.word = word.getWord() != null ? word.getWord().toLowerCase().trim().replaceAll("[^a-zA-ZáéíóúñÁÉÍÓÚÑ]", "") : "";
+        entity.word = WordTextUtils.normalizeWord(word.getWord());
         entity.meaning = word.getMeaning() != null ? word.getMeaning().trim() : "";
         entity.state = word.getState() != null ? word.getState().getValue() : Word.State.NEW.getValue();
         entity.createdAt = word.getCreatedAt() != null ? word.getCreatedAt() : System.currentTimeMillis();

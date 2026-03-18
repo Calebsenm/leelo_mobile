@@ -6,30 +6,34 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+
 import androidx.fragment.app.Fragment;
+
 import com.app.leelo.R;
 import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.model.Text;
+import com.app.leelo.util.FragmentUiUtils;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
+
 import java.time.LocalDate;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ImportUrlTextFragment extends Fragment {
 
-    private TextInputEditText inputTitle, inputUrl;
+    private TextInputEditText inputTitle;
+    private TextInputEditText inputUrl;
     private MaterialButton saveButton;
     private TextRepository textRepository;
     private ExecutorService executor;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_import_url_text, container, false);
 
         inputTitle = view.findViewById(R.id.inputTittleUrl);
@@ -38,7 +42,6 @@ public class ImportUrlTextFragment extends Fragment {
 
         textRepository = TextRepository.RepositoryProvider.getInstance(requireContext());
         executor = Executors.newSingleThreadExecutor();
-
         saveButton.setOnClickListener(v -> validateAndExtract());
 
         return view;
@@ -49,7 +52,7 @@ public class ImportUrlTextFragment extends Fragment {
         String url = inputUrl.getText().toString().trim();
 
         if (TextUtils.isEmpty(title)) {
-            inputTitle.setError("El título es requerido");
+            inputTitle.setError("El titulo es requerido");
             return;
         }
 
@@ -59,7 +62,7 @@ public class ImportUrlTextFragment extends Fragment {
         }
 
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            inputUrl.setError("URL inválida");
+            inputUrl.setError("URL invalida");
             return;
         }
 
@@ -67,7 +70,6 @@ public class ImportUrlTextFragment extends Fragment {
     }
 
     private void extractTextAndSave(String title, String url) {
-
         saveButton.setEnabled(false);
         saveButton.setText("Extrayendo...");
 
@@ -79,7 +81,6 @@ public class ImportUrlTextFragment extends Fragment {
                         .get();
 
                 String content = extractText(doc);
-
                 if (content.isEmpty()) {
                     showError("No se pudo extraer texto de la URL");
                     return;
@@ -90,16 +91,15 @@ public class ImportUrlTextFragment extends Fragment {
                 text.setContent(content);
                 text.setCreationDate(LocalDate.now());
 
-                textRepository.insertText(text, (success, id) -> requireActivity().runOnUiThread(() -> {
+                textRepository.insertText(text, (success, id) -> FragmentUiUtils.postToUiIfAdded(this, () -> {
                     if (success) {
                         Toast.makeText(getContext(), "Texto guardado", Toast.LENGTH_SHORT).show();
-                        clearInputs();
+                        FragmentUiUtils.navigateToTexts(this);
                     } else {
                         Toast.makeText(getContext(), "Error al guardar", Toast.LENGTH_SHORT).show();
+                        resetButton();
                     }
-                    resetButton();
                 }));
-
             } catch (Exception e) {
                 showError("Error: " + e.getMessage());
             }
@@ -107,13 +107,10 @@ public class ImportUrlTextFragment extends Fragment {
     }
 
     private String extractText(Document doc) {
-
-        // Limpiar basura
         doc.select("script, style, nav, footer, header, aside").remove();
 
         Elements paragraphs = doc.select("p");
         StringBuilder result = new StringBuilder();
-
         for (var p : paragraphs) {
             String text = p.text().trim();
             if (text.length() > 30) {
@@ -121,18 +118,15 @@ public class ImportUrlTextFragment extends Fragment {
             }
         }
 
-        // Fallback
         if (result.length() < 200) {
             result.append(doc.body().text());
         }
 
-        return result.toString()
-                .replaceAll("\\s+", " ")
-                .trim();
+        return result.toString().replaceAll("\\s+", " ").trim();
     }
 
     private void showError(String message) {
-        requireActivity().runOnUiThread(() -> {
+        FragmentUiUtils.postToUiIfAdded(this, () -> {
             Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
             resetButton();
         });
@@ -143,15 +137,11 @@ public class ImportUrlTextFragment extends Fragment {
         saveButton.setText("Guardar");
     }
 
-    private void clearInputs() {
-        inputTitle.setText("");
-        inputUrl.setText("");
-        inputTitle.requestFocus();
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (executor != null) executor.shutdown();
+        if (executor != null) {
+            executor.shutdown();
+        }
     }
 }

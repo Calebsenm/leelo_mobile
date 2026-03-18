@@ -43,19 +43,38 @@ public class TextViewModel extends ViewModel {
 
     // CREATE
     public void insertText(Text text) {
+        insertText(text, null);
+    }
+
+    public void insertText(Text text, Runnable onSuccess) {
         isLoading.setValue(true);
         repository.insertText(text, (success, id) -> {
             isLoading.postValue(false);
-            if (!success) error.postValue("Error al guardar el texto");
+            if (success) {
+                if (onSuccess != null) {
+                    onSuccess.run();
+                }
+            } else {
+                error.postValue("Error al guardar el texto");
+            }
         });
     }
 
-    // UPDATE
     public void updateText(Text text) {
+        updateText(text, null);
+    }
+
+    public void updateText(Text text, Runnable onSuccess) {
         isLoading.setValue(true);
         repository.updateText(text, (success, id) -> {
             isLoading.postValue(false);
-            if (!success) error.postValue("Error al actualizar el texto");
+            if (success) {
+                if (onSuccess != null) {
+                    onSuccess.run();
+                }
+            } else {
+                error.postValue("Error al actualizar el texto");
+            }
         });
     }
 

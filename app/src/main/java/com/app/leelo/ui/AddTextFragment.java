@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -15,22 +16,22 @@ import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.model.Text;
 import com.app.leelo.presentation.viewmodel.TextViewModel;
 import com.app.leelo.presentation.viewmodel.ViewModelFactory;
+import com.app.leelo.util.FragmentUiUtils;
 
 public class AddTextFragment extends Fragment {
 
-    private EditText titleEditText, contentEditText;
+    private EditText titleEditText;
+    private EditText contentEditText;
     private Button saveButton;
     private boolean isEditMode = false;
     private long editId = -1;
-
     private TextViewModel viewModel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         TextRepository repo = TextRepository.RepositoryProvider.getInstance(requireContext());
-        viewModel = new ViewModelProvider(this, new ViewModelFactory(repo))
-                .get(TextViewModel.class);
+        viewModel = new ViewModelProvider(this, new ViewModelFactory(repo)).get(TextViewModel.class);
     }
 
     @Override
@@ -48,6 +49,14 @@ public class AddTextFragment extends Fragment {
             loadTextForEditing(editId);
         }
 
+        viewModel.getError().observe(getViewLifecycleOwner(), error -> {
+            if (error != null && !error.isEmpty()) {
+                saveButton.setEnabled(true);
+                Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
+                viewModel.clearError();
+            }
+        });
+
         saveButton.setOnClickListener(v -> saveText());
         return view;
     }
@@ -61,16 +70,31 @@ public class AddTextFragment extends Fragment {
             return;
         }
 
+        saveButton.setEnabled(false);
+
         Text text = new Text();
         text.setTitle(title);
         text.setContent(content);
 
         if (isEditMode) {
             text.setId(editId);
-            viewModel.updateText(text);
+            viewModel.updateText(text, this::onSaveSuccess);
         } else {
-            viewModel.insertText(text);
+            viewModel.insertText(text, this::onSaveSuccess);
         }
+    }
+
+    private void onSaveSuccess() {
+        if (!isAdded()) {
+            return;
+        }
+
+        Toast.makeText(
+                getContext(),
+                isEditMode ? "Texto actualizado" : "Texto guardado",
+                Toast.LENGTH_SHORT
+        ).show();
+        FragmentUiUtils.navigateToTexts(this);
     }
 
     private void loadTextForEditing(long id) {
@@ -80,14 +104,16 @@ public class AddTextFragment extends Fragment {
                 contentEditText.setText(text.content);
             } else {
                 Toast.makeText(getContext(), "Texto no encontrado", Toast.LENGTH_SHORT).show();
-                navigateBack();
+                FragmentUiUtils.navigateToTexts(this);
             }
         });
     }
 
-    private void navigateBack() {
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).replaceFragment(new TextFragment());
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (saveButton != null) {
+            saveButton.setEnabled(true);
         }
     }
 }

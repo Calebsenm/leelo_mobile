@@ -50,7 +50,8 @@ public class TextRepositoryImpl implements TextRepository {
 
     @Override
     public LiveData<List<TextInfo>> searchText(String query) {
-        return textDao.searchText(query);
+        String normalizedQuery = query == null ? "" : query.trim();
+        return textDao.searchText("%" + normalizedQuery + "%");
     }
 
     @Override
@@ -96,6 +97,19 @@ public class TextRepositoryImpl implements TextRepository {
         });
     }
 
+    @Override
+    public void updateReadingProgress(long id, int currentPage, int totalPages, OnOperationCallback callback) {
+        executors.diskIO().execute(() -> {
+            try {
+                int rows = textDao.updateReadingProgress(id, currentPage, totalPages);
+                postOnMain(() -> callback.onComplete(rows > 0, id));
+            } catch (Exception e) {
+                Log.e(TAG, "Error actualizando progreso de lectura", e);
+                postOnMain(() -> callback.onComplete(false, id));
+            }
+        });
+    }
+
     private void validateText(Text text) {
         if (text.getTitle() == null || text.getTitle().trim().isEmpty() ||
             text.getContent() == null || text.getContent().trim().isEmpty()) {
@@ -108,10 +122,15 @@ public class TextRepositoryImpl implements TextRepository {
         if (model.getId() != null) entity.id = model.getId();
         entity.title = model.getTitle().trim();
         entity.content = model.getContent().trim();
+        TextEntity existingEntity = model.getId() != null ? textDao.getByIdSync(model.getId()) : null;
         entity.creationDate = model.getCreationDate() != null ?
                 model.getCreationDate().atStartOfDay().toEpochSecond(java.time.ZoneOffset.UTC) * 1000 :
-                System.currentTimeMillis();
+                (existingEntity != null && existingEntity.creationDate != null
+                        ? existingEntity.creationDate
+                        : System.currentTimeMillis());
         entity.modificationDate = System.currentTimeMillis();
+        entity.currentPage = existingEntity != null ? existingEntity.currentPage : 0;
+        entity.totalPages = existingEntity != null ? existingEntity.totalPages : 0;
         return entity;
     }
 

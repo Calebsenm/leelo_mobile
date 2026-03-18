@@ -15,14 +15,20 @@ import java.util.List;
 @Dao
 public interface TextDao {
 
-    @Query("SELECT id, title FROM texts ORDER BY modification_date DESC")
+    @Query("SELECT id, title, current_page, total_pages FROM texts ORDER BY modification_date DESC")
     LiveData<List<TextInfo>> getAllTextsInfo();
 
     @Query("SELECT * FROM texts WHERE id = :id")
     LiveData<TextEntity> getById(long id);
 
-    @Query("SELECT id, title FROM texts WHERE title LIKE :query OR content LIKE :query ORDER BY modification_date DESC")
+    @Query("SELECT * FROM texts WHERE id = :id LIMIT 1")
+    TextEntity getByIdSync(long id);
+
+    @Query("SELECT id, title, current_page, total_pages FROM texts WHERE title LIKE :query OR content LIKE :query ORDER BY modification_date DESC")
     LiveData<List<TextInfo>> searchText(String query);
+
+    @Query("UPDATE texts SET current_page = :currentPage, total_pages = :totalPages WHERE id = :id")
+    int updateReadingProgress(long id, int currentPage, int totalPages);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insert(TextEntity entity);
