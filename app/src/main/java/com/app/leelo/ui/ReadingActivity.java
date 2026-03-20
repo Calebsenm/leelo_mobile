@@ -43,10 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ReadingActivity extends AppCompatActivity {
     private static final int PAGE_CONTENT_PADDING_DP = 40;
@@ -55,7 +52,7 @@ public class ReadingActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private TextView pageIndicator;
     private TextView textTitle;
-    private List<String> pages = new ArrayList<>();
+    private final List<String> pages = new ArrayList<>();
     private PageAdapter adapter;
     private TextRepository textRepository;
     private WordRepository wordRepository;
@@ -68,7 +65,6 @@ public class ReadingActivity extends AppCompatActivity {
     private final Map<String, Word.State> savedWordsState = new HashMap<>();
     private final Map<String, String> savedWordsMeaning = new HashMap<>();
     private boolean isSavingWord = false;
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private String loadedContent;
     private boolean hasRestoredSavedPage = false;
     private int savedCurrentPage = 1;
@@ -173,7 +169,9 @@ public class ReadingActivity extends AppCompatActivity {
                 getResources().getDisplayMetrics().scaledDensity,
                 currentTextSize
         );
-        pages = TextPaginationUtils.paginateText(fullText, metrics);
+        List<String> paginatedPages = TextPaginationUtils.paginateText(fullText, metrics);
+        pages.clear();
+        pages.addAll(paginatedPages);
 
         if (adapter == null) {
             adapter = new PageAdapter(pages, currentTextSize, savedWordsState, this);
@@ -188,7 +186,7 @@ public class ReadingActivity extends AppCompatActivity {
                 }
             });
         } else {
-            adapter.notifyDataSetChanged();
+            adapter.refreshContent(currentTextSize);
         }
 
         restoreSavedPageIfNeeded();
@@ -290,6 +288,9 @@ public class ReadingActivity extends AppCompatActivity {
         previewText = dialogView.findViewById(R.id.previewText);
 
         fontSizeSlider.setValue(currentTextSize);
+        if (previewText != null) {
+            previewText.setTextSize(TypedValue.COMPLEX_UNIT_SP, currentTextSize);
+        }
         fontSizeSlider.addOnChangeListener((slider, value, fromUser) -> {
             currentTextSize = value;
             if (previewText != null) {
@@ -511,6 +512,10 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     private static String normalizeWordKey(String value) {
+        if (value == null) {
+            return "";
+        }
+
         StringBuilder normalized = new StringBuilder(value.length());
         for (int i = 0; i < value.length(); i++) {
             char currentChar = value.charAt(i);
@@ -518,7 +523,7 @@ public class ReadingActivity extends AppCompatActivity {
                 normalized.append(Character.toLowerCase(currentChar));
             }
         }
-        return normalized.toString().toLowerCase(Locale.ROOT).trim();
+        return normalized.toString().trim();
     }
 
     private void bindMeaningsPreview(LinearLayout container, List<String> meanings) {
@@ -601,12 +606,6 @@ public class ReadingActivity extends AppCompatActivity {
         return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        executor.shutdown();
-    }
-
     private static class PageAdapter extends RecyclerView.Adapter<PageAdapter.PageViewHolder> {
 
         private final List<String> pages;
@@ -627,6 +626,12 @@ public class ReadingActivity extends AppCompatActivity {
         public void setTextSize(float textSize) {
             this.textSize = textSize;
             notifyItemRangeChanged(0, getItemCount(), "text_size");
+        }
+
+        public void refreshContent(float textSize) {
+            this.textSize = textSize;
+            styledPageCache.evictAll();
+            notifyDataSetChanged();
         }
 
         public void updateWords(Map<String, Word.State> wordStates) {
