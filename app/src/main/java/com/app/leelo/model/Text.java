@@ -8,6 +8,8 @@ public class Text {
     private Long id;
     private String title;
     private String content;
+    private int currentPage = -1;
+    private int totalPages = -1;
 
     @Ignore
     private LocalDate creationDate;
@@ -37,6 +39,22 @@ public class Text {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
+    }
+
+    public int getTotalPages() {
+        return totalPages;
+    }
+
+    public void setTotalPages(int totalPages) {
+        this.totalPages = totalPages;
     }
 
     public LocalDate getCreationDate() {

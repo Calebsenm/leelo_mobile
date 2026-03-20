@@ -146,7 +146,12 @@ public class TextFragment extends Fragment {
             if (texts != null) {
                 TextInfo info = texts.get(pos);
                 h.title.setText(info.getTitle());
-                h.progress.setProgress(0);
+                int totalPages = info.getTotalPages();
+                int currentPage = info.getCurrentPage();
+                int progress = totalPages > 0
+                        ? Math.min(100, Math.max(0, (currentPage * 100) / totalPages))
+                        : 0;
+                h.progress.setProgress(progress);
 
                 h.itemView.setOnClickListener(v -> listener.onItemClick(info));
                 h.menu.setOnClickListener(v -> listener.onMenuClick(info));

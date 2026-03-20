@@ -9,12 +9,20 @@ public class TextInfo {
     @ColumnInfo(name = "title")
     private String title;
 
+    @ColumnInfo(name = "current_page")
+    private int currentPage;
+
+    @ColumnInfo(name = "total_pages")
+    private int totalPages;
+
     public TextInfo() {}
 
     @Ignore
-    public TextInfo(Long id, String title) {
+    public TextInfo(Long id, String title, int currentPage, int totalPages) {
         this.id = id;
         this.title = title;
+        this.currentPage = currentPage;
+        this.totalPages = totalPages;
     }
 
     public Long getId() {
@@ -31,5 +39,21 @@ public class TextInfo {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public int getCurrentPage() {
+        return currentPage;
+    }
+
+    public void setCurrentPage(int currentPage) {
+        this.currentPage = currentPage;
+    }
+
+    public int getTotalPages() {
+        return totalPages;
+    }
+
+    public void setTotalPages(int totalPages) {
+        this.totalPages = totalPages;
     }
 }

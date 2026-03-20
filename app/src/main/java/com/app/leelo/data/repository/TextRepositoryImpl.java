@@ -73,12 +73,29 @@ public class TextRepositoryImpl implements TextRepository {
         executors.diskIO().execute(() -> {
             try {
                 validateText(text);
-                TextEntity entity = modelToEntity(text);
+                TextEntity existingEntity = null;
+                if (text.getId() != null) {
+                    existingEntity = textDao.getByIdSync(text.getId());
+                }
+                TextEntity entity = modelToEntity(text, existingEntity);
                 int rows = textDao.update(entity);
                 postOnMain(() -> callback.onComplete(rows > 0, text.getId() != null ? text.getId() : -1));
             } catch (Exception e) {
                 Log.e(TAG, "Error actualizando", e);
                 postOnMain(() -> callback.onComplete(false, -1));
+            }
+        });
+    }
+
+    @Override
+    public void updateReadingProgress(long id, int currentPage, int totalPages, OnOperationCallback callback) {
+        executors.diskIO().execute(() -> {
+            try {
+                int rows = textDao.updateReadingProgress(id, currentPage, totalPages, System.currentTimeMillis());
+                postOnMain(() -> callback.onComplete(rows > 0, id));
+            } catch (Exception e) {
+                Log.e(TAG, "Error actualizando progreso", e);
+                postOnMain(() -> callback.onComplete(false, id));
             }
         });
     }
@@ -104,13 +121,25 @@ public class TextRepositoryImpl implements TextRepository {
     }
 
     private TextEntity modelToEntity(Text model) {
-        TextEntity entity = new TextEntity();
+        return modelToEntity(model, null);
+    }
+
+    private TextEntity modelToEntity(Text model, TextEntity existingEntity) {
+        TextEntity entity = existingEntity != null ? existingEntity : new TextEntity();
         if (model.getId() != null) entity.id = model.getId();
         entity.title = model.getTitle().trim();
         entity.content = model.getContent().trim();
-        entity.creationDate = model.getCreationDate() != null ?
-                model.getCreationDate().atStartOfDay().toEpochSecond(java.time.ZoneOffset.UTC) * 1000 :
-                System.currentTimeMillis();
+        entity.creationDate = model.getCreationDate() != null
+                ? model.getCreationDate().atStartOfDay().toEpochSecond(java.time.ZoneOffset.UTC) * 1000
+                : existingEntity != null && existingEntity.creationDate != null
+                ? existingEntity.creationDate
+                : System.currentTimeMillis();
+        if (model.getCurrentPage() >= 0) {
+            entity.currentPage = model.getCurrentPage();
+        }
+        if (model.getTotalPages() >= 0) {
+            entity.totalPages = model.getTotalPages();
+        }
         entity.modificationDate = System.currentTimeMillis();
         return entity;
     }

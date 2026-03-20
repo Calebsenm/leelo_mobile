@@ -11,10 +11,8 @@ import java.util.List;
 
 public class TextPaginationUtils {
 
-    private static final int DEFAULT_PAGE_PADDING_DP = 32;
-    private static final int DEFAULT_VERTICAL_PADDING_DP = 200;
     private static final float DEFAULT_TEXT_SIZE_SP = 16;
-    private static final float DEFAULT_LINE_SPACING = 1.2f;
+    private static final float DEFAULT_LINE_SPACING = 1.4f;
 
     public static class PageMetrics {
         public final int pageWidth;
@@ -29,16 +27,24 @@ public class TextPaginationUtils {
     }
 
     public static PageMetrics calculatePageMetrics(DisplayMetrics displayMetrics) {
-        int pageWidth = displayMetrics.widthPixels - 
-                        (int) (DEFAULT_PAGE_PADDING_DP * displayMetrics.density);
-        int pageHeight = displayMetrics.heightPixels - 
-                        (int) (DEFAULT_VERTICAL_PADDING_DP * displayMetrics.density);
+        return calculatePageMetrics(
+                displayMetrics.widthPixels,
+                displayMetrics.heightPixels,
+                displayMetrics.scaledDensity,
+                DEFAULT_TEXT_SIZE_SP
+        );
+    }
 
+    public static PageMetrics calculatePageMetrics(int pageWidth, int pageHeight, float scaledDensity, float textSizeSp) {
         TextPaint paint = new TextPaint();
-        paint.setTextSize(DEFAULT_TEXT_SIZE_SP * displayMetrics.scaledDensity);
+        paint.setTextSize(textSizeSp * scaledDensity);
         paint.setTypeface(Typeface.DEFAULT);
 
-        return new PageMetrics(pageWidth, pageHeight, paint);
+        return new PageMetrics(
+                Math.max(pageWidth, 1),
+                Math.max(pageHeight, 1),
+                paint
+        );
     }
 
     public static List<String> paginateText(String text, PageMetrics metrics) {

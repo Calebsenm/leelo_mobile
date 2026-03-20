@@ -15,6 +15,7 @@ public interface TextRepository {
 
     void insertText(Text text, OnOperationCallback callback);
     void updateText(Text text, OnOperationCallback callback);
+    void updateReadingProgress(long id, int currentPage, int totalPages, OnOperationCallback callback);
     void deleteText(long id, OnOperationCallback callback);
 
     interface OnOperationCallback {

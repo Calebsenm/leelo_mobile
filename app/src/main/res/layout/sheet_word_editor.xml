@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingStart="20dp"
+        android:paddingTop="18dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="28dp">
+
+        <TextView
+            android:id="@+id/editorWordText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Agrega uno o varios significados. Cada fila se guarda como una opción para esa palabra."
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:id="@+id/meaningInputsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/addMeaningButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:minWidth="0dp"
+            android:text="Agregar otro significado"
+            android:textAllCaps="false"
+            android:textSize="13sp"
+            app:cornerRadius="14dp"
+            app:strokeColor="@color/gold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp"
+            android:text="Estado de aprendizaje"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="14sp" />
+
+        <RadioGroup
+            android:id="@+id/stateRadioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radioNew"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="@color/word_new"
+                android:text="Nueva"
+                android:textColor="@color/word_new"
+                android:textSize="14sp" />
+
+            <RadioButton
+                android:id="@+id/radioLearning"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="@color/word_learning"
+                android:text="Aprendiendo"
+                android:textColor="@color/word_learning"
+                android:textSize="14sp" />
+
+            <RadioButton
+                android:id="@+id/radioLearned"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="@color/word_learned"
+                android:text="Aprendida"
+                android:textColor="@color/word_learned"
+                android:textSize="14sp" />
+
+        </RadioGroup>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/saveWordButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:text="Guardar palabra"
+            android:textAllCaps="false"
+            app:cornerRadius="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/deleteWordButton"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Eliminar palabra"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            app:cornerRadius="16dp"
+            app:strokeColor="@color/word_new" />
+
+    </LinearLayout>
+
+</ScrollView>
