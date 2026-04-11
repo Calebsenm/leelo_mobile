@@ -5,16 +5,15 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardBackgroundColor="?attr/colorSurface"
-    app:cardCornerRadius="18dp"
+    app:cardCornerRadius="10dp"
     app:cardElevation="8dp"
-    app:strokeColor="@color/gold"
-    app:strokeWidth="1dp">
+    app:strokeWidth="2dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="304dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/previewWordText"
@@ -41,6 +40,35 @@
             android:orientation="vertical"
             android:visibility="gone" />
 
+
+        <RadioGroup
+            android:id="@+id/stateRadioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/radioLearning"
+                android:layout_width="142dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="@color/word_learning"
+                android:text="Aprendiendo"
+                android:textColor="@color/word_learning"
+                android:textSize="14sp" />
+
+            <RadioButton
+                android:id="@+id/radioLearned"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="@color/word_learned"
+                android:text="Aprendida"
+                android:textColor="@color/word_learned"
+                android:textSize="14sp" />
+
+        </RadioGroup>
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/previewActionButton"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -51,7 +79,7 @@
             android:text="Editar"
             android:textAllCaps="false"
             android:textSize="13sp"
-            app:cornerRadius="14dp"
+            app:cornerRadius="10dp"
             app:strokeColor="@color/gold" />
 
     </LinearLayout>

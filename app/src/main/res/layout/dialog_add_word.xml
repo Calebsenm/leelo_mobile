@@ -53,16 +53,6 @@
         android:gravity="center">
 
         <RadioButton
-            android:id="@+id/radioNew"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Nueva"
-            android:textSize="14sp"
-            android:textColor="@color/word_new"
-            android:buttonTint="@color/word_new" />
-
-        <RadioButton
             android:id="@+id/radioLearning"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

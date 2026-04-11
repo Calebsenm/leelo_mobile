@@ -26,7 +26,7 @@ public class WordsFragment extends Fragment {
     private WordViewModel viewModel;
     private RecyclerView recyclerView;
     private TextView emptyView;
-    private TextView totalCount, newCount, learningCount, learnedCount;
+    private TextView totalCount, learningCount, learnedCount;
     private TabLayout tabLayout;
     private WordAdapter adapter;
 
@@ -48,7 +48,6 @@ public class WordsFragment extends Fragment {
         recyclerView = view.findViewById(R.id.wordsRecyclerView);
         emptyView = view.findViewById(R.id.emptyView);
         totalCount = view.findViewById(R.id.totalCount);
-        newCount = view.findViewById(R.id.newCount);
         learningCount = view.findViewById(R.id.learningCount);
         learnedCount = view.findViewById(R.id.learnedCount);
     }
@@ -61,7 +60,6 @@ public class WordsFragment extends Fragment {
 
     private void setupTabs() {
         tabLayout.addTab(tabLayout.newTab().setText("Todas"));
-        tabLayout.addTab(tabLayout.newTab().setText("Nuevas"));
         tabLayout.addTab(tabLayout.newTab().setText("Aprendiendo"));
         tabLayout.addTab(tabLayout.newTab().setText("Aprendidas"));
 
@@ -73,12 +71,9 @@ public class WordsFragment extends Fragment {
                         viewModel.setFilter(WordViewModel.FilterType.ALL);
                         break;
                     case 1:
-                        viewModel.setFilter(WordViewModel.FilterType.NEW);
-                        break;
-                    case 2:
                         viewModel.setFilter(WordViewModel.FilterType.LEARNING);
                         break;
-                    case 3:
+                    case 2:
                         viewModel.setFilter(WordViewModel.FilterType.LEARNED);
                         break;
                 }
@@ -117,10 +112,6 @@ public class WordsFragment extends Fragment {
             totalCount.setText(String.valueOf(count != null ? count : 0));
         });
 
-        viewModel.newCount.observe(getViewLifecycleOwner(), count -> {
-            newCount.setText(String.valueOf(count != null ? count : 0));
-        });
-
         viewModel.learningCount.observe(getViewLifecycleOwner(), count -> {
             learningCount.setText(String.valueOf(count != null ? count : 0));
         });
@@ -131,25 +122,21 @@ public class WordsFragment extends Fragment {
     }
 
     private void showWordOptionsDialog(Word word) {
-        String[] options = {"Cambiar a Nueva", "Cambiar a Aprendiendo", "Cambiar a Aprendida", "Eliminar"};
+        String[] options = {"Cambiar a Aprendiendo", "Cambiar a Aprendida", "Eliminar"};
         
         new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
                 .setTitle(word.getWord())
                 .setItems(options, (dialog, which) -> {
                     switch (which) {
                         case 0:
-                            word.setState(Word.State.NEW);
-                            viewModel.updateWord(word);
-                            break;
-                        case 1:
                             word.setState(Word.State.LEARNING);
                             viewModel.updateWord(word);
                             break;
-                        case 2:
+                        case 1:
                             word.setState(Word.State.LEARNED);
                             viewModel.updateWord(word);
                             break;
-                        case 3:
+                        case 2:
                             viewModel.deleteWord(word.getId());
                             break;
                     }
@@ -219,13 +206,9 @@ public class WordsFragment extends Fragment {
                 String stateLabel;
 
                 Word.State state = word.getState();
-                if (state == null) state = Word.State.NEW;
                 
                 switch (state) {
-                    case NEW:
-                        stateColor = itemView.getContext().getColor(R.color.word_new);
-                        stateLabel = "Nueva";
-                        break;
+
                     case LEARNING:
                         stateColor = itemView.getContext().getColor(R.color.word_learning);
                         stateLabel = "Aprendiendo";

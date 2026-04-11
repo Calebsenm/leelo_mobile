@@ -3,7 +3,6 @@ package com.app.leelo.model;
 public class Word {
 
     public enum State {
-        NEW(1),
         LEARNING(2),
         LEARNED(3);
 
@@ -20,7 +19,7 @@ public class Word {
             for (State state : values()) {
                 if (state.value == value) return state;
             }
-            return NEW;
+            return LEARNING;
         }
     }
 
@@ -32,7 +31,7 @@ public class Word {
     private Long updatedAt;
 
     public Word() {
-        this.state = State.NEW;
+        this.state = State.LEARNING;
         this.createdAt = System.currentTimeMillis();
         this.updatedAt = System.currentTimeMillis();
     }

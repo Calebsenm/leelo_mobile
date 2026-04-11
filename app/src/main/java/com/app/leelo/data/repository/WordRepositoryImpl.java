@@ -129,7 +129,7 @@ public class WordRepositoryImpl implements WordRepository {
         }
         entity.word = word.getWord() != null ? word.getWord().toLowerCase().trim().replaceAll("[^a-zA-ZáéíóúñÁÉÍÓÚÑ]", "") : "";
         entity.meaning = word.getMeaning() != null ? word.getMeaning().trim() : "";
-        entity.state = word.getState() != null ? word.getState().getValue() : Word.State.NEW.getValue();
+        entity.state = word.getState() != null ? word.getState().getValue() : Word.State.LEARNING.getValue();
         entity.createdAt = word.getCreatedAt() != null ? word.getCreatedAt() : System.currentTimeMillis();
         entity.updatedAt = System.currentTimeMillis();
         return entity;

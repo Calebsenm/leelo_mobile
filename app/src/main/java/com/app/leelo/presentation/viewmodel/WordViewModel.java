@@ -29,19 +29,19 @@ public class WordViewModel extends ViewModel {
     private final MutableLiveData<String> error = new MutableLiveData<>();
 
     public enum FilterType {
-        ALL, NEW, LEARNING, LEARNED
+        ALL, LEARNING, LEARNED
     }
 
     public WordViewModel(WordRepository repository) {
         this.repository = repository;
 
         this.allWords = repository.getAllWords();
-        this.newWords = repository.getWordsByState(Word.State.NEW);
+        this.newWords = repository.getWordsByState(Word.State.LEARNING);
         this.learningWords = repository.getWordsByState(Word.State.LEARNING);
         this.learnedWords = repository.getWordsByState(Word.State.LEARNED);
 
         this.totalCount = repository.getTotalCount();
-        this.newCount = repository.getCountByState(Word.State.NEW);
+        this.newCount = repository.getCountByState(Word.State.LEARNING);
         this.learningCount = repository.getCountByState(Word.State.LEARNING);
         this.learnedCount = repository.getCountByState(Word.State.LEARNED);
     }
@@ -49,8 +49,7 @@ public class WordViewModel extends ViewModel {
     public LiveData<List<Word>> getFilteredWords() {
         return Transformations.switchMap(currentFilter, filter -> {
             switch (filter) {
-                case NEW:
-                    return newWords;
+
                 case LEARNING:
                     return learningWords;
                 case LEARNED:

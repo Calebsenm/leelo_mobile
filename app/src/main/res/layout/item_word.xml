@@ -19,14 +19,14 @@
 
         <View
             android:id="@+id/stateIndicator"
-            android:layout_width="8dp"
-            android:layout_height="match_parent"
+            android:layout_width="15dp"
+            android:layout_height="52dp"
             android:layout_marginEnd="12dp"
             android:background="@color/word_new" />
 
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="55dp"
             android:layout_weight="1"
             android:orientation="vertical">
 

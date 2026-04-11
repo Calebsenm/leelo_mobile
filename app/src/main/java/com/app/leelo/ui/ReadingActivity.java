@@ -18,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -337,6 +338,9 @@ public class ReadingActivity extends AppCompatActivity {
         TextView previewWordText = popupView.findViewById(R.id.previewWordText);
         TextView previewEmptyText = popupView.findViewById(R.id.previewEmptyText);
         LinearLayout previewMeaningsContainer = popupView.findViewById(R.id.previewMeaningsContainer);
+        RadioGroup stateRadioGroup = popupView.findViewById(R.id.stateRadioGroup);
+        RadioButton radioLearning = popupView.findViewById(R.id.radioLearning);
+        RadioButton radioLearned = popupView.findViewById(R.id.radioLearned);
         MaterialButton previewActionButton = popupView.findViewById(R.id.previewActionButton);
 
         previewWordText.setText(selectedWord);
@@ -352,6 +356,19 @@ public class ReadingActivity extends AppCompatActivity {
             previewMeaningsContainer.setVisibility(View.GONE);
             previewActionButton.setText("Agregar significado");
         }
+
+        if (currentState == Word.State.LEARNING) {
+            radioLearning.setChecked(true);
+        } else if (currentState == Word.State.LEARNED) {
+            radioLearned.setChecked(true);
+        } else {
+            radioLearning.setChecked(true);
+        }
+
+        stateRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            Word.State newState = checkedId == R.id.radioLearned ? Word.State.LEARNED : Word.State.LEARNING;
+            saveWordToDatabase(wordKey, currentMeaning, newState);
+        });
 
         PopupWindow popupWindow = new PopupWindow(
                 popupView,
@@ -412,7 +429,6 @@ public class ReadingActivity extends AppCompatActivity {
         MaterialButton addMeaningButton = dialogView.findViewById(R.id.addMeaningButton);
         MaterialButton saveWordButton = dialogView.findViewById(R.id.saveWordButton);
         MaterialButton deleteWordButton = dialogView.findViewById(R.id.deleteWordButton);
-        RadioButton radioNew = dialogView.findViewById(R.id.radioNew);
         RadioButton radioLearning = dialogView.findViewById(R.id.radioLearning);
         RadioButton radioLearned = dialogView.findViewById(R.id.radioLearned);
 
@@ -434,7 +450,7 @@ public class ReadingActivity extends AppCompatActivity {
         } else if (currentState == Word.State.LEARNED) {
             radioLearned.setChecked(true);
         } else {
-            radioNew.setChecked(true);
+            radioLearning.setChecked(true);
         }
 
         if (wordExists) {
@@ -447,7 +463,7 @@ public class ReadingActivity extends AppCompatActivity {
 
         saveWordButton.setOnClickListener(v -> {
             String meaning = collectMeanings(meaningInputsContainer);
-            Word.State state = Word.State.NEW;
+            Word.State state = Word.State.LEARNING;
 
             if (radioLearning.isChecked()) {
                 state = Word.State.LEARNING;

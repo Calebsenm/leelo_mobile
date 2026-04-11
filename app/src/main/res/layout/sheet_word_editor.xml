@@ -45,9 +45,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:minWidth="0dp"
-            android:text="Agregar otro significado"
+            android:text="+"
             android:textAllCaps="false"
-            android:textSize="13sp"
+            android:textSize="30sp"
             app:cornerRadius="14dp"
             app:strokeColor="@color/gold" />
 
@@ -67,15 +67,7 @@
             android:gravity="center"
             android:orientation="horizontal">
 
-            <RadioButton
-                android:id="@+id/radioNew"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:buttonTint="@color/word_new"
-                android:text="Nueva"
-                android:textColor="@color/word_new"
-                android:textSize="14sp" />
+
 
             <RadioButton
                 android:id="@+id/radioLearning"
