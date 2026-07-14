@@ -1,85 +1,103 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_marginHorizontal="8dp"
+    android:layout_marginVertical="8dp"
     app:cardBackgroundColor="?attr/colorSurface"
-    app:cardCornerRadius="10dp"
-    app:cardElevation="8dp"
-    app:strokeWidth="2dp">
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:strokeColor="@color/gold"
+    app:strokeWidth="1dp">
 
     <LinearLayout
-        android:layout_width="304dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="12dp">
 
-        <TextView
-            android:id="@+id/previewWordText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/previewWordText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <RadioGroup
+                android:id="@+id/stateRadioGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_vertical">
+
+                <RadioButton
+                    android:id="@+id/radioLearned"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/word_learned"
+                    android:text="1"
+                    android:textColor="@color/word_learned"
+                    android:textSize="15sp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp" />
+
+                <RadioButton
+                    android:id="@+id/radioLearning"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:buttonTint="@color/word_learning"
+                    android:text="2"
+                    android:textColor="@color/word_learning"
+                    android:textSize="15sp"
+                    android:paddingStart="4dp"
+                    android:paddingEnd="4dp" />
+
+            </RadioGroup>
+        </LinearLayout>
 
         <TextView
             android:id="@+id/previewEmptyText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:text="Sin significado guardado."
-            android:textColor="?attr/colorOnSurface"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="14sp" />
 
         <LinearLayout
             android:id="@+id/previewMeaningsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="8dp"
             android:orientation="vertical"
             android:visibility="gone" />
-
-
-        <RadioGroup
-            android:id="@+id/stateRadioGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="horizontal">
-            <RadioButton
-                android:id="@+id/radioLearning"
-                android:layout_width="142dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:buttonTint="@color/word_learning"
-                android:text="Aprendiendo"
-                android:textColor="@color/word_learning"
-                android:textSize="14sp" />
-
-            <RadioButton
-                android:id="@+id/radioLearned"
-                android:layout_width="140dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:buttonTint="@color/word_learned"
-                android:text="Aprendida"
-                android:textColor="@color/word_learned"
-                android:textSize="14sp" />
-
-        </RadioGroup>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/previewActionButton"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="end"
             android:minWidth="0dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
             android:text="Editar"
             android:textAllCaps="false"
             android:textSize="13sp"
-            app:cornerRadius="10dp"
+            app:cornerRadius="8dp"
             app:strokeColor="@color/gold" />
 
     </LinearLayout>
