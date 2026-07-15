@@ -13,16 +13,11 @@ import java.util.List;
 public class TextViewModel extends ViewModel {
 
     private final TextRepository repository;
-
     public final LiveData<List<TextInfo>> texts;
     public final LiveData<List<TextInfo>> searchResults;
 
-    private final MutableLiveData<String> searchQuery = new MutableLiveData<>(
-        ""
-    );
-    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(
-        false
-    );
+    private final MutableLiveData<String> searchQuery = new MutableLiveData<>("");
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> error = new MutableLiveData<>();
 
     public TextViewModel(TextRepository repository) {
