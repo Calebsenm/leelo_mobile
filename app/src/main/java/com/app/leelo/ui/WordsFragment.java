@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -208,21 +209,28 @@ public class WordsFragment extends Fragment {
                 Word.State state = word.getState();
                 
                 switch (state) {
-
+                    case NEW:
+                        stateColor = itemView.getContext().getColor(R.color.word_new);
+                        stateLabel = "Nueva";
+                        break;
                     case LEARNING:
                         stateColor = itemView.getContext().getColor(R.color.word_learning);
                         stateLabel = "Aprendiendo";
                         break;
                     case LEARNED:
                     default:
-                        stateColor = itemView.getContext().getColor(R.color.word_learned);
+                        stateColor = android.graphics.Color.TRANSPARENT;
                         stateLabel = "Aprendida";
                         break;
                 }
 
                 stateIndicator.setBackgroundColor(stateColor);
                 stateText.setText(stateLabel);
-                stateText.setTextColor(stateColor);
+                if (state == Word.State.LEARNED) {
+                    stateText.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.word_learned));
+                } else {
+                    stateText.setTextColor(stateColor);
+                }
 
                 itemView.setOnClickListener(v -> listener.onWordClick(word));
                 deleteButton.setOnClickListener(v -> listener.onWordClick(word));

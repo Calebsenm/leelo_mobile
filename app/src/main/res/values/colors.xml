@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Colores base -->
-    <color name="black">#FF000000</color>
+    <color name="black">#FF000000</color>no
     <color name="white">#FFFFFFFF</color>
     <color name="gold">#DAA520</color>
     <color name="light_gray">#F5F5F5</color>
@@ -22,7 +22,8 @@
     <color name="card_dark">#2D2D2D</color>
     
     <!-- Estados de Palabras -->
-    <color name="word_new">#E53935</color>
-    <color name="word_learning">#00897B</color>
-    <color name="word_learned">#546E7A</color>
+    <color name="word_new">#FFF59D</color>
+    <color name="word_learning">#F8BBD0</color>
+    <color name="word_learned">#9E9E9E</color>
+
 </resources>

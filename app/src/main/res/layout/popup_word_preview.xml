@@ -35,36 +35,55 @@
                 android:maxLines="2"
                 android:ellipsize="end" />
 
-            <RadioGroup
-                android:id="@+id/stateRadioGroup"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_gravity="center_vertical">
+                android:gravity="center_vertical">
 
-                <RadioButton
-                    android:id="@+id/radioLearned"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/word_learned"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/actionRemove"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:text="1"
-                    android:textColor="@color/word_learned"
-                    android:textSize="15sp"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="4dp" />
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="22dp"
+                    app:strokeColor="@color/gold"
+                    app:strokeWidth="2dp" />
 
-                <RadioButton
-                    android:id="@+id/radioLearning"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:buttonTint="@color/word_learning"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/actionLearning"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_marginHorizontal="8dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
                     android:text="2"
-                    android:textColor="@color/word_learning"
-                    android:textSize="15sp"
-                    android:paddingStart="4dp"
-                    android:paddingEnd="4dp" />
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="22dp"
+                    app:strokeColor="@color/word_learning"
+                    app:strokeWidth="2dp" />
 
-            </RadioGroup>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/actionLearned"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:text="3"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="22dp"
+                    app:strokeWidth="2dp" />
+
+            </LinearLayout>
         </LinearLayout>
 
         <TextView

@@ -136,23 +136,23 @@ public class TextFragment extends Fragment {
         @NonNull
         @Override
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_text, parent, false);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_text, parent, false);
             return new VH(v);
         }
 
         @Override
         public void onBindViewHolder(@NonNull VH h, int pos) {
             if (texts != null) {
+
                 TextInfo info = texts.get(pos);
                 h.title.setText(info.getTitle());
+
                 int totalPages = info.getTotalPages();
                 int currentPage = info.getCurrentPage();
-                int progress = totalPages > 0
-                        ? Math.min(100, Math.max(0, (currentPage * 100) / totalPages))
-                        : 0;
-                h.progress.setProgress(progress);
+                int progress = totalPages > 0 ? Math.min(100, Math.max(0, (currentPage * 100) / totalPages)) : 0;
 
+
+                h.progress.setProgress(progress);
                 h.itemView.setOnClickListener(v -> listener.onItemClick(info));
                 h.menu.setOnClickListener(v -> listener.onMenuClick(info));
             }

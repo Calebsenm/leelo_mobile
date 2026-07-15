@@ -36,12 +36,12 @@ public class WordViewModel extends ViewModel {
         this.repository = repository;
 
         this.allWords = repository.getAllWords();
-        this.newWords = repository.getWordsByState(Word.State.LEARNING);
+        this.newWords = repository.getWordsByState(Word.State.NEW);
         this.learningWords = repository.getWordsByState(Word.State.LEARNING);
         this.learnedWords = repository.getWordsByState(Word.State.LEARNED);
 
         this.totalCount = repository.getTotalCount();
-        this.newCount = repository.getCountByState(Word.State.LEARNING);
+        this.newCount = repository.getCountByState(Word.State.NEW);
         this.learningCount = repository.getCountByState(Word.State.LEARNING);
         this.learnedCount = repository.getCountByState(Word.State.LEARNED);
     }

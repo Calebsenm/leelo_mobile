@@ -1,13 +1,15 @@
 package com.app.leelo.ui;
 
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Layout;
 import android.text.TextUtils;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-import android.text.style.ForegroundColorSpan;
+
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.collection.LruCache;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -50,7 +53,6 @@ public class ReadingActivity extends AppCompatActivity {
     private static final int PAGE_CONTENT_PADDING_DP = 40;
 
     private ViewPager2 viewPager;
-    private ProgressBar progressBar;
     private TextView pageIndicator;
     private TextView textTitle;
     private final List<String> pages = new ArrayList<>();
@@ -130,9 +132,7 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     private void loadTextData() {
-        showLoading(true);
         textRepository.getTextById(textId).observe(this, text -> {
-            showLoading(false);
             if (text != null && text.content != null) {
                 if (title == null) {
                     title = text.title;
@@ -192,9 +192,6 @@ public class ReadingActivity extends AppCompatActivity {
 
         restoreSavedPageIfNeeded();
         isDataLoaded = true;
-        if (progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
     }
 
     private void restoreSavedPageIfNeeded() {
@@ -219,10 +216,6 @@ public class ReadingActivity extends AppCompatActivity {
             pageIndicator.setText("Page " + currentPage + "/" + totalPages);
         }
 
-        if (progressBar != null && totalPages > 0) {
-            int progress = (currentPage * 100) / totalPages;
-            progressBar.setProgress(progress);
-        }
     }
 
     private void persistReadingProgress(int position) {
@@ -243,14 +236,6 @@ public class ReadingActivity extends AppCompatActivity {
         });
     }
 
-    private void showLoading(boolean show) {
-        if (progressBar != null) {
-            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-        if (!show && isDataLoaded && progressBar != null) {
-            progressBar.setVisibility(View.VISIBLE);
-        }
-    }
 
     private void showErrorAndFinish() {
         finish();
@@ -259,7 +244,6 @@ public class ReadingActivity extends AppCompatActivity {
     private void initViews() {
         viewPager = findViewById(R.id.viewPager);
         viewPager.setOffscreenPageLimit(2);
-        progressBar = findViewById(R.id.progressBar);
         pageIndicator = findViewById(R.id.pageIndicator);
         textTitle = findViewById(R.id.textTitle);
     }
@@ -338,10 +322,21 @@ public class ReadingActivity extends AppCompatActivity {
         TextView previewWordText = popupView.findViewById(R.id.previewWordText);
         TextView previewEmptyText = popupView.findViewById(R.id.previewEmptyText);
         LinearLayout previewMeaningsContainer = popupView.findViewById(R.id.previewMeaningsContainer);
-        RadioGroup stateRadioGroup = popupView.findViewById(R.id.stateRadioGroup);
-        RadioButton radioLearning = popupView.findViewById(R.id.radioLearning);
-        RadioButton radioLearned = popupView.findViewById(R.id.radioLearned);
+        MaterialButton actionRemove = popupView.findViewById(R.id.actionRemove);
+        MaterialButton actionLearning = popupView.findViewById(R.id.actionLearning);
+        MaterialButton actionLearned = popupView.findViewById(R.id.actionLearned);
         MaterialButton previewActionButton = popupView.findViewById(R.id.previewActionButton);
+
+        PopupWindow popupWindow = new PopupWindow(
+                popupView,
+                Math.min(dpToPx(320), getResources().getDisplayMetrics().widthPixels - dpToPx(32)),
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                true
+        );
+        popupWindow.setElevation(dpToPx(12));
+        popupWindow.setOutsideTouchable(true);
+        popupWindow.setFocusable(true);
+        popupWindow.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
 
         previewWordText.setText(selectedWord);
 
@@ -357,33 +352,37 @@ public class ReadingActivity extends AppCompatActivity {
             previewActionButton.setText("Agregar significado");
         }
 
-        if (currentState == Word.State.LEARNING) {
-            radioLearning.setChecked(true);
-        } else if (currentState == Word.State.LEARNED) {
-            radioLearned.setChecked(true);
-        } else {
-            radioLearning.setChecked(true);
-        }
-
-        stateRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            Word.State newState = checkedId == R.id.radioLearned ? Word.State.LEARNED : Word.State.LEARNING;
-            saveWordToDatabase(wordKey, currentMeaning, newState);
+        actionRemove.setOnClickListener(v -> {
+            deleteWordFromDatabase(wordKey);
+            popupWindow.dismiss();
         });
 
-        PopupWindow popupWindow = new PopupWindow(
-                popupView,
-                Math.min(dpToPx(320), getResources().getDisplayMetrics().widthPixels - dpToPx(32)),
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                true
-        );
-        popupWindow.setElevation(dpToPx(12));
-        popupWindow.setOutsideTouchable(true);
-        popupWindow.setFocusable(true);
-        popupWindow.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+        actionLearning.setOnClickListener(v -> {
+            markButtonSelected(actionLearning, R.color.word_learning);
+            markButtonDeselected(actionRemove);
+            markButtonDeselected(actionLearned);
+            saveWordToDatabase(wordKey, currentMeaning, Word.State.LEARNING);
+        });
+
+        actionLearned.setOnClickListener(v -> {
+            markButtonSelected(actionLearned, android.R.color.transparent);
+            markButtonDeselected(actionRemove);
+            markButtonDeselected(actionLearning);
+            saveWordToDatabase(wordKey, currentMeaning, Word.State.LEARNED);
+        });
+
+        if (currentState == Word.State.LEARNING) {
+            markButtonSelected(actionLearning, R.color.word_learning);
+        } else if (currentState == Word.State.LEARNED) {
+            markButtonSelected(actionLearned, android.R.color.transparent);
+        }
 
         previewActionButton.setOnClickListener(v -> {
             popupWindow.dismiss();
-            showWordEditorSheet(selectedWord, wordKey, currentMeaning, currentState, wordExists);
+            Word.State latestState = savedWordsState.get(wordKey);
+            String latestMeaning = savedWordsMeaning.get(wordKey);
+            boolean isWordSaved = latestState != null || !parseMeanings(latestMeaning).isEmpty();
+            showWordEditorSheet(selectedWord, wordKey, latestMeaning, latestState, isWordSaved);
         });
 
         popupView.measure(
@@ -476,6 +475,30 @@ public class ReadingActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    private void markButtonSelected(MaterialButton button, int colorRes) {
+        button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+                android.graphics.Color.TRANSPARENT));
+        if (colorRes != android.R.color.transparent) {
+            int color = ContextCompat.getColor(this, colorRes);
+            button.setStrokeColor(android.content.res.ColorStateList.valueOf(color));
+            button.setTextColor(color);
+        } else {
+            int gray = ContextCompat.getColor(this, R.color.word_learned);
+            button.setStrokeColor(android.content.res.ColorStateList.valueOf(gray));
+            button.setTextColor(gray);
+        }
+        button.setStrokeWidth(dpToPx(2));
+    }
+
+    private void markButtonDeselected(MaterialButton button) {
+        button.setBackgroundTintList(null);
+        button.setStrokeWidth(dpToPx(1));
+        button.setStrokeColor(null);
+        android.util.TypedValue tv = new android.util.TypedValue();
+        button.getContext().getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnSurface, tv, true);
+        button.setTextColor(tv.data);
     }
 
     private void saveWordToDatabase(String word, String meaning, Word.State state) {
@@ -721,10 +744,23 @@ public class ReadingActivity extends AppCompatActivity {
                     continue;
                 }
 
-                int color = resolveWordColor(wordStates.get(cleanWord));
-                spannable.setSpan(new ForegroundColorSpan(color), start, index, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                Word.State state = wordStates.get(cleanWord);
+                int highlightColor = 0;
+                if (state == null) {
+                    highlightColor = activity.getColor(R.color.word_new);
+                } else if (state == Word.State.LEARNING) {
+                    highlightColor = activity.getColor(R.color.word_learning);
+                }
+                if (highlightColor != 0) {
+                    spannable.setSpan(
+                            new android.text.style.BackgroundColorSpan(highlightColor),
+                            start, index,
+                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                    );
+                }
+
                 spannable.setSpan(
-                        new WordClickableSpan(activity, cleanWord, color),
+                        new WordClickableSpan(activity, cleanWord),
                         start,
                         index,
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -734,16 +770,6 @@ public class ReadingActivity extends AppCompatActivity {
             return spannable;
         }
 
-        private int resolveWordColor(Word.State state) {
-            if (state == Word.State.LEARNING) {
-                return activity.getColor(R.color.word_learning);
-            }
-            if (state == Word.State.LEARNED) {
-                return activity.getColor(R.color.word_learned);
-            }
-            return activity.getColor(R.color.word_new);
-        }
-
         static class PageViewHolder extends RecyclerView.ViewHolder {
             private final TextView pageText;
 
@@ -751,6 +777,11 @@ public class ReadingActivity extends AppCompatActivity {
                 super(itemView);
                 pageText = itemView.findViewById(R.id.pageText);
                 pageText.setMovementMethod(LinkMovementMethod.getInstance());
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    pageText.setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY);
+                    pageText.setJustificationMode(Layout.JUSTIFICATION_MODE_INTER_WORD);
+                }
             }
 
             public void bind(CharSequence text, float textSize) {
@@ -766,12 +797,10 @@ public class ReadingActivity extends AppCompatActivity {
         private static class WordClickableSpan extends ClickableSpan {
             private final ReadingActivity activity;
             private final String word;
-            private final int color;
 
-            private WordClickableSpan(ReadingActivity activity, String word, int color) {
+            private WordClickableSpan(ReadingActivity activity, String word) {
                 this.activity = activity;
                 this.word = word;
-                this.color = color;
             }
 
             @Override
@@ -783,7 +812,9 @@ public class ReadingActivity extends AppCompatActivity {
             public void updateDrawState(@NonNull TextPaint ds) {
                 super.updateDrawState(ds);
                 ds.setUnderlineText(false);
-                ds.setColor(color);
+                android.util.TypedValue tv = new android.util.TypedValue();
+                activity.getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnSurface, tv, true);
+                ds.setColor(tv.data);
             }
         }
     }

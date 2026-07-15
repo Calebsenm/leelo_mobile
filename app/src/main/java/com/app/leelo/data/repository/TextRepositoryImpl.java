@@ -4,9 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-
 import androidx.lifecycle.LiveData;
-
 import com.app.leelo.data.dao.TextDao;
 import com.app.leelo.data.database.AppDatabase;
 import com.app.leelo.data.entity.TextEntity;
@@ -14,13 +12,11 @@ import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.model.Text;
 import com.app.leelo.model.TextInfo;
 import com.app.leelo.utils.AppExecutors;
-
 import java.util.List;
 
 public class TextRepositoryImpl implements TextRepository {
 
     private static final String TAG = "TextRepositoryImpl";
-
     private static TextRepositoryImpl instance;
     private final TextDao textDao;
     private final AppExecutors executors;

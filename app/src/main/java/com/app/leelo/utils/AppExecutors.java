@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 public class AppExecutors {
 
     private static volatile AppExecutors instance;
-
     private final ExecutorService diskIO;
 
     private AppExecutors() {

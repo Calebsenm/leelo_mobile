@@ -3,7 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="20dp"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="20dp"
     android:gravity="top|start"
     android:background="?android:attr/colorBackground">
 
@@ -13,8 +16,11 @@
         android:layout_height="wrap_content"
         android:textSize="15sp"
         android:textColor="?attr/colorOnSurface"
-        android:lineSpacingMultiplier="1.4"
+        android:lineSpacingMultiplier="1.3"
+        android:lineSpacingExtra="2dp"
         android:justificationMode="inter_word"
+        android:textAlignment="viewStart"
+        android:breakStrategy="high_quality"
         android:fontFamily="sans-serif" />
 
 </LinearLayout>
