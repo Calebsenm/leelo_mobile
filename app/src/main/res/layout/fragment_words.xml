@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="?android:attr/colorBackground"
-    tools:context=".ui.WordsFragment">
+    tools:context=".presentation.viewmodel.ui.WordsFragment">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayout"

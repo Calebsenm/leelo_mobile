@@ -1,4 +1,4 @@
-package com.app.leelo.ui;
+package com.app.leelo.presentation.viewmodel.ui;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -18,9 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.ProgressBar;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -33,9 +31,9 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.app.leelo.R;
 import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.domain.repository.WordRepository;
-import com.app.leelo.model.Word;
+import com.app.leelo.domain.repository.model.Word;
 import com.app.leelo.util.ReadingPreferences;
-import com.app.leelo.utils.TextPaginationUtils;
+import com.app.leelo.util.TextPaginationUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.bottomsheet.BottomSheetDialog;

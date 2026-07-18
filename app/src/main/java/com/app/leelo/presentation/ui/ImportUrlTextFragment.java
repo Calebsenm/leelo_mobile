@@ -1,4 +1,4 @@
-package com.app.leelo.ui;
+package com.app.leelo.presentation.ui;
 
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -9,7 +9,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import com.app.leelo.R;
 import com.app.leelo.domain.repository.TextRepository;
-import com.app.leelo.model.Text;
+import com.app.leelo.domain.model.Text;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import org.jsoup.Jsoup;

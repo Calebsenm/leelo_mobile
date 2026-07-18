@@ -5,9 +5,9 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 import com.app.leelo.domain.repository.TextRepository;
-import com.app.leelo.data.entity.TextEntity;
-import com.app.leelo.model.Text;
-import com.app.leelo.model.TextInfo;
+import com.app.leelo.data.local.entity.TextEntity;
+import com.app.leelo.domain.model.Text;
+import com.app.leelo.domain.model.TextInfo;
 import java.util.List;
 
 public class TextViewModel extends ViewModel {

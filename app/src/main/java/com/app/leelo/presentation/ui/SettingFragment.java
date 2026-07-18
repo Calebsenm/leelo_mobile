@@ -1,4 +1,4 @@
-package com.app.leelo.ui;
+package com.app.leelo.presentation.viewmodel.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

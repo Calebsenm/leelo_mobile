@@ -4,25 +4,20 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Transformations;
-
-import com.app.leelo.data.dao.WordDao;
-import com.app.leelo.data.database.AppDatabase;
-import com.app.leelo.data.entity.WordEntity;
+import com.app.leelo.data.local.dao.WordDao;
+import com.app.leelo.data.local.database.AppDatabase;
+import com.app.leelo.data.local.entity.WordEntity;
 import com.app.leelo.domain.repository.WordRepository;
-import com.app.leelo.model.Word;
-import com.app.leelo.utils.AppExecutors;
-
+import com.app.leelo.domain.repository.model.Word;
+import com.app.leelo.util.AppExecutors;
 import java.util.ArrayList;
 import java.util.List;
 
 public class WordRepositoryImpl implements WordRepository {
 
-    private static final String TAG = "WordRepositoryImpl";
     private static volatile WordRepositoryImpl instance;
-
     private final WordDao wordDao;
     private final AppExecutors executors;
     private final Handler mainHandler;
@@ -83,7 +78,6 @@ public class WordRepositoryImpl implements WordRepository {
                 long id = wordDao.insert(entity);
                 postOnMain(() -> callback.onComplete(true, id));
             } catch (Exception e) {
-                Log.e(TAG, "Error inserting word", e);
                 postOnMain(() -> callback.onComplete(false, -1));
             }
         });
@@ -98,7 +92,6 @@ public class WordRepositoryImpl implements WordRepository {
                 int rows = wordDao.update(entity);
                 postOnMain(() -> callback.onComplete(rows > 0, word.getId() != null ? word.getId() : -1));
             } catch (Exception e) {
-                Log.e(TAG, "Error updating word", e);
                 postOnMain(() -> callback.onComplete(false, -1));
             }
         });
@@ -111,7 +104,6 @@ public class WordRepositoryImpl implements WordRepository {
                 int rows = wordDao.deleteById(id);
                 postOnMain(() -> callback.onComplete(rows > 0, id));
             } catch (Exception e) {
-                Log.e(TAG, "Error deleting word", e);
                 postOnMain(() -> callback.onComplete(false, -1));
             }
         });

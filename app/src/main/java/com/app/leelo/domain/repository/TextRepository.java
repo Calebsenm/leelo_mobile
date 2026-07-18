@@ -2,9 +2,9 @@ package com.app.leelo.domain.repository;
 
 import android.content.Context;
 import androidx.lifecycle.LiveData;
-import com.app.leelo.data.entity.TextEntity;
-import com.app.leelo.model.Text;
-import com.app.leelo.model.TextInfo;
+import com.app.leelo.data.local.entity.TextEntity;
+import com.app.leelo.domain.model.Text;
+import com.app.leelo.domain.model.TextInfo;
 import java.util.List;
 
 public interface TextRepository {

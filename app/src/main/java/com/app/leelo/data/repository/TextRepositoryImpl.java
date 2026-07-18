@@ -3,20 +3,18 @@ package com.app.leelo.data.repository;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import androidx.lifecycle.LiveData;
-import com.app.leelo.data.dao.TextDao;
-import com.app.leelo.data.database.AppDatabase;
-import com.app.leelo.data.entity.TextEntity;
+import com.app.leelo.data.local.dao.TextDao;
+import com.app.leelo.data.local.database.AppDatabase;
+import com.app.leelo.data.local.entity.TextEntity;
 import com.app.leelo.domain.repository.TextRepository;
-import com.app.leelo.model.Text;
-import com.app.leelo.model.TextInfo;
-import com.app.leelo.utils.AppExecutors;
+import com.app.leelo.domain.repository.model.Text;
+import com.app.leelo.domain.repository.model.TextInfo;
+import com.app.leelo.util.AppExecutors;
 import java.util.List;
 
 public class TextRepositoryImpl implements TextRepository {
 
-    private static final String TAG = "TextRepositoryImpl";
     private static TextRepositoryImpl instance;
     private final TextDao textDao;
     private final AppExecutors executors;
@@ -58,7 +56,6 @@ public class TextRepositoryImpl implements TextRepository {
                 long id = textDao.insert(entity);
                 postOnMain(() -> callback.onComplete(true, id));
             } catch (Exception e) {
-                Log.e(TAG, "Error insertando", e);
                 postOnMain(() -> callback.onComplete(false, -1));
             }
         });
@@ -77,7 +74,6 @@ public class TextRepositoryImpl implements TextRepository {
                 int rows = textDao.update(entity);
                 postOnMain(() -> callback.onComplete(rows > 0, text.getId() != null ? text.getId() : -1));
             } catch (Exception e) {
-                Log.e(TAG, "Error actualizando", e);
                 postOnMain(() -> callback.onComplete(false, -1));
             }
         });
@@ -90,7 +86,6 @@ public class TextRepositoryImpl implements TextRepository {
                 int rows = textDao.updateReadingProgress(id, currentPage, totalPages, System.currentTimeMillis());
                 postOnMain(() -> callback.onComplete(rows > 0, id));
             } catch (Exception e) {
-                Log.e(TAG, "Error actualizando progreso", e);
                 postOnMain(() -> callback.onComplete(false, id));
             }
         });
@@ -103,7 +98,6 @@ public class TextRepositoryImpl implements TextRepository {
                 int rows = textDao.deleteById(id);
                 postOnMain(() -> callback.onComplete(rows > 0, id));
             } catch (Exception e) {
-                Log.e(TAG, "Error eliminando", e);
                 postOnMain(() -> callback.onComplete(false, id));
             }
         });

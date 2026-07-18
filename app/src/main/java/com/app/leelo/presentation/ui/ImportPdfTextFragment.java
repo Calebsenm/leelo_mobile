@@ -1,4 +1,4 @@
-package com.app.leelo.ui;
+package com.app.leelo.presentation.ui;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,20 +8,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-
 import com.app.leelo.R;
 import com.app.leelo.domain.repository.TextRepository;
-import com.app.leelo.model.Text;
+import com.app.leelo.domain.model.Text;
 import com.google.android.material.button.MaterialButton;
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader;
 import com.tom_roush.pdfbox.pdmodel.PDDocument;
 import com.tom_roush.pdfbox.text.PDFTextStripper;
-
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.concurrent.ExecutorService;
@@ -174,8 +171,8 @@ public class ImportPdfTextFragment extends Fragment {
     }
 
     private void navigateToHome() {
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).replaceFragment(new TextFragment());
+        if (getActivity() instanceof com.app.leelo.presentation.viewmodel.ui.MainActivity) {
+            ((com.app.leelo.presentation.viewmodel.ui.MainActivity) getActivity()).replaceFragment(new com.app.leelo.presentation.viewmodel.ui.TextFragment());
         }
     }
 

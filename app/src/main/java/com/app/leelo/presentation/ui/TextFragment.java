@@ -1,4 +1,4 @@
-package com.app.leelo.ui;
+package com.app.leelo.presentation.viewmodel.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,7 +15,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.app.leelo.R;
-import com.app.leelo.model.TextInfo;
+import com.app.leelo.domain.repository.model.TextInfo;
 import com.app.leelo.presentation.viewmodel.TextViewModel;
 import com.app.leelo.presentation.viewmodel.ViewModelFactory;
 import com.app.leelo.domain.repository.TextRepository;

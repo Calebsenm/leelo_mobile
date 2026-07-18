@@ -1,4 +1,4 @@
-package com.app.leelo.ui;
+package com.app.leelo.presentation.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,10 +9,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.app.leelo.R;
 import com.app.leelo.domain.repository.TextRepository;
-import com.app.leelo.model.Text;
+import com.app.leelo.domain.model.Text;
 import com.app.leelo.presentation.viewmodel.TextViewModel;
 import com.app.leelo.presentation.viewmodel.ViewModelFactory;
 
@@ -22,7 +21,6 @@ public class AddTextFragment extends Fragment {
     private Button saveButton;
     private boolean isEditMode = false;
     private long editId = -1;
-
     private TextViewModel viewModel;
 
     @Override
@@ -86,8 +84,8 @@ public class AddTextFragment extends Fragment {
     }
 
     private void navigateBack() {
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).replaceFragment(new TextFragment());
+        if (getActivity() instanceof com.app.leelo.presentation.viewmodel.ui.MainActivity) {
+            ((com.app.leelo.presentation.viewmodel.ui.MainActivity) getActivity()).replaceFragment(new com.app.leelo.presentation.viewmodel.ui.TextFragment());
         }
     }
 }

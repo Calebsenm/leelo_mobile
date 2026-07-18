@@ -1,13 +1,13 @@
-package com.app.leelo.data.database;
+package com.app.leelo.data.local.database;
 
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import android.content.Context;
-import com.app.leelo.data.entity.TextEntity;
-import com.app.leelo.data.entity.WordEntity;
-import com.app.leelo.data.dao.TextDao;
-import com.app.leelo.data.dao.WordDao;
+import com.app.leelo.data.local.entity.TextEntity;
+import com.app.leelo.data.local.entity.WordEntity;
+import com.app.leelo.data.local.dao.TextDao;
+import com.app.leelo.data.local.dao.WordDao;
 
 
 @Database(

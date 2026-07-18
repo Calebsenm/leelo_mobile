@@ -6,7 +6,7 @@ import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
 
 import com.app.leelo.domain.repository.WordRepository;
-import com.app.leelo.model.Word;
+import com.app.leelo.domain.repository.model.Word;
 
 import java.util.List;
 

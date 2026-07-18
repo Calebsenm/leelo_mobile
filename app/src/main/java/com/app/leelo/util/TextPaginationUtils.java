@@ -1,4 +1,4 @@
-package com.app.leelo.utils;
+package com.app.leelo.util;
 
 import android.graphics.Typeface;
 import android.text.Layout;

@@ -1,4 +1,4 @@
-package com.app.leelo.ui;
+package com.app.leelo.presentation.ui;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
