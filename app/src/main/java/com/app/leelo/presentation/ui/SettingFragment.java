@@ -1,4 +1,4 @@
-package com.app.leelo.presentation.viewmodel.ui;
+package com.app.leelo.presentation.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,11 +21,10 @@ public class SettingFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_setting, container, false);
         
         themeManager = ThemeManager.getInstance(requireContext());
-        
         darkModeSwitch = view.findViewById(R.id.darkModeSwitch);
         themeIcon = view.findViewById(R.id.themeIcon);
-        
         darkModeSwitch.setChecked(themeManager.isDarkMode());
+
         updateIcon(themeManager.isDarkMode());
         
         darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {

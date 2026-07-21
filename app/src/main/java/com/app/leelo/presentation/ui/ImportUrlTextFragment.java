@@ -31,14 +31,11 @@ public class ImportUrlTextFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_import_url_text, container, false);
-
         inputTitle = view.findViewById(R.id.inputTittleUrl);
         inputUrl = view.findViewById(R.id.inputTextUrl);
         saveButton = view.findViewById(R.id.SaveTextButtonTextUrl);
-
         textRepository = TextRepository.RepositoryProvider.getInstance(requireContext());
         executor = Executors.newSingleThreadExecutor();
-
         saveButton.setOnClickListener(v -> validateAndExtract());
 
         return view;

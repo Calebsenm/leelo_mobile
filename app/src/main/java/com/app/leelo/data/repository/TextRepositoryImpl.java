@@ -8,8 +8,8 @@ import com.app.leelo.data.local.dao.TextDao;
 import com.app.leelo.data.local.database.AppDatabase;
 import com.app.leelo.data.local.entity.TextEntity;
 import com.app.leelo.domain.repository.TextRepository;
-import com.app.leelo.domain.repository.model.Text;
-import com.app.leelo.domain.repository.model.TextInfo;
+import com.app.leelo.domain.model.Text;
+import com.app.leelo.domain.model.TextInfo;
 import com.app.leelo.util.AppExecutors;
 import java.util.List;
 

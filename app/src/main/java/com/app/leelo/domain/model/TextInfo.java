@@ -1,11 +1,14 @@
 package com.app.leelo.domain.model;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Ignore;
 
 public class TextInfo {
     private Long id;
     private String title;
+    @ColumnInfo(name = "current_page")
     private int currentPage;
+    @ColumnInfo(name = "total_pages")
     private int totalPages;
 
     public TextInfo() {}

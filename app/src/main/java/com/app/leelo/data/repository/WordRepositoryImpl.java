@@ -10,7 +10,7 @@ import com.app.leelo.data.local.dao.WordDao;
 import com.app.leelo.data.local.database.AppDatabase;
 import com.app.leelo.data.local.entity.WordEntity;
 import com.app.leelo.domain.repository.WordRepository;
-import com.app.leelo.domain.repository.model.Word;
+import com.app.leelo.domain.model.Word;
 import com.app.leelo.util.AppExecutors;
 import java.util.ArrayList;
 import java.util.List;

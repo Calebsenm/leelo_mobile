@@ -14,6 +14,7 @@ import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.domain.model.Text;
 import com.app.leelo.presentation.viewmodel.TextViewModel;
 import com.app.leelo.presentation.viewmodel.ViewModelFactory;
+import com.app.leelo.presentation.ui.TextFragment;
 
 public class AddTextFragment extends Fragment {
 
@@ -84,8 +85,8 @@ public class AddTextFragment extends Fragment {
     }
 
     private void navigateBack() {
-        if (getActivity() instanceof com.app.leelo.presentation.viewmodel.ui.MainActivity) {
-            ((com.app.leelo.presentation.viewmodel.ui.MainActivity) getActivity()).replaceFragment(new com.app.leelo.presentation.viewmodel.ui.TextFragment());
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).replaceFragment(new TextFragment());
         }
     }
 }

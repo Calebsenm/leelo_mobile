@@ -8,6 +8,9 @@ import androidx.fragment.app.FragmentTransaction;
 import com.app.leelo.R;
 import com.app.leelo.databinding.ActivityMainBinding;
 import com.app.leelo.util.ThemeManager;
+import com.app.leelo.presentation.ui.TextFragment;
+import com.app.leelo.presentation.ui.WordsFragment;
+import com.app.leelo.presentation.ui.SettingFragment;
 
 public class MainActivity extends AppCompatActivity {
 

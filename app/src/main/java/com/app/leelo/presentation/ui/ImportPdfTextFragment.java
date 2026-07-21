@@ -23,17 +23,16 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.app.leelo.presentation.ui.MainActivity;
+import com.app.leelo.presentation.ui.TextFragment;
 
 public class ImportPdfTextFragment extends Fragment {
-
-    private static final String TAG = "ImportPdfFragment";
 
     private LinearLayout selectLayout;
     private LinearLayout loadingLayout;
     private LinearLayout readyLayout;
     private MaterialButton selectButton;
     private MaterialButton saveButton;
-
     private Uri selectedPdfUri;
     private String extractedText;
     private TextRepository repository;
@@ -113,7 +112,6 @@ public class ImportPdfTextFragment extends Fragment {
                 requireActivity().runOnUiThread(this::onPdfProcessed);
 
             } catch (Exception e) {
-                Log.e(TAG, "Error procesando PDF", e);
                 requireActivity().runOnUiThread(() -> onError(e.getMessage()));
             }
         });
@@ -124,7 +122,6 @@ public class ImportPdfTextFragment extends Fragment {
             PDFTextStripper stripper = new PDFTextStripper();
             return stripper.getText(document).trim();
         } catch (Exception e) {
-            Log.e(TAG, "Error extrayendo texto", e);
             return null;
         }
     }
@@ -171,8 +168,8 @@ public class ImportPdfTextFragment extends Fragment {
     }
 
     private void navigateToHome() {
-        if (getActivity() instanceof com.app.leelo.presentation.viewmodel.ui.MainActivity) {
-            ((com.app.leelo.presentation.viewmodel.ui.MainActivity) getActivity()).replaceFragment(new com.app.leelo.presentation.viewmodel.ui.TextFragment());
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).replaceFragment(new TextFragment());
         }
     }
 
