@@ -1,4 +1,4 @@
-package com.app.leelo.data.dao;
+package com.app.leelo.data.local.dao;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
@@ -6,10 +6,8 @@ import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
-
-import com.app.leelo.data.entity.TextEntity;
-import com.app.leelo.model.TextInfo;
-
+import com.app.leelo.data.local.entity.TextEntity;
+import com.app.leelo.domain.model.TextInfo;
 import java.util.List;
 
 @Dao

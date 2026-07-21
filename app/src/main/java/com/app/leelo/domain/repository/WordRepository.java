@@ -2,9 +2,7 @@ package com.app.leelo.domain.repository;
 
 import android.content.Context;
 import androidx.lifecycle.LiveData;
-import com.app.leelo.model.Word;
-import com.app.leelo.data.entity.WordEntity;
-
+import com.app.leelo.domain.model.Word;
 import java.util.List;
 
 public interface WordRepository {

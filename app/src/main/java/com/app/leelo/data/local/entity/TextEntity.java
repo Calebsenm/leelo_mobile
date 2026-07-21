@@ -1,11 +1,8 @@
-package com.app.leelo.data.entity;
+package com.app.leelo.data.local.entity;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 import androidx.room.ColumnInfo;
-import androidx.room.Ignore;
-
-import java.time.LocalDate;
 
 
 @Entity(tableName = "texts")
@@ -38,11 +35,13 @@ public class TextEntity {
         this.totalPages = 0;
     }
 
+    /*
     public LocalDate getCreationDateAsLocalDate() {
         if (creationDate == null) return null;
         return new java.util.Date(creationDate).toInstant()
                 .atZone(java.time.ZoneId.systemDefault()).toLocalDate();
     }
+   */
 
     @Override
     public String toString() {

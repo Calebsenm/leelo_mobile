@@ -1,4 +1,4 @@
-package com.app.leelo.ui;
+package com.app.leelo.presentation.ui;
 
 import android.os.Build;
 import android.os.Bundle;
@@ -9,7 +9,6 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -18,31 +17,26 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.ProgressBar;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.collection.LruCache;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
-
 import com.app.leelo.R;
+import com.app.leelo.domain.model.Word;
 import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.domain.repository.WordRepository;
-import com.app.leelo.model.Word;
 import com.app.leelo.util.ReadingPreferences;
-import com.app.leelo.utils.TextPaginationUtils;
+import com.app.leelo.util.TextPaginationUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.slider.Slider;
 import com.google.android.material.textfield.TextInputEditText;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -50,8 +44,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ReadingActivity extends AppCompatActivity {
-    private static final int PAGE_CONTENT_PADDING_DP = 40;
 
+    private static final int PAGE_CONTENT_PADDING_DP = 40;
     private ViewPager2 viewPager;
     private TextView pageIndicator;
     private TextView textTitle;
@@ -83,7 +77,6 @@ public class ReadingActivity extends AppCompatActivity {
         wordRepository = WordRepository.RepositoryProvider.getInstance(this);
         readingPrefs = ReadingPreferences.getInstance(this);
         currentTextSize = readingPrefs.getTextSize();
-
         textId = getIntent().getLongExtra("text_id", -1);
         title = getIntent().getStringExtra("title");
 

@@ -1,4 +1,4 @@
-package com.app.leelo.model;
+package com.app.leelo.domain.model;
 
 import androidx.room.Ignore;
 import java.time.LocalDate;

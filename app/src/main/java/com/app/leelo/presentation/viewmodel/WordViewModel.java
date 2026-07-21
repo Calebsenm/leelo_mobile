@@ -4,26 +4,21 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 import androidx.lifecycle.ViewModel;
-
 import com.app.leelo.domain.repository.WordRepository;
-import com.app.leelo.model.Word;
-
+import com.app.leelo.domain.model.Word;
 import java.util.List;
 
-public class WordViewModel extends ViewModel {
+public class  WordViewModel extends ViewModel {
 
     private final WordRepository repository;
-
     public final LiveData<List<Word>> allWords;
     public final LiveData<List<Word>> newWords;
     public final LiveData<List<Word>> learningWords;
     public final LiveData<List<Word>> learnedWords;
-
     public final LiveData<Integer> totalCount;
     public final LiveData<Integer> newCount;
     public final LiveData<Integer> learningCount;
     public final LiveData<Integer> learnedCount;
-
     private final MutableLiveData<FilterType> currentFilter = new MutableLiveData<>(FilterType.ALL);
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<String> error = new MutableLiveData<>();

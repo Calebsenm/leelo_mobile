@@ -1,14 +1,12 @@
-package com.app.leelo.data.dao;
+package com.app.leelo.data.local.dao;
 
+import com.app.leelo.data.local.entity.WordEntity;
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
-
-import com.app.leelo.data.entity.WordEntity;
-
 import java.util.List;
 
 @Dao

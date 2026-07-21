@@ -1,4 +1,4 @@
-package com.app.leelo.utils;
+package com.app.leelo.util;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;

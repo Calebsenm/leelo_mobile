@@ -1,25 +1,22 @@
-package com.app.leelo.ui;
+package com.app.leelo.presentation.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.app.leelo.R;
 import com.app.leelo.domain.repository.WordRepository;
-import com.app.leelo.model.Word;
+import com.app.leelo.domain.model.Word;
 import com.app.leelo.presentation.viewmodel.WordViewModel;
 import com.app.leelo.presentation.viewmodel.WordViewModelFactory;
 import com.google.android.material.tabs.TabLayout;
-
 import java.util.List;
 
 public class WordsFragment extends Fragment {

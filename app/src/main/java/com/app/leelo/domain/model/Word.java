@@ -1,4 +1,4 @@
-package com.app.leelo.model;
+package com.app.leelo.domain.model;
 
 public class Word {
 
