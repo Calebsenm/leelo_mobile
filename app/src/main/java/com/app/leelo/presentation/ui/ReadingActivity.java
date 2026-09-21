@@ -2,6 +2,10 @@ package com.app.leelo.presentation.ui;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.graphics.Typeface;
+import android.graphics.Rect;
+import android.graphics.drawable.GradientDrawable;
+import android.speech.tts.TextToSpeech;
 import android.text.Layout;
 import android.text.TextUtils;
 import android.text.SpannableString;
@@ -21,6 +25,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.collection.LruCache;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,7 +35,9 @@ import com.app.leelo.domain.model.Word;
 import com.app.leelo.domain.repository.TextRepository;
 import com.app.leelo.domain.repository.WordRepository;
 import com.app.leelo.util.ReadingPreferences;
+import com.app.leelo.util.AppExecutors;
 import com.app.leelo.util.TextPaginationUtils;
+import com.app.leelo.util.TranslationClient;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -41,7 +48,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ReadingActivity extends AppCompatActivity {
 
@@ -67,6 +76,11 @@ public class ReadingActivity extends AppCompatActivity {
     private int savedCurrentPage = 1;
     private int lastSavedPage = -1;
     private int lastSavedTotalPages = -1;
+    private int lastPageWidth = -1;
+    private int lastPageHeight = -1;
+    private final AppExecutors executors = AppExecutors.getInstance();
+    private final AtomicInteger paginationGeneration = new AtomicInteger();
+    private TextToSpeech textToSpeech;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +90,11 @@ public class ReadingActivity extends AppCompatActivity {
         textRepository = TextRepository.RepositoryProvider.getInstance(this);
         wordRepository = WordRepository.RepositoryProvider.getInstance(this);
         readingPrefs = ReadingPreferences.getInstance(this);
+        textToSpeech = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS && textToSpeech != null) {
+                textToSpeech.setLanguage(Locale.US);
+            }
+        });
         currentTextSize = readingPrefs.getTextSize();
         textId = getIntent().getLongExtra("text_id", -1);
         title = getIntent().getStringExtra("title");
@@ -161,30 +180,43 @@ public class ReadingActivity extends AppCompatActivity {
                 pageWidth,
                 pageHeight,
                 getResources().getDisplayMetrics().scaledDensity,
+                getResources().getDisplayMetrics().density,
                 currentTextSize
         );
-        List<String> paginatedPages = TextPaginationUtils.paginateText(fullText, metrics);
-        pages.clear();
-        pages.addAll(paginatedPages);
+        final int generation = paginationGeneration.incrementAndGet();
 
-        if (adapter == null) {
-            adapter = new PageAdapter(pages, currentTextSize, savedWordsState, this);
-            viewPager.setAdapter(adapter);
-
-            viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-                @Override
-                public void onPageSelected(int position) {
-                    updatePageIndicator(position);
-                    textTitle.setVisibility(position > 0 ? View.GONE : View.VISIBLE);
-                    persistReadingProgress(position);
+        // StaticLayout over a complete imported book is expensive. Keep it off the UI
+        // thread so swipes and the word tooltip remain responsive.
+        executors.diskIO().execute(() -> {
+            List<String> paginatedPages = TextPaginationUtils.paginateText(fullText, metrics);
+            runOnUiThread(() -> {
+                if (generation != paginationGeneration.get() || !fullText.equals(loadedContent)) {
+                    return;
                 }
-            });
-        } else {
-            adapter.refreshContent(currentTextSize);
-        }
 
-        restoreSavedPageIfNeeded();
-        isDataLoaded = true;
+                pages.clear();
+                pages.addAll(paginatedPages);
+
+                if (adapter == null) {
+                    adapter = new PageAdapter(pages, currentTextSize, savedWordsState, this);
+                    viewPager.setAdapter(adapter);
+
+                    viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                        @Override
+                        public void onPageSelected(int position) {
+                            updatePageIndicator(position);
+                            updateReadingTitleLayout(position == 0);
+                            persistReadingProgress(position);
+                        }
+                    });
+                } else {
+                    adapter.refreshContent(currentTextSize);
+                }
+
+                restoreSavedPageIfNeeded();
+                isDataLoaded = true;
+            });
+        });
     }
 
     private void restoreSavedPageIfNeeded() {
@@ -197,8 +229,25 @@ public class ReadingActivity extends AppCompatActivity {
         hasRestoredSavedPage = true;
         viewPager.setCurrentItem(restoredPosition, false);
         updatePageIndicator(restoredPosition);
-        textTitle.setVisibility(restoredPosition > 0 ? View.GONE : View.VISIBLE);
+        updateReadingTitleLayout(restoredPosition == 0);
         persistReadingProgress(restoredPosition);
+    }
+
+    private void updateReadingTitleLayout(boolean showTitle) {
+        textTitle.setVisibility(showTitle ? View.VISIBLE : View.GONE);
+
+        ConstraintLayout.LayoutParams params =
+                (ConstraintLayout.LayoutParams) viewPager.getLayoutParams();
+        if (showTitle) {
+            params.topToTop = ConstraintLayout.LayoutParams.UNSET;
+            params.topToBottom = R.id.textTitle;
+            params.topMargin = dpToPx(12);
+        } else {
+            params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
+            params.topToBottom = ConstraintLayout.LayoutParams.UNSET;
+            params.topMargin = 0;
+        }
+        viewPager.setLayoutParams(params);
     }
 
     private void updatePageIndicator(int position) {
@@ -236,7 +285,23 @@ public class ReadingActivity extends AppCompatActivity {
 
     private void initViews() {
         viewPager = findViewById(R.id.viewPager);
-        viewPager.setOffscreenPageLimit(2);
+        // Keep only the adjacent page alive; each page contains many clickable spans.
+        viewPager.setOffscreenPageLimit(1);
+        viewPager.addOnLayoutChangeListener((view, left, top, right, bottom,
+                                              oldLeft, oldTop, oldRight, oldBottom) -> {
+            int width = right - left;
+            int height = bottom - top;
+            if (width <= 0 || height <= 0 || (width == lastPageWidth && height == lastPageHeight)) {
+                return;
+            }
+            lastPageWidth = width;
+            lastPageHeight = height;
+            if (loadedContent != null && isDataLoaded) {
+                savedCurrentPage = viewPager.getCurrentItem() + 1;
+                hasRestoredSavedPage = false;
+                processTextInChunks(loadedContent);
+            }
+        });
         pageIndicator = findViewById(R.id.pageIndicator);
         textTitle = findViewById(R.id.textTitle);
     }
@@ -295,12 +360,52 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     public void showWordDialog(String selectedWord, View anchorView) {
+        showWordDialog(selectedWord, anchorView, null);
+    }
+
+    private void showWordDialog(String selectedWord, View anchorView, android.text.style.ClickableSpan clickedSpan) {
         String wordKey = normalizeWordKey(selectedWord);
         Word.State currentState = savedWordsState.get(wordKey);
         String currentMeaning = savedWordsMeaning.get(wordKey);
         boolean wordExists = currentState != null || !parseMeanings(currentMeaning).isEmpty();
 
-        showWordPreviewPopup(selectedWord, wordKey, currentMeaning, currentState, wordExists, anchorView);
+        int[] anchorLocation = getWordAnchor(anchorView, clickedSpan);
+        showWordPreviewPopup(
+                selectedWord,
+                wordKey,
+                currentMeaning,
+                currentState,
+                wordExists,
+                anchorLocation[0],
+                anchorLocation[1],
+                anchorLocation[2],
+                anchorLocation[3]
+        );
+    }
+
+    private int[] getWordAnchor(View view, android.text.style.ClickableSpan clickedSpan) {
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+        int width = view.getWidth();
+        int height = view.getHeight();
+
+        if (clickedSpan instanceof PageAdapter.WordClickableSpan && view instanceof TextView) {
+            TextView textView = (TextView) view;
+            android.text.Layout layout = textView.getLayout();
+            android.text.Spannable text = (android.text.Spannable) textView.getText();
+            int start = text.getSpanStart(clickedSpan);
+            int end = text.getSpanEnd(clickedSpan);
+            if (layout != null && start >= 0 && end > start) {
+                int line = layout.getLineForOffset(start);
+                int left = Math.round(Math.min(layout.getPrimaryHorizontal(start), layout.getPrimaryHorizontal(end)));
+                int right = Math.round(Math.max(layout.getPrimaryHorizontal(start), layout.getPrimaryHorizontal(end)));
+                location[0] += left;
+                location[1] += layout.getLineTop(line);
+                width = Math.max(1, right - left);
+                height = layout.getLineBottom(line) - layout.getLineTop(line);
+            }
+        }
+        return new int[]{location[0], location[1], width, height};
     }
 
     private void showWordPreviewPopup(
@@ -309,20 +414,25 @@ public class ReadingActivity extends AppCompatActivity {
             String currentMeaning,
             Word.State currentState,
             boolean wordExists,
-            View anchorView
+            int anchorX,
+            int anchorY,
+            int anchorWidth,
+            int anchorHeight
     ) {
         View popupView = LayoutInflater.from(this).inflate(R.layout.popup_word_preview, null);
         TextView previewWordText = popupView.findViewById(R.id.previewWordText);
         TextView previewEmptyText = popupView.findViewById(R.id.previewEmptyText);
         LinearLayout previewMeaningsContainer = popupView.findViewById(R.id.previewMeaningsContainer);
         MaterialButton actionRemove = popupView.findViewById(R.id.actionRemove);
+        MaterialButton actionQuickAdd = popupView.findViewById(R.id.actionQuickAdd);
+        MaterialButton actionSpeak = popupView.findViewById(R.id.actionSpeak);
         MaterialButton actionLearning = popupView.findViewById(R.id.actionLearning);
         MaterialButton actionLearned = popupView.findViewById(R.id.actionLearned);
         MaterialButton previewActionButton = popupView.findViewById(R.id.previewActionButton);
 
         PopupWindow popupWindow = new PopupWindow(
                 popupView,
-                Math.min(dpToPx(320), getResources().getDisplayMetrics().widthPixels - dpToPx(32)),
+                Math.min(dpToPx(304), getResources().getDisplayMetrics().widthPixels - dpToPx(32)),
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 true
         );
@@ -334,6 +444,7 @@ public class ReadingActivity extends AppCompatActivity {
         previewWordText.setText(selectedWord);
 
         List<String> meanings = parseMeanings(currentMeaning);
+        List<String> resolvedMeanings = new ArrayList<>(meanings);
         if (wordExists && !meanings.isEmpty()) {
             previewEmptyText.setVisibility(View.GONE);
             previewMeaningsContainer.setVisibility(View.VISIBLE);
@@ -341,9 +452,17 @@ public class ReadingActivity extends AppCompatActivity {
             previewActionButton.setText("Editar");
         } else {
             previewEmptyText.setVisibility(View.VISIBLE);
+            previewEmptyText.setText("Buscando significados…");
             previewMeaningsContainer.setVisibility(View.GONE);
             previewActionButton.setText("Agregar significado");
         }
+
+        actionQuickAdd.setVisibility(wordExists ? View.GONE : View.VISIBLE);
+        actionSpeak.setOnClickListener(v -> speakWord(selectedWord));
+        actionQuickAdd.setOnClickListener(v -> {
+            saveWordToDatabase(wordKey, TextUtils.join("\n", resolvedMeanings), Word.State.NEW);
+            popupWindow.dismiss();
+        });
 
         actionRemove.setOnClickListener(v -> {
             deleteWordFromDatabase(wordKey);
@@ -374,7 +493,11 @@ public class ReadingActivity extends AppCompatActivity {
             popupWindow.dismiss();
             Word.State latestState = savedWordsState.get(wordKey);
             String latestMeaning = savedWordsMeaning.get(wordKey);
-            boolean isWordSaved = latestState != null || !parseMeanings(latestMeaning).isEmpty();
+            if ((latestMeaning == null || latestMeaning.trim().isEmpty()) && !resolvedMeanings.isEmpty()) {
+                latestMeaning = TextUtils.join("\n", resolvedMeanings);
+            }
+            boolean isWordSaved = savedWordsState.containsKey(wordKey)
+                    || !parseMeanings(savedWordsMeaning.get(wordKey)).isEmpty();
             showWordEditorSheet(selectedWord, wordKey, latestMeaning, latestState, isWordSaved);
         });
 
@@ -382,26 +505,44 @@ public class ReadingActivity extends AppCompatActivity {
                 View.MeasureSpec.makeMeasureSpec(popupWindow.getWidth(), View.MeasureSpec.AT_MOST),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
         );
-        int[] anchorLocation = new int[2];
-        anchorView.getLocationOnScreen(anchorLocation);
-
         View rootView = getWindow().getDecorView();
-        int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        int screenHeight = getResources().getDisplayMetrics().heightPixels;
+        Rect visibleFrame = new Rect();
+        rootView.getWindowVisibleDisplayFrame(visibleFrame);
+        int screenWidth = visibleFrame.width();
+        int screenHeight = visibleFrame.height();
         int popupWidth = popupWindow.getWidth();
         int popupHeight = popupView.getMeasuredHeight();
         int screenMargin = dpToPx(16);
 
-        int x = anchorLocation[0] + (anchorView.getWidth() - popupWidth) / 2;
+        int x = anchorX + (anchorWidth - popupWidth) / 2;
         x = Math.max(screenMargin, Math.min(x, screenWidth - popupWidth - screenMargin));
 
-        int preferredAboveY = anchorLocation[1] - popupHeight - dpToPx(12);
-        int fallbackBelowY = anchorLocation[1] + anchorView.getHeight() + dpToPx(12);
+        int preferredAboveY = anchorY - popupHeight - dpToPx(12);
+        int fallbackBelowY = anchorY + anchorHeight + dpToPx(12);
         int y = preferredAboveY >= screenMargin
                 ? preferredAboveY
                 : Math.min(fallbackBelowY, screenHeight - popupHeight - screenMargin);
 
-        popupWindow.showAtLocation(rootView, Gravity.TOP | Gravity.START, x, y);
+        popupWindow.showAtLocation(rootView, Gravity.TOP | Gravity.START,
+                x + visibleFrame.left, y + visibleFrame.top);
+
+        if (!wordExists) {
+            executors.diskIO().execute(() -> TranslationClient.fetch(wordKey, fetchedMeanings ->
+                    runOnUiThread(() -> {
+                        if (!popupWindow.isShowing()) {
+                            return;
+                        }
+                        resolvedMeanings.clear();
+                        resolvedMeanings.addAll(fetchedMeanings);
+                        if (fetchedMeanings.isEmpty()) {
+                            previewEmptyText.setText("No se encontraron acepciones. Puedes agregar una.");
+                            return;
+                        }
+                        previewEmptyText.setVisibility(View.GONE);
+                        previewMeaningsContainer.setVisibility(View.VISIBLE);
+                        bindMeaningsPreview(previewMeaningsContainer, fetchedMeanings);
+                    })));
+        }
     }
 
     private void showWordEditorSheet(
@@ -560,24 +701,39 @@ public class ReadingActivity extends AppCompatActivity {
 
     private void bindMeaningsPreview(LinearLayout container, List<String> meanings) {
         container.removeAllViews();
-        for (String meaning : meanings) {
+        int visibleMeanings = Math.min(3, meanings.size());
+        for (int index = 0; index < visibleMeanings; index++) {
+            String meaning = meanings.get(index);
             TextView meaningView = new TextView(this);
-            meaningView.setText("\u2022 " + meaning);
+            meaningView.setText(meaning);
             meaningView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
             meaningView.setTextColor(resolveThemeColor());
+            meaningView.setPadding(dpToPx(10), dpToPx(7), dpToPx(10), dpToPx(7));
+            GradientDrawable meaningBackground = new GradientDrawable();
+            meaningBackground.setColor(resolveThemeColor(com.google.android.material.R.attr.colorSurfaceVariant));
+            meaningBackground.setCornerRadius(dpToPx(10));
+            meaningBackground.setStroke(dpToPx(1), resolveThemeColor(com.google.android.material.R.attr.colorOutline));
+            meaningView.setBackground(meaningBackground);
+            if (index == 0) {
+                meaningView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            }
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
             );
-            params.bottomMargin = dpToPx(6);
+            params.bottomMargin = dpToPx(3);
             meaningView.setLayoutParams(params);
             container.addView(meaningView);
         }
     }
 
     private int resolveThemeColor() {
+        return resolveThemeColor(com.google.android.material.R.attr.colorOnSurface);
+    }
+
+    private int resolveThemeColor(int attribute) {
         android.util.TypedValue value = new android.util.TypedValue();
-        getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnSurface, value, true);
+        getTheme().resolveAttribute(attribute, value, true);
         return value.data;
     }
 
@@ -638,6 +794,21 @@ public class ReadingActivity extends AppCompatActivity {
         return Math.round(dp * getResources().getDisplayMetrics().density);
     }
 
+    private void speakWord(String word) {
+        if (textToSpeech != null && word != null && !word.trim().isEmpty()) {
+            textToSpeech.speak(word, TextToSpeech.QUEUE_FLUSH, null, "leelo-word");
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onDestroy();
+    }
+
     private static class PageAdapter extends RecyclerView.Adapter<PageAdapter.PageViewHolder> {
 
         private final List<String> pages;
@@ -657,7 +828,7 @@ public class ReadingActivity extends AppCompatActivity {
 
         public void setTextSize(float textSize) {
             this.textSize = textSize;
-            notifyItemRangeChanged(0, getItemCount(), "text_size");
+            notifyVisiblePagesChanged("text_size");
         }
 
         public void refreshContent(float textSize) {
@@ -670,7 +841,15 @@ public class ReadingActivity extends AppCompatActivity {
             this.wordStates.clear();
             this.wordStates.putAll(wordStates);
             styledPageCache.evictAll();
-            notifyDataSetChanged();
+            notifyVisiblePagesChanged("word_state");
+        }
+
+        private void notifyVisiblePagesChanged(String payload) {
+            int center = activity.viewPager.getCurrentItem();
+            for (int position = Math.max(0, center - 1);
+                    position <= Math.min(getItemCount() - 1, center + 1); position++) {
+                notifyItemChanged(position, payload);
+            }
         }
 
         @Override
@@ -693,7 +872,7 @@ public class ReadingActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(@NonNull PageViewHolder holder, int position, @NonNull List<Object> payloads) {
-            if (!payloads.isEmpty()) {
+            if (payloads.size() == 1 && "text_size".equals(payloads.get(0))) {
                 holder.updateTextSize(textSize);
                 return;
             }
@@ -738,22 +917,8 @@ public class ReadingActivity extends AppCompatActivity {
                 }
 
                 Word.State state = wordStates.get(cleanWord);
-                int highlightColor = 0;
-                if (state == null) {
-                    highlightColor = activity.getColor(R.color.word_new);
-                } else if (state == Word.State.LEARNING) {
-                    highlightColor = activity.getColor(R.color.word_learning);
-                }
-                if (highlightColor != 0) {
-                    spannable.setSpan(
-                            new android.text.style.BackgroundColorSpan(highlightColor),
-                            start, index,
-                            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-                    );
-                }
-
                 spannable.setSpan(
-                        new WordClickableSpan(activity, cleanWord),
+                        new WordClickableSpan(activity, cleanWord, state),
                         start,
                         index,
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
@@ -790,15 +955,17 @@ public class ReadingActivity extends AppCompatActivity {
         private static class WordClickableSpan extends ClickableSpan {
             private final ReadingActivity activity;
             private final String word;
+            private final Word.State state;
 
-            private WordClickableSpan(ReadingActivity activity, String word) {
+            private WordClickableSpan(ReadingActivity activity, String word, Word.State state) {
                 this.activity = activity;
                 this.word = word;
+                this.state = state;
             }
 
             @Override
             public void onClick(@NonNull View widget) {
-                activity.showWordDialog(word, widget);
+                activity.showWordDialog(word, widget, this);
             }
 
             @Override
@@ -808,6 +975,9 @@ public class ReadingActivity extends AppCompatActivity {
                 android.util.TypedValue tv = new android.util.TypedValue();
                 activity.getTheme().resolveAttribute(com.google.android.material.R.attr.colorOnSurface, tv, true);
                 ds.setColor(tv.data);
+                if (state == null || state == Word.State.LEARNING) {
+                    ds.setUnderlineText(true);
+                }
             }
         }
     }
