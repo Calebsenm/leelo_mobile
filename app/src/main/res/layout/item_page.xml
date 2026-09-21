@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:paddingStart="20dp"
     android:paddingEnd="20dp"
     android:paddingTop="20dp"
     android:paddingBottom="20dp"
-    android:gravity="top|start"
+    android:fillViewport="true"
+    android:scrollbars="vertical"
+    android:overScrollMode="ifContentScrolls"
     android:background="?android:attr/colorBackground">
 
     <TextView
@@ -16,11 +17,12 @@
         android:layout_height="wrap_content"
         android:textSize="15sp"
         android:textColor="?attr/colorOnSurface"
-        android:lineSpacingMultiplier="1.3"
+        android:lineSpacingMultiplier="1.6"
         android:lineSpacingExtra="2dp"
         android:justificationMode="inter_word"
         android:textAlignment="viewStart"
+        android:includeFontPadding="false"
         android:breakStrategy="high_quality"
         android:fontFamily="sans-serif" />
 
-</LinearLayout>
+</androidx.core.widget.NestedScrollView>

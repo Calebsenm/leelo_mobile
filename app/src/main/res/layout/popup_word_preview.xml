@@ -6,9 +6,9 @@
     android:layout_marginHorizontal="8dp"
     android:layout_marginVertical="8dp"
     app:cardBackgroundColor="?attr/colorSurface"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp"
-    app:strokeColor="@color/gold"
+    app:cardCornerRadius="14dp"
+    app:cardElevation="5dp"
+    app:strokeColor="?attr/colorOutline"
     app:strokeWidth="1dp">
 
     <LinearLayout
@@ -30,7 +30,7 @@
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:textColor="?attr/colorOnSurface"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:maxLines="2"
                 android:ellipsize="end" />
@@ -42,17 +42,66 @@
                 android:gravity="center_vertical">
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/actionSpeak"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="Escuchar palabra"
+                    android:gravity="center"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    app:cornerRadius="20dp"
+                    app:icon="@drawable/ic_volume_up"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconTint="?attr/colorPrimary"
+                    app:strokeColor="?attr/colorOutline"
+                    app:strokeWidth="1dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/actionQuickAdd"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="Guardar palabra"
+                    android:gravity="center"
+                    android:insetTop="0dp"
+                    android:insetBottom="0dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:text=""
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="22dp"
+                    app:icon="@drawable/baseline_add"
+                    app:iconTint="?attr/colorPrimary"
+                    app:strokeColor="?attr/colorPrimary"
+                    app:iconPadding="0dp"
+                    app:strokeWidth="1dp" />
+
+                <LinearLayout
+                    android:id="@+id/wordStateActions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/actionRemove"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="44dp"
                     android:layout_height="44dp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:text="1"
-                    android:textSize="16sp"
+                    android:contentDescription="Eliminar palabra"
+                    android:text="×"
+                    android:textSize="20sp"
                     android:textStyle="bold"
                     app:cornerRadius="22dp"
-                    app:strokeColor="@color/gold"
+                    app:strokeColor="?attr/colorOutline"
                     app:strokeWidth="2dp" />
 
                 <com.google.android.material.button.MaterialButton
@@ -63,8 +112,9 @@
                     android:layout_marginHorizontal="8dp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:text="2"
-                    android:textSize="16sp"
+                    android:contentDescription="Marcar como aprendiendo"
+                    android:text="A"
+                    android:textSize="15sp"
                     android:textStyle="bold"
                     app:cornerRadius="22dp"
                     app:strokeColor="@color/word_learning"
@@ -77,12 +127,14 @@
                     android:layout_height="44dp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:text="3"
-                    android:textSize="16sp"
+                    android:contentDescription="Marcar como aprendida"
+                    android:text="✓"
+                    android:textSize="17sp"
                     android:textStyle="bold"
                     app:cornerRadius="22dp"
                     app:strokeWidth="2dp" />
 
+            </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
@@ -99,7 +151,7 @@
             android:id="@+id/previewMeaningsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:orientation="vertical"
             android:visibility="gone" />
 
@@ -107,17 +159,21 @@
             android:id="@+id/previewActionButton"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
             android:layout_gravity="end"
+            android:gravity="center"
             android:minWidth="0dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:minHeight="0dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:text="Editar"
             android:textAllCaps="false"
+            android:textColor="?attr/colorOnPrimary"
             android:textSize="13sp"
             app:cornerRadius="8dp"
-            app:strokeColor="@color/gold" />
+            app:strokeWidth="0dp"
+            android:backgroundTint="?attr/colorPrimary" />
 
     </LinearLayout>
 
