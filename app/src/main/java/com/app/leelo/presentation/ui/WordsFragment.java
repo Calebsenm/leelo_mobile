@@ -216,18 +216,14 @@ public class WordsFragment extends Fragment {
                         break;
                     case LEARNED:
                     default:
-                        stateColor = android.graphics.Color.TRANSPARENT;
+                        stateColor = itemView.getContext().getColor(R.color.state_learned);
                         stateLabel = "Aprendida";
                         break;
                 }
 
                 stateIndicator.setBackgroundColor(stateColor);
                 stateText.setText(stateLabel);
-                if (state == Word.State.LEARNED) {
-                    stateText.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.word_learned));
-                } else {
-                    stateText.setTextColor(stateColor);
-                }
+                stateText.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.ink_muted));
 
                 itemView.setOnClickListener(v -> listener.onWordClick(word));
                 deleteButton.setOnClickListener(v -> listener.onWordClick(word));

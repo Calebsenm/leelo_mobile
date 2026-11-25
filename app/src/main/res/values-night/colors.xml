@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Estados de Palabras - Modo Oscuro -->
-    <color name="word_new">#4FC3F7</color>
-    <color name="word_learning">#F48FB1</color>
-    <color name="word_learned">#757575</color>
+    <!-- True high-contrast inversion: light ink on near-black paper. -->
+    <color name="paper">#FF0E0E0E</color>
+    <color name="ink">#FFEDEDE8</color>
+    <color name="ink_muted">#FFA6A6A0</color>
+    <color name="line">#FF30302E</color>
+    <color name="accent">#FFB9B9B3</color>
+    <color name="accent_on">#FF0E0E0E</color>
 
-
+    <color name="state_new">#FF777772</color>
+    <color name="state_learning">#FFB9B9B3</color>
+    <color name="state_learned">#FF74746F</color>
 </resources>

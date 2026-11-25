@@ -3,11 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="8dp"
-    android:layout_marginVertical="8dp"
     app:cardBackgroundColor="?attr/colorSurface"
-    app:cardCornerRadius="14dp"
-    app:cardElevation="5dp"
+    app:cardCornerRadius="6dp"
+    app:cardElevation="0dp"
     app:strokeColor="?attr/colorOutline"
     app:strokeWidth="1dp">
 
@@ -15,126 +13,105 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/previewWordText"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="12dp"
                 android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="18sp"
-                android:textStyle="bold"
+                android:ellipsize="end"
+                android:fontFamily="serif"
                 android:maxLines="2"
-                android:ellipsize="end" />
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="19sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/actionSpeak"
+                style="@style/Widget.Leelo.OutlinedButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:contentDescription="Escuchar palabra"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                app:icon="@drawable/ic_volume_up"
+                app:iconPadding="0dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/actionQuickAdd"
+                style="@style/Widget.Leelo.OutlinedButton"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="6dp"
+                android:contentDescription="Guardar palabra"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:padding="0dp"
+                app:icon="@drawable/baseline_add"
+                app:iconPadding="0dp" />
 
             <LinearLayout
+                android:id="@+id/wordStateActions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/actionSpeak"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="6dp"
-                    android:contentDescription="Escuchar palabra"
-                    android:gravity="center"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    app:cornerRadius="20dp"
-                    app:icon="@drawable/ic_volume_up"
-                    app:iconGravity="textStart"
-                    app:iconPadding="0dp"
-                    app:iconTint="?attr/colorPrimary"
-                    app:strokeColor="?attr/colorOutline"
-                    app:strokeWidth="1dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/actionQuickAdd"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:layout_marginEnd="6dp"
-                    android:contentDescription="Guardar palabra"
-                    android:gravity="center"
-                    android:insetTop="0dp"
-                    android:insetBottom="0dp"
-                    android:minWidth="0dp"
-                    android:minHeight="0dp"
-                    android:text=""
-                    android:textSize="22sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="22dp"
-                    app:icon="@drawable/baseline_add"
-                    app:iconTint="?attr/colorPrimary"
-                    app:strokeColor="?attr/colorPrimary"
-                    app:iconPadding="0dp"
-                    app:strokeWidth="1dp" />
-
-                <LinearLayout
-                    android:id="@+id/wordStateActions"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:visibility="gone">
+                android:visibility="gone">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/actionRemove"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                    style="@style/Widget.Leelo.TextButton"
+                    android:layout_width="32dp"
+                    android:layout_height="36dp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:contentDescription="Eliminar palabra"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
                     android:text="×"
-                    android:textSize="20sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="22dp"
-                    app:strokeColor="?attr/colorOutline"
-                    app:strokeWidth="2dp" />
+                    android:textSize="17sp"
+                    android:contentDescription="Eliminar palabra" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/actionLearning"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:layout_marginHorizontal="8dp"
+                    style="@style/Widget.Leelo.OutlinedButton"
+                    android:layout_width="32dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="4dp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:contentDescription="Marcar como aprendiendo"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
                     android:text="A"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="22dp"
-                    app:strokeColor="@color/word_learning"
-                    app:strokeWidth="2dp" />
+                    android:textSize="12sp"
+                    android:contentDescription="Marcar como aprendiendo" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/actionLearned"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
+                    style="@style/Widget.Leelo.OutlinedButton"
+                    android:layout_width="32dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="4dp"
                     android:insetTop="0dp"
                     android:insetBottom="0dp"
-                    android:contentDescription="Marcar como aprendida"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="0dp"
                     android:text="✓"
-                    android:textSize="17sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="22dp"
-                    app:strokeWidth="2dp" />
-
-            </LinearLayout>
+                    android:textSize="14sp"
+                    android:contentDescription="Marcar como aprendida" />
             </LinearLayout>
         </LinearLayout>
 
@@ -142,38 +119,34 @@
             android:id="@+id/previewEmptyText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="10dp"
             android:text="Sin significado guardado."
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="14sp" />
+            android:textSize="13sp" />
 
         <LinearLayout
             android:id="@+id/previewMeaningsContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:orientation="vertical"
             android:visibility="gone" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/previewActionButton"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            style="@style/Widget.Leelo.OutlinedButton"
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginTop="8dp"
+            android:layout_height="36dp"
             android:layout_gravity="end"
-            android:gravity="center"
+            android:layout_marginTop="10dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
             android:minWidth="0dp"
             android:minHeight="0dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
             android:text="Editar"
-            android:textAllCaps="false"
-            android:textColor="?attr/colorOnPrimary"
-            android:textSize="13sp"
-            app:cornerRadius="8dp"
-            app:strokeWidth="0dp"
-            android:backgroundTint="?attr/colorPrimary" />
+            android:textSize="13sp" />
 
     </LinearLayout>
 

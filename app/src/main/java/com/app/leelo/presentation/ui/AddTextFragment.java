@@ -47,6 +47,7 @@ public class AddTextFragment extends Fragment {
             loadTextForEditing(editId);
         }
 
+        view.findViewById(R.id.backButton).setOnClickListener(v -> navigateBack());
         saveButton.setOnClickListener(v -> saveText());
         return view;
     }
@@ -86,7 +87,7 @@ public class AddTextFragment extends Fragment {
 
     private void navigateBack() {
         if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).replaceFragment(new TextFragment());
+            ((MainActivity) getActivity()).navigateToTexts();
         }
     }
 }

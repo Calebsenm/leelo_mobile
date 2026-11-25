@@ -1,61 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="24dp"
-    android:background="?android:attr/colorBackground">
+    android:background="@color/paper"
+    android:fillViewport="true">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        android:text="Configuración"
-        android:textColor="?attr/colorOnSurface"
-        android:textSize="24sp"
-        android:textStyle="bold" />
-
-    <com.google.android.material.card.MaterialCardView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="0dp"
-        app:strokeWidth="1dp"
-        app:strokeColor="?attr/colorOutline"
-        app:cardBackgroundColor="?attr/colorSurface">
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="28dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="32dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Ajustes"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="20sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="20dp"
+            android:background="?attr/colorOutline" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:padding="16dp">
+            android:orientation="horizontal"
+            android:paddingVertical="18dp">
 
             <ImageView
                 android:id="@+id/themeIcon"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:src="@drawable/ic_moon"
-                app:tint="?attr/colorOnSurface" />
+                android:tint="?attr/colorOnSurfaceVariant" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:layout_weight="1"
-                android:text="Modo Oscuro"
-                android:textSize="16sp"
+                android:text="Modo oscuro"
                 android:textColor="?attr/colorOnSurface"
-                android:layout_marginStart="16dp" />
+                android:textSize="15sp" />
 
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/darkModeSwitch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
-
         </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorOutline" />
 
-</LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="Tamaño de letra, tipografía y tema de lectura se ajustan desde el icono de lectura dentro de cada texto."
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+</ScrollView>

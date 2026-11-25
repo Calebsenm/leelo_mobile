@@ -7,6 +7,7 @@ public class ReadingPreferences {
 
     private static final String PREFS_NAME = "leelo_reading_prefs";
     private static final String KEY_TEXT_SIZE = "text_size";
+    private static final String KEY_SERIF = "use_serif";
     private static final float DEFAULT_TEXT_SIZE = 16f;
 
     private static volatile ReadingPreferences instance;
@@ -33,5 +34,14 @@ public class ReadingPreferences {
 
     public void setTextSize(float textSize) {
         prefs.edit().putFloat(KEY_TEXT_SIZE, textSize).apply();
+    }
+
+    /** Serif is the default because the reader is meant to feel like a book. */
+    public boolean isSerif() {
+        return prefs.getBoolean(KEY_SERIF, true);
+    }
+
+    public void setSerif(boolean useSerif) {
+        prefs.edit().putBoolean(KEY_SERIF, useSerif).apply();
     }
 }

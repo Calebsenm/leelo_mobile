@@ -1,33 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="@color/paper"
     tools:context=".presentation.ui.TextFragment">
 
     <LinearLayout
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="72dp"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:layout_marginBottom="80dp">
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="20dp">
 
         <androidx.appcompat.widget.SearchView
             android:id="@+id/searchView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            app:queryHint="Buscar por título..."
-            app:iconifiedByDefault="false" />
+            android:layout_marginBottom="12dp"
+            android:background="@null"
+            app:iconifiedByDefault="false"
+            app:queryBackground="@android:color/transparent"
+            app:queryHint="Buscar por título…" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="vertical"
+            android:clipToPadding="false"
+            android:scrollbars="none"
             tools:listitem="@layout/item_text" />
 
     </LinearLayout>
@@ -38,8 +43,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="No hay textos todavía"
-        android:textSize="18sp"
-        android:textColor="?attr/colorOnSurface"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="15sp"
         android:visibility="gone" />
 
     <TextView
@@ -48,18 +53,23 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="No se encontraron resultados"
-        android:textSize="18sp"
-        android:textColor="?attr/colorOnSurface"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="15sp"
         android:visibility="gone" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/add_text_button"
+        style="@style/Widget.Leelo.OutlinedButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        app:backgroundTint="@color/gold"
-        app:srcCompat="@drawable/baseline_add"
-        app:tint="@android:color/black" />
+        android:layout_margin="20dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:minWidth="0dp"
+        android:text="Agregar texto"
+        android:textSize="13sp"
+        app:icon="@drawable/baseline_add"
+        app:iconPadding="6dp" />
 
 </FrameLayout>

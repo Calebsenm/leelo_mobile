@@ -47,6 +47,18 @@ public class MainActivity extends AppCompatActivity {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.frame_layout, fragment);
+
+        boolean isRoot = fragment instanceof TextFragment
+                || fragment instanceof WordsFragment
+                || fragment instanceof SettingFragment;
+        if (!isRoot) {
+            fragmentTransaction.addToBackStack(null);
+        }
         fragmentTransaction.commit();
+    }
+
+    public void navigateToTexts() {
+        binding.bottomNavigationView.getMenu().findItem(R.id.texts).setChecked(true);
+        replaceFragment(new TextFragment());
     }
 }

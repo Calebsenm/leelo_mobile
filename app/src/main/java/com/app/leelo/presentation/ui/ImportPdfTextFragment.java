@@ -60,7 +60,7 @@ public class ImportPdfTextFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_import_pdf_text, container, false);
         initViews(view);
         initRepository();
-        setupListeners();
+        setupListeners(view);
         return view;
     }
 
@@ -85,7 +85,8 @@ public class ImportPdfTextFragment extends Fragment {
         }
     }
 
-    private void setupListeners() {
+    private void setupListeners(View view) {
+        view.findViewById(R.id.backButton).setOnClickListener(v -> navigateToHome());
         selectButton.setOnClickListener(v -> openPdfPicker());
         saveButton.setOnClickListener(v -> saveText());
     }
@@ -169,7 +170,7 @@ public class ImportPdfTextFragment extends Fragment {
 
     private void navigateToHome() {
         if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).replaceFragment(new TextFragment());
+            ((MainActivity) getActivity()).navigateToTexts();
         }
     }
 

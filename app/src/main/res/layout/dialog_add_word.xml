@@ -22,8 +22,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        app:boxStrokeColor="@color/gold"
-        app:hintTextColor="@color/gold"
+        app:boxStrokeColor="?attr/colorOutline"
+        app:hintTextColor="?attr/colorOnSurfaceVariant"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -59,8 +59,8 @@
             android:layout_weight="1"
             android:text="Aprendiendo"
             android:textSize="14sp"
-            android:textColor="@color/word_learning"
-            android:buttonTint="@color/word_learning" />
+            android:textColor="?attr/colorOnSurface"
+            android:buttonTint="?attr/colorPrimary" />
 
         <RadioButton
             android:id="@+id/radioLearned"
@@ -69,8 +69,8 @@
             android:layout_weight="1"
             android:text="Aprendida"
             android:textSize="14sp"
-            android:textColor="@color/word_learned"
-            android:buttonTint="@color/word_learned" />
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:buttonTint="?attr/colorPrimary" />
 
     </RadioGroup>
 

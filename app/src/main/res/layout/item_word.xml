@@ -1,72 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="0dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="?attr/colorOutline"
-    app:cardBackgroundColor="?attr/colorSurface">
+    android:background="?android:attr/selectableItemBackground"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="8dp"
+    android:paddingTop="14dp"
+    android:paddingEnd="4dp"
+    android:paddingBottom="14dp">
+
+    <View
+        android:id="@+id/stateIndicator"
+        android:layout_width="2dp"
+        android:layout_height="44dp"
+        android:layout_marginEnd="14dp"
+        android:background="@color/state_new" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="108dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-        <View
-            android:id="@+id/stateIndicator"
-            android:layout_width="15dp"
-            android:layout_height="52dp"
-            android:layout_marginEnd="12dp"
-            android:background="@color/word_new" />
+        <TextView
+            android:id="@+id/wordText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="serif"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="17sp" />
 
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="55dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
+        <TextView
+            android:id="@+id/meaningText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="13sp" />
 
-            <TextView
-                android:id="@+id/wordText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/meaningText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/stateText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/bg_state_chip"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="2dp"
-                android:textSize="12sp" />
-
-        </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/deleteButton"
+        <TextView
+            android:id="@+id/stateText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Eliminar"
-            android:src="@drawable/delete"
-            android:tint="?attr/colorOnSurface" />
+            android:layout_marginTop="6dp"
+            android:fontFamily="sans-serif"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="11sp" />
 
     </LinearLayout>
 
-</com.google.android.material.card.MaterialCardView>
+    <ImageButton
+        android:id="@+id/deleteButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Eliminar"
+        android:padding="10dp"
+        android:src="@drawable/delete"
+        android:tint="?attr/colorOnSurfaceVariant" />
+
+</LinearLayout>

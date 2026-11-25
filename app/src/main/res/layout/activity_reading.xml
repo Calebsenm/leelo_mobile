@@ -5,43 +5,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="@color/paper"
     tools:context=".presentation.ui.ReadingActivity">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:background="@color/paper"
+        android:elevation="0dp"
         app:navigationIcon="@drawable/arrow_back"
         app:navigationIconTint="?attr/colorOnSurface"
-        app:titleTextColor="?attr/colorOnSurface"
         app:iconTint="?attr/colorOnSurface"
-        android:background="?attr/colorSurface" />
+        app:title=""
+        app:titleTextColor="?attr/colorOnSurface" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="?attr/actionBarSize"
-        android:background="?android:attr/colorBackground">
+        android:background="@color/paper">
 
         <TextView
             android:id="@+id/textTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="24dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="24dp"
             android:layout_marginEnd="24dp"
+            android:fontFamily="serif"
             android:gravity="center"
-            android:text="Text Title"
+            android:includeFontPadding="false"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="18sp"
-            android:textStyle="normal"
-            android:fontFamily="sans-serif-medium"
+            android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager"
@@ -56,20 +56,16 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
     <TextView
         android:id="@+id/pageIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="1/10"
-        android:textColor="?attr/colorOnSurface"
-        android:textSize="14sp"
-        android:textStyle="normal"
-        android:fontFamily="sans-serif-medium"
-        app:layout_anchor="@+id/toolbar"
+        android:layout_marginTop="10dp"
+        android:fontFamily="sans-serif"
+        android:letterSpacing="0.04"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="12sp"
+        app:layout_anchor="@id/toolbar"
         app:layout_anchorGravity="center" />
-
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -2,27 +2,29 @@
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingStart="20dp"
-    android:paddingEnd="20dp"
-    android:paddingTop="20dp"
-    android:paddingBottom="20dp"
+    android:background="@color/paper"
+    android:clipToPadding="false"
     android:fillViewport="true"
-    android:scrollbars="vertical"
     android:overScrollMode="ifContentScrolls"
-    android:background="?android:attr/colorBackground">
+    android:paddingStart="24dp"
+    android:paddingTop="24dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="32dp"
+    android:scrollbars="none">
 
     <TextView
         android:id="@+id/pageText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:textColor="?attr/colorOnSurface"
-        android:lineSpacingMultiplier="1.6"
-        android:lineSpacingExtra="2dp"
-        android:justificationMode="inter_word"
-        android:textAlignment="viewStart"
-        android:includeFontPadding="false"
+        android:layout_gravity="center_horizontal"
         android:breakStrategy="high_quality"
-        android:fontFamily="sans-serif" />
+        android:fontFamily="serif"
+        android:includeFontPadding="false"
+        android:lineSpacingExtra="0dp"
+        android:lineSpacingMultiplier="1.6"
+        android:maxWidth="560dp"
+        android:textAlignment="viewStart"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="16sp" />
 
 </androidx.core.widget.NestedScrollView>

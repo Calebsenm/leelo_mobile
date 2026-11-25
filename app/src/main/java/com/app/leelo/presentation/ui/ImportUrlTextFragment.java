@@ -36,6 +36,11 @@ public class ImportUrlTextFragment extends Fragment {
         saveButton = view.findViewById(R.id.SaveTextButtonTextUrl);
         textRepository = TextRepository.RepositoryProvider.getInstance(requireContext());
         executor = Executors.newSingleThreadExecutor();
+        view.findViewById(R.id.backButton).setOnClickListener(v -> {
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).navigateToTexts();
+            }
+        });
         saveButton.setOnClickListener(v -> validateAndExtract());
 
         return view;

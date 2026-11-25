@@ -2,9 +2,11 @@ package com.app.leelo.presentation.ui;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
+import android.provider.Settings;
 import android.speech.tts.TextToSpeech;
 import android.text.Layout;
 import android.text.TextUtils;
@@ -14,8 +16,11 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.TypedValue;
+import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -37,6 +42,7 @@ import com.app.leelo.domain.repository.WordRepository;
 import com.app.leelo.util.ReadingPreferences;
 import com.app.leelo.util.AppExecutors;
 import com.app.leelo.util.TextPaginationUtils;
+import com.app.leelo.util.ThemeManager;
 import com.app.leelo.util.TranslationClient;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -56,8 +62,14 @@ public class ReadingActivity extends AppCompatActivity {
 
     private static final int PAGE_CONTENT_PADDING_DP = 40;
     private ViewPager2 viewPager;
+    private MaterialToolbar toolbar;
     private TextView pageIndicator;
     private TextView textTitle;
+    private boolean isFocusMode = false;
+    private boolean titleVisibleOnPage = false;
+    private boolean useSerif = true;
+    private long lastWordClickAt = 0L;
+    private ThemeManager themeManager;
     private final List<String> pages = new ArrayList<>();
     private PageAdapter adapter;
     private TextRepository textRepository;
@@ -90,6 +102,8 @@ public class ReadingActivity extends AppCompatActivity {
         textRepository = TextRepository.RepositoryProvider.getInstance(this);
         wordRepository = WordRepository.RepositoryProvider.getInstance(this);
         readingPrefs = ReadingPreferences.getInstance(this);
+        themeManager = ThemeManager.getInstance(this);
+        useSerif = readingPrefs.isSerif();
         textToSpeech = new TextToSpeech(this, status -> {
             if (status == TextToSpeech.SUCCESS && textToSpeech != null) {
                 textToSpeech.setLanguage(Locale.US);
@@ -181,7 +195,8 @@ public class ReadingActivity extends AppCompatActivity {
                 pageHeight,
                 getResources().getDisplayMetrics().scaledDensity,
                 getResources().getDisplayMetrics().density,
-                currentTextSize
+                currentTextSize,
+                useSerif ? Typeface.SERIF : Typeface.SANS_SERIF
         );
         final int generation = paginationGeneration.incrementAndGet();
 
@@ -198,7 +213,7 @@ public class ReadingActivity extends AppCompatActivity {
                 pages.addAll(paginatedPages);
 
                 if (adapter == null) {
-                    adapter = new PageAdapter(pages, currentTextSize, savedWordsState, this);
+                    adapter = new PageAdapter(pages, currentTextSize, useSerif, savedWordsState, this);
                     viewPager.setAdapter(adapter);
 
                     viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -210,7 +225,7 @@ public class ReadingActivity extends AppCompatActivity {
                         }
                     });
                 } else {
-                    adapter.refreshContent(currentTextSize);
+                    adapter.refreshContent(currentTextSize, useSerif);
                 }
 
                 restoreSavedPageIfNeeded();
@@ -234,7 +249,7 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     private void updateReadingTitleLayout(boolean showTitle) {
-        textTitle.setVisibility(showTitle ? View.VISIBLE : View.GONE);
+        titleVisibleOnPage = showTitle;
 
         ConstraintLayout.LayoutParams params =
                 (ConstraintLayout.LayoutParams) viewPager.getLayoutParams();
@@ -248,6 +263,7 @@ public class ReadingActivity extends AppCompatActivity {
             params.topMargin = 0;
         }
         viewPager.setLayoutParams(params);
+        applyChromeVisibility();
     }
 
     private void updatePageIndicator(int position) {
@@ -255,9 +271,83 @@ public class ReadingActivity extends AppCompatActivity {
         int totalPages = pages.size();
 
         if (pageIndicator != null) {
-            pageIndicator.setText("Page " + currentPage + "/" + totalPages);
+            pageIndicator.setText(getString(R.string.page_indicator, currentPage, totalPages));
+        }
+    }
+
+    /** A single tap in the middle of the page is the only focus-mode gesture. */
+    private void handleReaderTap(float x, float y, View source) {
+        if (System.currentTimeMillis() - lastWordClickAt < 500L) {
+            return;
         }
 
+        int width = source.getWidth();
+        int height = source.getHeight();
+        if (width <= 0 || height <= 0) {
+            return;
+        }
+
+        boolean inCenter = x > width * 0.25f && x < width * 0.75f
+                && y > height * 0.25f && y < height * 0.75f;
+        if (!inCenter) {
+            return;
+        }
+
+        source.performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY);
+        setFocusMode(!isFocusMode);
+    }
+
+    private void setFocusMode(boolean enabled) {
+        if (isFocusMode == enabled) {
+            return;
+        }
+        isFocusMode = enabled;
+
+        int duration = shouldReduceMotion() ? 0 : 120;
+        fadeView(toolbar, !enabled, duration);
+        fadeView(pageIndicator, !enabled, duration);
+        if (titleVisibleOnPage) {
+            fadeView(textTitle, !enabled, duration);
+        }
+    }
+
+    private void applyChromeVisibility() {
+        boolean show = !isFocusMode;
+        setViewVisibility(toolbar, show);
+        setViewVisibility(pageIndicator, show);
+        setViewVisibility(textTitle, show && titleVisibleOnPage);
+    }
+
+    private void setViewVisibility(View view, boolean visible) {
+        if (view != null) {
+            view.animate().cancel();
+            view.setVisibility(visible ? View.VISIBLE : View.GONE);
+            view.setAlpha(1f);
+        }
+    }
+
+    private void fadeView(View view, boolean visible, int duration) {
+        if (view == null) {
+            return;
+        }
+        view.animate().cancel();
+        if (duration == 0) {
+            setViewVisibility(view, visible);
+            return;
+        }
+        if (visible) {
+            view.setAlpha(0f);
+            view.setVisibility(View.VISIBLE);
+            view.animate().alpha(1f).setDuration(duration).start();
+        } else {
+            view.animate().alpha(0f).setDuration(duration)
+                    .withEndAction(() -> view.setVisibility(View.GONE)).start();
+        }
+    }
+
+    private boolean shouldReduceMotion() {
+        return Settings.Global.getFloat(getContentResolver(),
+                Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f;
     }
 
     private void persistReadingProgress(int position) {
@@ -302,14 +392,15 @@ public class ReadingActivity extends AppCompatActivity {
                 processTextInChunks(loadedContent);
             }
         });
+        toolbar = findViewById(R.id.toolbar);
         pageIndicator = findViewById(R.id.pageIndicator);
         textTitle = findViewById(R.id.textTitle);
     }
 
     private void setupToolbar(String title) {
-        MaterialToolbar toolbar = findViewById(R.id.toolbar);
-
-        toolbar.inflateMenu(R.menu.reading_menu);
+        if (toolbar.getMenu().size() == 0) {
+            toolbar.inflateMenu(R.menu.reading_menu);
+        }
         toolbar.setNavigationOnClickListener(v -> finish());
         toolbar.setOnMenuItemClickListener(item -> {
             if (item.getItemId() == R.id.action_settings) {
@@ -329,33 +420,91 @@ public class ReadingActivity extends AppCompatActivity {
 
         Slider fontSizeSlider = dialogView.findViewById(R.id.fontSizeSlider);
         previewText = dialogView.findViewById(R.id.previewText);
+        MaterialButton fontSerif = dialogView.findViewById(R.id.buttonFontSerif);
+        MaterialButton fontSans = dialogView.findViewById(R.id.buttonFontSans);
+        MaterialButton themeLight = dialogView.findViewById(R.id.buttonThemeLight);
+        MaterialButton themeDark = dialogView.findViewById(R.id.buttonThemeDark);
 
-        fontSizeSlider.setValue(currentTextSize);
-        if (previewText != null) {
-            previewText.setTextSize(TypedValue.COMPLEX_UNIT_SP, currentTextSize);
-        }
+        final float[] pendingTextSize = {currentTextSize};
+        final boolean[] pendingSerif = {useSerif};
+        final boolean[] pendingDark = {themeManager.isDarkMode()};
+
+        fontSizeSlider.setValue(pendingTextSize[0]);
+        updatePreview(previewText, pendingTextSize[0], pendingSerif[0]);
+        markSelection(fontSerif, fontSans, pendingSerif[0]);
+        markSelection(themeLight, themeDark, !pendingDark[0]);
+
         fontSizeSlider.addOnChangeListener((slider, value, fromUser) -> {
-            currentTextSize = value;
-            if (previewText != null) {
-                previewText.setTextSize(TypedValue.COMPLEX_UNIT_SP, value);
-            }
+            pendingTextSize[0] = value;
+            previewText.setTextSize(TypedValue.COMPLEX_UNIT_SP, value);
+        });
+        fontSerif.setOnClickListener(v -> {
+            pendingSerif[0] = true;
+            markSelection(fontSerif, fontSans, true);
+            updatePreview(previewText, pendingTextSize[0], true);
+        });
+        fontSans.setOnClickListener(v -> {
+            pendingSerif[0] = false;
+            markSelection(fontSerif, fontSans, false);
+            updatePreview(previewText, pendingTextSize[0], false);
+        });
+        themeLight.setOnClickListener(v -> {
+            pendingDark[0] = false;
+            markSelection(themeLight, themeDark, true);
+        });
+        themeDark.setOnClickListener(v -> {
+            pendingDark[0] = true;
+            markSelection(themeLight, themeDark, false);
         });
 
         new MaterialAlertDialogBuilder(this)
-                .setTitle("Configuración de lectura")
+                .setTitle("Ajustes de lectura")
                 .setView(dialogView)
-                .setPositiveButton("Aplicar", (dialog, which) -> applyTextSizeToAllPages())
+                .setPositiveButton("Aplicar", (dialog, which) ->
+                        applyReadingPreferences(pendingTextSize[0], pendingSerif[0], pendingDark[0]))
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
 
-    private void applyTextSizeToAllPages() {
-        readingPrefs.setTextSize(currentTextSize);
+    private void updatePreview(TextView preview, float textSize, boolean serif) {
+        if (preview == null) {
+            return;
+        }
+        preview.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
+        preview.setTypeface(serif ? Typeface.SERIF : Typeface.SANS_SERIF);
+    }
+
+    private void markSelection(MaterialButton first, MaterialButton second, boolean selectFirst) {
+        MaterialButton selected = selectFirst ? first : second;
+        MaterialButton other = selectFirst ? second : first;
+        int accent = resolveThemeColor(androidx.appcompat.R.attr.colorPrimary);
+        int outline = resolveThemeColor(com.google.android.material.R.attr.colorOutline);
+        int onSurface = resolveThemeColor(com.google.android.material.R.attr.colorOnSurface);
+
+        selected.setStrokeColor(ColorStateList.valueOf(accent));
+        selected.setTextColor(accent);
+        other.setStrokeColor(ColorStateList.valueOf(outline));
+        other.setTextColor(onSurface);
+    }
+
+    private void applyReadingPreferences(float textSize, boolean serif, boolean dark) {
+        currentTextSize = textSize;
+        useSerif = serif;
+        readingPrefs.setTextSize(textSize);
+        readingPrefs.setSerif(serif);
+
+        boolean themeChanged = themeManager.isDarkMode() != dark;
+        if (themeChanged) {
+            themeManager.setDarkMode(dark);
+            recreate();
+            return;
+        }
+
         if (loadedContent != null) {
             hasRestoredSavedPage = false;
             processTextInChunks(loadedContent);
         } else if (adapter != null) {
-            adapter.setTextSize(currentTextSize);
+            adapter.refreshContent(currentTextSize, useSerif);
         }
     }
 
@@ -423,6 +572,7 @@ public class ReadingActivity extends AppCompatActivity {
         TextView previewWordText = popupView.findViewById(R.id.previewWordText);
         TextView previewEmptyText = popupView.findViewById(R.id.previewEmptyText);
         LinearLayout previewMeaningsContainer = popupView.findViewById(R.id.previewMeaningsContainer);
+        LinearLayout wordStateActions = popupView.findViewById(R.id.wordStateActions);
         MaterialButton actionRemove = popupView.findViewById(R.id.actionRemove);
         MaterialButton actionQuickAdd = popupView.findViewById(R.id.actionQuickAdd);
         MaterialButton actionSpeak = popupView.findViewById(R.id.actionSpeak);
@@ -432,11 +582,11 @@ public class ReadingActivity extends AppCompatActivity {
 
         PopupWindow popupWindow = new PopupWindow(
                 popupView,
-                Math.min(dpToPx(304), getResources().getDisplayMetrics().widthPixels - dpToPx(32)),
+                Math.min(dpToPx(320), getResources().getDisplayMetrics().widthPixels - dpToPx(32)),
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 true
         );
-        popupWindow.setElevation(dpToPx(12));
+        popupWindow.setElevation(0f);
         popupWindow.setOutsideTouchable(true);
         popupWindow.setFocusable(true);
         popupWindow.setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
@@ -458,6 +608,7 @@ public class ReadingActivity extends AppCompatActivity {
         }
 
         actionQuickAdd.setVisibility(wordExists ? View.GONE : View.VISIBLE);
+        wordStateActions.setVisibility(wordExists ? View.VISIBLE : View.GONE);
         actionSpeak.setOnClickListener(v -> speakWord(selectedWord));
         actionQuickAdd.setOnClickListener(v -> {
             saveWordToDatabase(wordKey, TextUtils.join("\n", resolvedMeanings), Word.State.NEW);
@@ -470,23 +621,23 @@ public class ReadingActivity extends AppCompatActivity {
         });
 
         actionLearning.setOnClickListener(v -> {
-            markButtonSelected(actionLearning, R.color.word_learning);
+            markButtonSelected(actionLearning, R.color.accent);
             markButtonDeselected(actionRemove);
             markButtonDeselected(actionLearned);
             saveWordToDatabase(wordKey, currentMeaning, Word.State.LEARNING);
         });
 
         actionLearned.setOnClickListener(v -> {
-            markButtonSelected(actionLearned, android.R.color.transparent);
+            markButtonSelected(actionLearned, R.color.state_learned);
             markButtonDeselected(actionRemove);
             markButtonDeselected(actionLearning);
             saveWordToDatabase(wordKey, currentMeaning, Word.State.LEARNED);
         });
 
         if (currentState == Word.State.LEARNING) {
-            markButtonSelected(actionLearning, R.color.word_learning);
+            markButtonSelected(actionLearning, R.color.accent);
         } else if (currentState == Word.State.LEARNED) {
-            markButtonSelected(actionLearned, android.R.color.transparent);
+            markButtonSelected(actionLearned, R.color.state_learned);
         }
 
         previewActionButton.setOnClickListener(v -> {
@@ -612,18 +763,12 @@ public class ReadingActivity extends AppCompatActivity {
     }
 
     private void markButtonSelected(MaterialButton button, int colorRes) {
-        button.setBackgroundTintList(android.content.res.ColorStateList.valueOf(
+        int color = ContextCompat.getColor(this, colorRes);
+        button.setBackgroundTintList(ColorStateList.valueOf(
                 android.graphics.Color.TRANSPARENT));
-        if (colorRes != android.R.color.transparent) {
-            int color = ContextCompat.getColor(this, colorRes);
-            button.setStrokeColor(android.content.res.ColorStateList.valueOf(color));
-            button.setTextColor(color);
-        } else {
-            int gray = ContextCompat.getColor(this, R.color.word_learned);
-            button.setStrokeColor(android.content.res.ColorStateList.valueOf(gray));
-            button.setTextColor(gray);
-        }
-        button.setStrokeWidth(dpToPx(2));
+        button.setStrokeColor(ColorStateList.valueOf(color));
+        button.setTextColor(color);
+        button.setStrokeWidth(dpToPx(1));
     }
 
     private void markButtonDeselected(MaterialButton button) {
@@ -706,17 +851,14 @@ public class ReadingActivity extends AppCompatActivity {
             String meaning = meanings.get(index);
             TextView meaningView = new TextView(this);
             meaningView.setText(meaning);
-            meaningView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            meaningView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
             meaningView.setTextColor(resolveThemeColor());
-            meaningView.setPadding(dpToPx(10), dpToPx(7), dpToPx(10), dpToPx(7));
+            meaningView.setPadding(dpToPx(10), dpToPx(6), dpToPx(10), dpToPx(6));
             GradientDrawable meaningBackground = new GradientDrawable();
-            meaningBackground.setColor(resolveThemeColor(com.google.android.material.R.attr.colorSurfaceVariant));
-            meaningBackground.setCornerRadius(dpToPx(10));
+            meaningBackground.setColor(resolveThemeColor(com.google.android.material.R.attr.colorSurface));
+            meaningBackground.setCornerRadius(dpToPx(6));
             meaningBackground.setStroke(dpToPx(1), resolveThemeColor(com.google.android.material.R.attr.colorOutline));
             meaningView.setBackground(meaningBackground);
-            if (index == 0) {
-                meaningView.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-            }
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
@@ -816,10 +958,13 @@ public class ReadingActivity extends AppCompatActivity {
         private final ReadingActivity activity;
         private final LruCache<Integer, CharSequence> styledPageCache;
         private float textSize;
+        private boolean useSerif;
 
-        public PageAdapter(List<String> pages, float textSize, Map<String, Word.State> wordStates, ReadingActivity activity) {
+        public PageAdapter(List<String> pages, float textSize, boolean useSerif,
+                           Map<String, Word.State> wordStates, ReadingActivity activity) {
             this.pages = pages;
             this.textSize = textSize;
+            this.useSerif = useSerif;
             this.activity = activity;
             this.wordStates.putAll(wordStates);
             this.styledPageCache = new LruCache<>(Math.max(6, Math.min(pages.size(), 30)));
@@ -831,8 +976,9 @@ public class ReadingActivity extends AppCompatActivity {
             notifyVisiblePagesChanged("text_size");
         }
 
-        public void refreshContent(float textSize) {
+        public void refreshContent(float textSize, boolean useSerif) {
             this.textSize = textSize;
+            this.useSerif = useSerif;
             styledPageCache.evictAll();
             notifyDataSetChanged();
         }
@@ -862,12 +1008,12 @@ public class ReadingActivity extends AppCompatActivity {
         public PageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_page, parent, false);
-            return new PageViewHolder(view);
+            return new PageViewHolder(view, activity);
         }
 
         @Override
         public void onBindViewHolder(@NonNull PageViewHolder holder, int position) {
-            holder.bind(getStyledPage(position), textSize);
+            holder.bind(getStyledPage(position), textSize, useSerif);
         }
 
         @Override
@@ -930,19 +1076,34 @@ public class ReadingActivity extends AppCompatActivity {
 
         static class PageViewHolder extends RecyclerView.ViewHolder {
             private final TextView pageText;
+            private final ReadingActivity activity;
 
-            public PageViewHolder(@NonNull View itemView) {
+            public PageViewHolder(@NonNull View itemView, ReadingActivity activity) {
                 super(itemView);
+                this.activity = activity;
                 pageText = itemView.findViewById(R.id.pageText);
                 pageText.setMovementMethod(LinkMovementMethod.getInstance());
 
+                GestureDetector focusDetector = new GestureDetector(itemView.getContext(),
+                        new GestureDetector.SimpleOnGestureListener() {
+                            @Override
+                            public boolean onSingleTapConfirmed(MotionEvent event) {
+                                activity.handleReaderTap(event.getX(), event.getY(), pageText);
+                                return false;
+                            }
+                        });
+                pageText.setOnTouchListener((view, event) -> {
+                    focusDetector.onTouchEvent(event);
+                    return false;
+                });
+
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     pageText.setBreakStrategy(Layout.BREAK_STRATEGY_HIGH_QUALITY);
-                    pageText.setJustificationMode(Layout.JUSTIFICATION_MODE_INTER_WORD);
                 }
             }
 
-            public void bind(CharSequence text, float textSize) {
+            public void bind(CharSequence text, float textSize, boolean useSerif) {
+                pageText.setTypeface(useSerif ? Typeface.SERIF : Typeface.SANS_SERIF);
                 pageText.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
                 pageText.setText(text);
             }
@@ -965,6 +1126,7 @@ public class ReadingActivity extends AppCompatActivity {
 
             @Override
             public void onClick(@NonNull View widget) {
+                activity.lastWordClickAt = System.currentTimeMillis();
                 activity.showWordDialog(word, widget, this);
             }
 

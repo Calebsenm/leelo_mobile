@@ -1,29 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Colores base -->
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="gold">#DAA520</color>
-    <color name="light_gray">#F5F5F5</color>
-    <color name="gray">#808080</color>
-    
-    <!-- Modo Claro -->
-    <color name="background_light">#FFFFFF</color>
-    <color name="surface_light">#FFFFFF</color>
-    <color name="on_background_light">#1C1B1F</color>
-    <color name="on_surface_light">#1C1B1F</color>
-    <color name="card_light">#F5F5F5</color>
-    
-    <!-- Modo Oscuro -->
-    <color name="background_dark">#121212</color>
-    <color name="surface_dark">#1E1E1E</color>
-    <color name="on_background_dark">#E6E1E5</color>
-    <color name="on_surface_dark">#E6E1E5</color>
-    <color name="card_dark">#2D2D2D</color>
-    
-    <!-- Estados de Palabras -->
-    <color name="word_new">#94A3B8</color>
-    <color name="word_learning">#3B82F6</color>
-    <color name="word_learned">#9E9E9E</color>
+    <!-- Neutral reading palette: paper + ink, with one desaturated accent. -->
+    <color name="paper">#FFF5F4F1</color>
+    <color name="ink">#FF2B2B28</color>
+    <color name="ink_muted">#FF6E6E69</color>
+    <color name="line">#FFD8D7D2</color>
+    <color name="accent">#FF63635F</color>
+    <color name="accent_on">#FFF5F4F1</color>
 
+    <!-- Word states stay in the same neutral family. -->
+    <color name="state_new">#FF9A9A95</color>
+    <color name="state_learning">#FF63635F</color>
+    <color name="state_learned">#FFB2B2AC</color>
+
+    <!-- Backwards-compatible aliases. They now resolve to neutral values. -->
+    <color name="gold">@color/accent</color>
+    <color name="white">@color/paper</color>
+    <color name="black">@color/ink</color>
+    <color name="light_gray">@color/paper</color>
+    <color name="gray">@color/ink_muted</color>
+    <color name="word_new">@color/state_new</color>
+    <color name="word_learning">@color/state_learning</color>
+    <color name="word_learned">@color/state_learned</color>
+
+    <color name="background_light">@color/paper</color>
+    <color name="surface_light">@color/paper</color>
+    <color name="on_background_light">@color/ink</color>
+    <color name="on_surface_light">@color/ink</color>
+    <color name="card_light">@color/paper</color>
+
+    <color name="background_dark">#FF0E0E0E</color>
+    <color name="surface_dark">#FF0E0E0E</color>
+    <color name="on_background_dark">#FFEDEDE8</color>
+    <color name="on_surface_dark">#FFEDEDE8</color>
+    <color name="card_dark">#FF0E0E0E</color>
 </resources>

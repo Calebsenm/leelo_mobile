@@ -1,67 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/dialog_bg">
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_bg"
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/choosetxt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
-        android:text="Choose"
-        android:textColor="@color/black"
-        android:layout_marginTop="5dp"
-        android:textSize="25dp"
-        android:textStyle="bold"/>
+        android:layout_marginBottom="8dp"
+        android:gravity="center"
+        android:text="Opciones del texto"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="16sp" />
 
     <LinearLayout
         android:id="@+id/layout_edit_text"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="14dp">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:src="@drawable/edit"
-            android:tint="@color/black" />
+            android:tint="?attr/colorOnSurfaceVariant" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="30dp"
-            android:text="Edit text"
-            android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:layout_marginStart="20dp"
+            android:text="Editar"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="15sp" />
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/layout_delete_text"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="14dp">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:src="@drawable/delete"
-            android:tint="@color/black"
-            />
+            android:tint="?attr/colorOnSurfaceVariant" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Delete"
-            android:layout_marginLeft="30dp"
-            android:textSize="16sp"
-            android:textColor="@color/black"
-            />
+            android:layout_marginStart="20dp"
+            android:text="Eliminar"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="15sp" />
     </LinearLayout>
-
-
 
 </LinearLayout>

@@ -13,7 +13,7 @@ public class TextPaginationUtils {
 
     private static final float DEFAULT_TEXT_SIZE_SP = 16;
     private static final float DEFAULT_LINE_SPACING = 1.6f;
-    private static final float DEFAULT_LINE_SPACING_EXTRA_DP = 2f;
+    private static final float DEFAULT_LINE_SPACING_EXTRA_DP = 0f;
     private static final int MAX_LAYOUT_CHARS = 24000;
     private static final int WORDS_PER_READING_PAGE = 200;
 
@@ -57,9 +57,21 @@ public class TextPaginationUtils {
             float density,
             float textSizeSp
     ) {
+        return calculatePageMetrics(pageWidth, pageHeight, scaledDensity, density,
+                textSizeSp, Typeface.DEFAULT);
+    }
+
+    public static PageMetrics calculatePageMetrics(
+            int pageWidth,
+            int pageHeight,
+            float scaledDensity,
+            float density,
+            float textSizeSp,
+            Typeface typeface
+    ) {
         TextPaint paint = new TextPaint();
         paint.setTextSize(textSizeSp * scaledDensity);
-        paint.setTypeface(Typeface.DEFAULT);
+        paint.setTypeface(typeface != null ? typeface : Typeface.DEFAULT);
 
         return new PageMetrics(
                 Math.max(pageWidth, 1),

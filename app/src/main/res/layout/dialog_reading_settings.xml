@@ -4,78 +4,139 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="24dp">
+    android:paddingStart="24dp"
+    android:paddingTop="20dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="16dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:text="Tamano de letra"
+        android:text="Tamaño de letra"
         android:textColor="?attr/colorOnSurface"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textSize="15sp" />
 
     <com.google.android.material.slider.Slider
         android:id="@+id/fontSizeSlider"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:stepSize="1"
         android:value="16"
-        android:valueFrom="12"
-        android:valueTo="28"
-        app:labelBehavior="floating"
-        app:thumbColor="@color/gold"
-        app:trackColorActive="@color/gold" />
+        android:valueFrom="16"
+        android:valueTo="30"
+        app:labelBehavior="gone"
+        app:thumbColor="?attr/colorPrimary"
+        app:trackColorActive="?attr/colorPrimary"
+        app:trackColorInactive="?attr/colorOutline" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Pequeno"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="12sp" />
-
-        <View
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="16"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="12sp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Grande"
-            android:textColor="?attr/colorOnSurface"
+            android:text="30"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="12sp" />
-
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginVertical="16dp"
+        android:layout_marginVertical="18dp"
         android:background="?attr/colorOutline" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:text="Vista previa"
+        android:text="Tipografía"
         android:textColor="?attr/colorOnSurface"
-        android:textSize="14sp" />
+        android:textSize="15sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonFontSerif"
+            style="@style/Widget.Leelo.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Serif" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonFontSans"
+            style="@style/Widget.Leelo.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Sans" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:text="Tema"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="15sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonThemeLight"
+            style="@style/Widget.Leelo.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:text="Claro" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonThemeDark"
+            style="@style/Widget.Leelo.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Oscuro" />
+    </LinearLayout>
 
     <TextView
         android:id="@+id/previewText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:lineSpacingMultiplier="1.4"
-        android:text="Este es un ejemplo del texto que veras al leer. El tamano de letra se ajustara segun tu preferencia."
+        android:layout_marginTop="20dp"
+        android:fontFamily="serif"
+        android:lineSpacingMultiplier="1.6"
+        android:text="La lectura es el único protagonista de esta página."
         android:textColor="?attr/colorOnSurface"
         android:textSize="16sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Toca el centro de la página para ocultar la interfaz."
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="12sp" />
 
 </LinearLayout>
