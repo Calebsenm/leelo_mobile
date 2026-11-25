@@ -1,5 +1,6 @@
 package com.app.leelo.presentation.ui;
 
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.content.res.ColorStateList;
@@ -32,6 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.collection.LruCache;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -579,6 +581,7 @@ public class ReadingActivity extends AppCompatActivity {
         MaterialButton actionLearning = popupView.findViewById(R.id.actionLearning);
         MaterialButton actionLearned = popupView.findViewById(R.id.actionLearned);
         MaterialButton previewActionButton = popupView.findViewById(R.id.previewActionButton);
+        TextView previewDictionaryLink = popupView.findViewById(R.id.previewDictionaryLink);
 
         PopupWindow popupWindow = new PopupWindow(
                 popupView,
@@ -650,6 +653,11 @@ public class ReadingActivity extends AppCompatActivity {
             boolean isWordSaved = savedWordsState.containsKey(wordKey)
                     || !parseMeanings(savedWordsMeaning.get(wordKey)).isEmpty();
             showWordEditorSheet(selectedWord, wordKey, latestMeaning, latestState, isWordSaved);
+        });
+
+        previewDictionaryLink.setOnClickListener(v -> {
+            popupWindow.dismiss();
+            openDictionary(selectedWord);
         });
 
         popupView.measure(
@@ -760,6 +768,17 @@ public class ReadingActivity extends AppCompatActivity {
         });
 
         dialog.show();
+    }
+
+    /** Opens a real dictionary in an in-app tab so the reading flow is not interrupted. */
+    private void openDictionary(String word) {
+        String url = "https://www.wordreference.com/enes/" + Uri.encode(word);
+        CustomTabsIntent tabs = new CustomTabsIntent.Builder()
+                .setShowTitle(false)
+                .setUrlBarHidingEnabled(true)
+                .setToolbarColor(resolveThemeColor(com.google.android.material.R.attr.colorSurface))
+                .build();
+        tabs.launchUrl(this, Uri.parse(url));
     }
 
     private void markButtonSelected(MaterialButton button, int colorRes) {
