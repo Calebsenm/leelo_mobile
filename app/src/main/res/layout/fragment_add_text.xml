@@ -97,30 +97,6 @@
                 android:layout_height="48dp"
                 android:spinnerMode="dialog" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Palabras nuevas"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="12sp" />
-
-            <Spinner
-                android:id="@+id/wordCountSpinner"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:spinnerMode="dialog" />
-
-            <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/examplesSwitch"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:checked="true"
-                android:text="Incluir ejemplos"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="14sp" />
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/generateTextButton"
                 style="@style/Widget.Leelo.OutlinedButton"

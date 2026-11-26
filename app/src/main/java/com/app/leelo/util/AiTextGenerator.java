@@ -12,7 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
-/** Generates a graded English reading text with new words and examples. */
+/** Generates a short graded English reading text from a topic and CEFR level. */
 public final class AiTextGenerator {
 
     public static class Result {
@@ -33,22 +33,18 @@ public final class AiTextGenerator {
     private static final int CONNECT_TIMEOUT_MS = 10_000;
     private static final int READ_TIMEOUT_MS = 30_000;
     private static final String SYSTEM_PROMPT =
-            "You write short graded English reading texts for Spanish learners. "
+            "You write a short English reading text for a Spanish learner. "
                     + "Reply with ONLY a JSON object, no markdown: "
                     + "{\"title\": string, \"content\": string}. "
-                    + "The content must be 120-180 words in English, appropriate to the requested CEFR level. "
-                    + "End with a short section titled 'New words:' listing the requested new words "
-                    + "with their Spanish meaning and one example sentence each when examples are requested.";
+                    + "The content must be 120-180 words in English, appropriate to the requested CEFR level, "
+                    + "with varied vocabulary and no word lists or glossaries.";
 
     private AiTextGenerator() {
     }
 
-    public static void generate(String topic, String level, int wordCount, boolean examples,
+    public static void generate(String topic, String level,
                                 String apiKey, String model, String endpoint, Callback callback) {
-        String userPrompt = "Topic: " + topic
-                + "\nCEFR level: " + level
-                + "\nNew words: " + wordCount
-                + "\nInclude examples: " + (examples ? "yes" : "no");
+        String userPrompt = "Topic: " + topic + "\nCEFR level: " + level;
 
         String url = normalizeEndpoint(endpoint);
         String error = request(userPrompt, apiKey, model, url, true, callback);

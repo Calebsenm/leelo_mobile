@@ -23,7 +23,6 @@ import com.app.leelo.util.AiPreferences;
 import com.app.leelo.util.AiTextGenerator;
 import com.app.leelo.util.AppExecutors;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.materialswitch.MaterialSwitch;
 
 public class AddTextFragment extends Fragment {
 
@@ -31,12 +30,9 @@ public class AddTextFragment extends Fragment {
             "A1 - Principiante", "A2 - Elemental", "B1 - Intermedio",
             "B2 - Intermedio alto", "C1 - Avanzado"
     };
-    private static final int[] WORD_COUNTS = {5, 8, 12};
-
     private EditText titleEditText, contentEditText, topicInput;
     private Button saveButton;
-    private Spinner levelSpinner, wordCountSpinner;
-    private MaterialSwitch examplesSwitch;
+    private Spinner levelSpinner;
     private MaterialButton generateTextButton;
     private MaterialButton showGenerateButton;
     private TextView generationStatusText;
@@ -65,8 +61,6 @@ public class AddTextFragment extends Fragment {
         aiGenerateContainer = view.findViewById(R.id.aiGenerateContainer);
         topicInput = view.findViewById(R.id.topicInput);
         levelSpinner = view.findViewById(R.id.levelSpinner);
-        wordCountSpinner = view.findViewById(R.id.wordCountSpinner);
-        examplesSwitch = view.findViewById(R.id.examplesSwitch);
         generateTextButton = view.findViewById(R.id.generateTextButton);
         showGenerateButton = view.findViewById(R.id.showGenerateButton);
         generationStatusText = view.findViewById(R.id.generationStatusText);
@@ -100,10 +94,6 @@ public class AddTextFragment extends Fragment {
     private void setupGenerationControls() {
         levelSpinner.setAdapter(spinnerAdapter(LEVELS));
         levelSpinner.setSelection(2);
-
-        String[] counts = {"5 palabras", "8 palabras", "12 palabras"};
-        wordCountSpinner.setAdapter(spinnerAdapter(counts));
-        wordCountSpinner.setSelection(1);
     }
 
     private ArrayAdapter<String> spinnerAdapter(String[] values) {
@@ -124,14 +114,12 @@ public class AddTextFragment extends Fragment {
         }
 
         String level = LEVELS[levelSpinner.getSelectedItemPosition()].substring(0, 2);
-        int wordCount = WORD_COUNTS[wordCountSpinner.getSelectedItemPosition()];
-        boolean examples = examplesSwitch.isChecked();
 
         generationStatusText.setText("Generando texto…");
         generateTextButton.setEnabled(false);
         AppExecutors.getInstance().diskIO().execute(() ->
                 AiTextGenerator.generate(
-                        topic, level, wordCount, examples,
+                        topic, level,
                         aiPrefs.getApiKey(), aiPrefs.getModel(), aiPrefs.getEndpoint(),
                         (result, error) -> {
                             if (!isAdded()) {
