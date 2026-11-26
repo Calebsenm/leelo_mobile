@@ -83,7 +83,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:text="En inglés"
+                    android:text="Pega tu clave"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="12sp" />
 
@@ -92,7 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="En español"
+                    android:text="Cifrada en el móvil"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="12sp" />
 
@@ -101,7 +101,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Contexto"
+                    android:text="Prueba de conexión"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="12sp" />
             </LinearLayout>
@@ -114,7 +114,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:fontFamily="serif"
-        android:text="Dos formas de entender"
+        android:text="Manual o IA, tú eliges"
         android:textColor="?attr/colorOnSurface"
         android:textSize="22sp" />
 
@@ -124,7 +124,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:lineSpacingMultiplier="1.6"
-        android:text="Manual es 100 % tuyo: escribes los significados. Con IA pegas tu clave y ves definición, traducción y contexto. Cambia cuando quieras."
+        android:text="En Manual escribes tus significados. Con IA pegas tu clave y la app los crea. Puedes cambiar cuando quieras."
         android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="15sp" />
 

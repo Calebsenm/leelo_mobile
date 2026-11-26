@@ -178,8 +178,7 @@ public class OnboardingActivity extends AppCompatActivity {
             revealInOrder(base + 100L,
                     page.findViewById(R.id.addOption1),
                     page.findViewById(R.id.addOption2),
-                    page.findViewById(R.id.addOption3),
-                    page.findViewById(R.id.addOption4));
+                    page.findViewById(R.id.addOption3));
         } else if (index == 4) {
             drawLine(page.findViewById(R.id.demoProgress), base + 80L, duration + 180L);
             revealInOrder(base + 260L, page.findViewById(R.id.demoResult));

@@ -101,7 +101,7 @@
             android:paddingTop="4dp"
             android:paddingEnd="10dp"
             android:paddingBottom="4dp"
-            android:text="Guardado ✓"
+            android:text="En tus textos"
             android:textColor="?attr/colorOnSurface"
             android:textSize="12sp" />
     </LinearLayout>
@@ -112,7 +112,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:fontFamily="serif"
-        android:text="Tu propio material"
+        android:text="Crea un texto con IA"
         android:textColor="?attr/colorOnSurface"
         android:textSize="22sp" />
 
@@ -122,7 +122,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:lineSpacingMultiplier="1.6"
-        android:text="Elige tema y nivel, genera un texto, revísalo y guárdalo. Verás un resumen y volverás a tus textos."
+        android:text="Elige tema y nivel. La IA escribe el texto, tú lo revisas y lo guardas."
         android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="15sp" />
 

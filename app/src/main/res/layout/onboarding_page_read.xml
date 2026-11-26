@@ -68,7 +68,7 @@
             android:paddingTop="4dp"
             android:paddingEnd="10dp"
             android:paddingBottom="4dp"
-            android:text="Guardada ✓"
+            android:text="En tu vocabulario"
             android:textColor="?attr/colorOnSurface"
             android:textSize="12sp" />
     </LinearLayout>
@@ -79,7 +79,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:fontFamily="serif"
-        android:text="Lee sin fricción"
+        android:text="Toca una palabra"
         android:textColor="?attr/colorOnSurface"
         android:textSize="22sp" />
 
@@ -89,7 +89,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:lineSpacingMultiplier="1.6"
-        android:text="Toca una palabra y aparece su significado, su traducción y un contexto. Si quieres, guárdala con un toque."
+        android:text="Aparece su significado, su traducción y un ejemplo. Si te sirve, guárdala para repasarla después."
         android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="15sp" />
 

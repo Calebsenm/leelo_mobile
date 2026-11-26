@@ -91,34 +91,6 @@
             <ImageView
                 android:layout_width="20dp"
                 android:layout_height="20dp"
-                android:src="@drawable/baseline_book_24"
-                android:tint="?attr/colorPrimary" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="20dp"
-                android:text="Generar con IA"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="14sp" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginStart="40dp"
-            android:background="?attr/colorOutline" />
-
-        <LinearLayout
-            android:id="@+id/addOption4"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
                 android:src="@drawable/upload_file"
                 android:tint="?attr/colorPrimary" />
 
@@ -138,7 +110,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
         android:fontFamily="serif"
-        android:text="Tus textos, como quieras"
+        android:text="Trae tus propios textos"
         android:textColor="?attr/colorOnSurface"
         android:textSize="22sp" />
 
@@ -148,7 +120,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:lineSpacingMultiplier="1.6"
-        android:text="Escribe un texto simple, trae uno desde una URL o un PDF, o deja que la IA lo cree. Todos se leen igual en la app."
+        android:text="Escribe un texto simple o importa una URL o un PDF. Quedan en tu biblioteca, listos para leer."
         android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="15sp" />
 

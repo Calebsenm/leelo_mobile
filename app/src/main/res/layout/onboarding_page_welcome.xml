@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:lineSpacingMultiplier="1.6"
-        android:text="Aprende inglés leyendo, sin fricción. Textos cortos, significados al toque, a tu ritmo."
+        android:text="Aprende inglés leyendo, sin fricción."
         android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="15sp" />
 
