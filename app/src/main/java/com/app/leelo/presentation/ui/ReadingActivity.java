@@ -1,6 +1,5 @@
 package com.app.leelo.presentation.ui;
 
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.content.res.ColorStateList;
@@ -33,7 +32,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.collection.LruCache;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -45,7 +43,8 @@ import com.app.leelo.util.ReadingPreferences;
 import com.app.leelo.util.AppExecutors;
 import com.app.leelo.util.TextPaginationUtils;
 import com.app.leelo.util.ThemeManager;
-import com.app.leelo.util.TranslationClient;
+import com.app.leelo.util.AiDictionaryClient;
+import com.app.leelo.util.AiPreferences;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -82,6 +81,7 @@ public class ReadingActivity extends AppCompatActivity {
     private float currentTextSize = 16f;
     private TextView previewText;
     private ReadingPreferences readingPrefs;
+    private AiPreferences aiPrefs;
     private final Map<String, Word.State> savedWordsState = new HashMap<>();
     private final Map<String, String> savedWordsMeaning = new HashMap<>();
     private boolean isSavingWord = false;
@@ -104,6 +104,7 @@ public class ReadingActivity extends AppCompatActivity {
         textRepository = TextRepository.RepositoryProvider.getInstance(this);
         wordRepository = WordRepository.RepositoryProvider.getInstance(this);
         readingPrefs = ReadingPreferences.getInstance(this);
+        aiPrefs = AiPreferences.getInstance(this);
         themeManager = ThemeManager.getInstance(this);
         useSerif = readingPrefs.isSerif();
         textToSpeech = new TextToSpeech(this, status -> {
@@ -581,7 +582,6 @@ public class ReadingActivity extends AppCompatActivity {
         MaterialButton actionLearning = popupView.findViewById(R.id.actionLearning);
         MaterialButton actionLearned = popupView.findViewById(R.id.actionLearned);
         MaterialButton previewActionButton = popupView.findViewById(R.id.previewActionButton);
-        TextView previewDictionaryLink = popupView.findViewById(R.id.previewDictionaryLink);
 
         PopupWindow popupWindow = new PopupWindow(
                 popupView,
@@ -605,9 +605,15 @@ public class ReadingActivity extends AppCompatActivity {
             previewActionButton.setText("Editar");
         } else {
             previewEmptyText.setVisibility(View.VISIBLE);
-            previewEmptyText.setText("Buscando significados…");
             previewMeaningsContainer.setVisibility(View.GONE);
             previewActionButton.setText("Agregar significado");
+            if (aiPrefs.isAiMode()) {
+                previewEmptyText.setText(aiPrefs.getApiKey().isEmpty()
+                        ? "Añade tu clave IA en Ajustes."
+                        : "Buscando con IA…");
+            } else {
+                previewEmptyText.setText("Sin significado guardado.");
+            }
         }
 
         actionQuickAdd.setVisibility(wordExists ? View.GONE : View.VISIBLE);
@@ -655,11 +661,6 @@ public class ReadingActivity extends AppCompatActivity {
             showWordEditorSheet(selectedWord, wordKey, latestMeaning, latestState, isWordSaved);
         });
 
-        previewDictionaryLink.setOnClickListener(v -> {
-            popupWindow.dismiss();
-            openDictionary(selectedWord);
-        });
-
         popupView.measure(
                 View.MeasureSpec.makeMeasureSpec(popupWindow.getWidth(), View.MeasureSpec.AT_MOST),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
@@ -685,21 +686,26 @@ public class ReadingActivity extends AppCompatActivity {
         popupWindow.showAtLocation(rootView, Gravity.TOP | Gravity.START,
                 x + visibleFrame.left, y + visibleFrame.top);
 
-        if (!wordExists) {
-            executors.diskIO().execute(() -> TranslationClient.fetch(wordKey, fetchedMeanings ->
+        if (!wordExists && aiPrefs.isAiMode() && !aiPrefs.getApiKey().isEmpty()) {
+            String apiKey = aiPrefs.getApiKey();
+            String model = aiPrefs.getModel();
+            executors.diskIO().execute(() -> AiDictionaryClient.fetch(selectedWord, apiKey, model, result ->
                     runOnUiThread(() -> {
                         if (!popupWindow.isShowing()) {
                             return;
                         }
-                        resolvedMeanings.clear();
-                        resolvedMeanings.addAll(fetchedMeanings);
-                        if (fetchedMeanings.isEmpty()) {
-                            previewEmptyText.setText("No se encontraron acepciones. Puedes agregar una.");
+                        if (result == null) {
+                            previewEmptyText.setText("No se pudo consultar la IA. Puedes agregar el significado.");
                             return;
+                        }
+                        resolvedMeanings.clear();
+                        resolvedMeanings.add(result.translationEs);
+                        if (!result.context.trim().isEmpty()) {
+                            resolvedMeanings.add(result.context);
                         }
                         previewEmptyText.setVisibility(View.GONE);
                         previewMeaningsContainer.setVisibility(View.VISIBLE);
-                        bindMeaningsPreview(previewMeaningsContainer, fetchedMeanings);
+                        bindAiPreview(previewMeaningsContainer, result);
                     })));
         }
     }
@@ -768,17 +774,6 @@ public class ReadingActivity extends AppCompatActivity {
         });
 
         dialog.show();
-    }
-
-    /** Opens a real dictionary in an in-app tab so the reading flow is not interrupted. */
-    private void openDictionary(String word) {
-        String url = "https://www.wordreference.com/enes/" + Uri.encode(word);
-        CustomTabsIntent tabs = new CustomTabsIntent.Builder()
-                .setShowTitle(false)
-                .setUrlBarHidingEnabled(true)
-                .setToolbarColor(resolveThemeColor(com.google.android.material.R.attr.colorSurface))
-                .build();
-        tabs.launchUrl(this, Uri.parse(url));
     }
 
     private void markButtonSelected(MaterialButton button, int colorRes) {
@@ -886,6 +881,41 @@ public class ReadingActivity extends AppCompatActivity {
             meaningView.setLayoutParams(params);
             container.addView(meaningView);
         }
+    }
+
+    private void bindAiPreview(LinearLayout container, AiDictionaryClient.Result result) {
+        container.removeAllViews();
+        addAiLine(container, "En inglés", result.meaningEn);
+        addAiLine(container, "En español", result.translationEs);
+        addAiLine(container, "Contexto", result.context);
+    }
+
+    private void addAiLine(LinearLayout container, String label, String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return;
+        }
+
+        String text = label + "\n" + value;
+        SpannableString spannable = new SpannableString(text);
+        spannable.setSpan(new android.text.style.StyleSpan(Typeface.BOLD),
+                0, label.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        TextView view = new TextView(this);
+        view.setText(spannable);
+        view.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+        view.setTextColor(resolveThemeColor());
+        view.setPadding(dpToPx(10), dpToPx(6), dpToPx(10), dpToPx(6));
+        GradientDrawable background = new GradientDrawable();
+        background.setColor(resolveThemeColor(com.google.android.material.R.attr.colorSurface));
+        background.setCornerRadius(dpToPx(6));
+        background.setStroke(dpToPx(1), resolveThemeColor(com.google.android.material.R.attr.colorOutline));
+        view.setBackground(background);
+
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        params.bottomMargin = dpToPx(3);
+        view.setLayoutParams(params);
+        container.addView(view);
     }
 
     private int resolveThemeColor() {
