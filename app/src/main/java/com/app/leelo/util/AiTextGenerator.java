@@ -52,14 +52,27 @@ public final class AiTextGenerator {
 
         String url = normalizeEndpoint(endpoint);
         String error = request(userPrompt, apiKey, model, url, true, callback);
-        if (error != null && needsFallback(error)) {
-            request(userPrompt, apiKey, model, url, false, callback);
+        if (error == null) {
+            return;
         }
+
+        if (needsFallback(error)) {
+            error = request(userPrompt, apiKey, model, url, false, callback);
+            if (error == null) {
+                return;
+            }
+        }
+
+        // Every failure path must notify the caller, otherwise the Generate button stays disabled.
+        callback.onResult(null, error);
     }
 
     private static boolean needsFallback(String error) {
         String lower = error.toLowerCase();
-        return lower.contains("response_format") || lower.contains("json_object") || lower.contains("http 400");
+        return lower.contains("response_format")
+                || lower.contains("json_object")
+                || lower.contains("http 400")
+                || lower.contains("respuesta inesperada");
     }
 
     /** Returns an error description, or null when the callback was invoked with a result. */
