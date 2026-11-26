@@ -9,22 +9,47 @@
     android:paddingEnd="24dp"
     android:paddingBottom="28dp">
 
-    <FrameLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="36dp">
+        android:layout_height="36dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:fontFamily="serif"
+            android:text="leelo"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/pageIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:text="1 de 3"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="12sp" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/skipButton"
             style="@style/Widget.Leelo.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="36dp"
-            android:layout_gravity="end"
             android:minWidth="0dp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:text="Omitir"
             android:textSize="13sp" />
-    </FrameLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="6dp"
+        android:background="?attr/colorOutline" />
 
     <FrameLayout
         android:id="@+id/pageContainer"

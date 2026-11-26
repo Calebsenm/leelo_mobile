@@ -3,13 +3,19 @@ package com.app.leelo.presentation.ui;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StyleSpan;
+import android.text.style.UnderlineSpan;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,6 +35,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
     private FrameLayout pageContainer;
     private MaterialButton nextButton;
+    private TextView pageIndicator;
     private View[] dots;
     private int current = 0;
     private boolean animating = false;
@@ -50,6 +57,7 @@ public class OnboardingActivity extends AppCompatActivity {
 
         pageContainer = findViewById(R.id.pageContainer);
         nextButton = findViewById(R.id.nextButton);
+        pageIndicator = findViewById(R.id.pageIndicator);
         dots = new View[]{findViewById(R.id.dot1), findViewById(R.id.dot2), findViewById(R.id.dot3)};
 
         nextButton.setOnClickListener(v -> {
@@ -72,6 +80,7 @@ public class OnboardingActivity extends AppCompatActivity {
             pageContainer.removeAllViews();
             pageContainer.addView(page);
             animateVisual(page);
+            playPageAnimation(page, index, false);
             updateDots(index, false);
             updateLabel(index);
             current = index;
@@ -86,6 +95,7 @@ public class OnboardingActivity extends AppCompatActivity {
         page.setTranslationX(24f);
         pageContainer.addView(page);
         animateVisual(page);
+        playPageAnimation(page, index, true);
 
         oldPage.animate()
                 .alpha(0f)
@@ -131,6 +141,71 @@ public class OnboardingActivity extends AppCompatActivity {
                 .start();
     }
 
+    /** Small, sequenced demos: each motion is short, but together they explain the real flow. */
+    private void playPageAnimation(View page, int index, boolean afterTransition) {
+        if (duration == 0L) {
+            return;
+        }
+        long base = afterTransition ? duration + 40L : 60L;
+        revealInOrder(base, page.findViewById(R.id.pageTitle), page.findViewById(R.id.pageBody));
+
+        if (index == 0) {
+            highlightWord(page.findViewById(R.id.demoSentence), "ticket");
+            revealInOrder(base + 160L, page.findViewById(R.id.demoPopup));
+            revealInOrder(base + 320L, page.findViewById(R.id.demoSavedChip));
+        } else if (index == 1) {
+            View aiCard = page.findViewById(R.id.aiCard);
+            if (aiCard != null) {
+                aiCard.setAlpha(0.6f);
+                aiCard.animate().alpha(1f).setStartDelay(base + 80L).setDuration(duration).start();
+            }
+            revealInOrder(base + 160L, page.findViewById(R.id.aiLine1),
+                    page.findViewById(R.id.aiLine2), page.findViewById(R.id.aiLine3));
+        } else if (index == 2) {
+            View progress = page.findViewById(R.id.demoProgress);
+            if (progress != null) {
+                progress.setPivotX(0f);
+                progress.setScaleX(0f);
+                progress.animate().scaleX(1f).setStartDelay(base + 80L)
+                        .setDuration(duration + 180L).start();
+            }
+            revealInOrder(base + 260L, page.findViewById(R.id.demoResult));
+            revealInOrder(base + 420L, page.findViewById(R.id.demoSavedChip));
+        }
+    }
+
+    private void revealInOrder(long delay, View... views) {
+        for (View view : views) {
+            if (view == null) {
+                continue;
+            }
+            view.setAlpha(0f);
+            view.setTranslationY(8f);
+            view.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .setStartDelay(delay)
+                    .setDuration(duration)
+                    .start();
+        }
+    }
+
+    private void highlightWord(TextView view, String word) {
+        if (view == null) {
+            return;
+        }
+        String text = view.getText().toString();
+        int start = text.indexOf(word);
+        if (start < 0) {
+            return;
+        }
+        SpannableString spannable = new SpannableString(text);
+        int end = start + word.length();
+        spannable.setSpan(new StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spannable.setSpan(new UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        view.setText(spannable);
+    }
+
     private void updateDots(int index, boolean animate) {
         for (int i = 0; i < dots.length; i++) {
             View dot = dots[i];
@@ -149,6 +224,9 @@ public class OnboardingActivity extends AppCompatActivity {
 
     private void updateLabel(int index) {
         nextButton.setText(index == PAGES.length - 1 ? "Empezar" : "Siguiente");
+        if (pageIndicator != null) {
+            pageIndicator.setText((index + 1) + " de " + PAGES.length);
+        }
     }
 
     private int dp(int value) {
