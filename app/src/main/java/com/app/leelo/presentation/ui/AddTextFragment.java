@@ -23,6 +23,7 @@ import com.app.leelo.util.AiPreferences;
 import com.app.leelo.util.AiTextGenerator;
 import com.app.leelo.util.AppExecutors;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 public class AddTextFragment extends Fragment {
 
@@ -39,6 +40,9 @@ public class AddTextFragment extends Fragment {
     private View aiGenerateContainer;
     private boolean isEditMode = false;
     private long editId = -1;
+    private boolean generatedByAi = false;
+    private String generatedTopic = "";
+    private String generatedLevel = "";
     private TextViewModel viewModel;
     private AiPreferences aiPrefs;
 
@@ -133,6 +137,9 @@ public class AddTextFragment extends Fragment {
                                 }
                                 titleEditText.setText(result.title);
                                 contentEditText.setText(result.content);
+                                generatedByAi = true;
+                                generatedTopic = topic;
+                                generatedLevel = level;
                                 generationStatusText.setText("Texto generado. Revísalo y guarda.");
                             });
                         }));
@@ -156,6 +163,16 @@ public class AddTextFragment extends Fragment {
             viewModel.updateText(text);
         } else {
             viewModel.insertText(text);
+        }
+
+        if (generatedByAi && isAdded()) {
+            String levelLabel = generatedLevel.isEmpty() ? "—" : generatedLevel;
+            new MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Texto guardado")
+                    .setMessage("Título: " + title + "\nTema: " + generatedTopic + "\nNivel: " + levelLabel)
+                    .setPositiveButton("Aceptar", (dialog, which) -> navigateBack())
+                    .setOnCancelListener(dialog -> navigateBack())
+                    .show();
         }
     }
 
