@@ -63,6 +63,30 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/layout_generate_with_ai"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="14dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/baseline_book_24"
+            android:tint="?attr/colorOnSurfaceVariant" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:text="Generar con IA"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/layout_add_text_pdf"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

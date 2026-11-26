@@ -234,6 +234,16 @@ public class TextFragment extends Fragment {
                             .replaceFragment(new ImportUrlTextFragment());
                 });
 
+        v.findViewById(R.id.layout_generate_with_ai)
+                .setOnClickListener(x -> {
+                    d.dismiss();
+                    AddTextFragment f = new AddTextFragment();
+                    Bundle args = new Bundle();
+                    args.putBoolean("generateAi", true);
+                    f.setArguments(args);
+                    ((MainActivity) requireActivity()).replaceFragment(f);
+                });
+
         v.findViewById(R.id.layout_add_text_pdf)
                 .setOnClickListener(x -> {
                     d.dismiss();
