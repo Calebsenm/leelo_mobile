@@ -35,6 +35,7 @@ public class SettingFragment extends Fragment {
     private RadioGroup modeRadioGroup;
     private View aiSettingsContainer;
     private Spinner providerSpinner;
+    private Spinner modelSpinner;
     private View endpointInputLayout;
     private TextInputEditText endpointInput;
     private TextInputEditText modelInput;
@@ -55,6 +56,7 @@ public class SettingFragment extends Fragment {
         modeRadioGroup = view.findViewById(R.id.modeRadioGroup);
         aiSettingsContainer = view.findViewById(R.id.aiSettingsContainer);
         providerSpinner = view.findViewById(R.id.providerSpinner);
+        modelSpinner = view.findViewById(R.id.modelSpinner);
         endpointInputLayout = view.findViewById(R.id.endpointInputLayout);
         endpointInput = view.findViewById(R.id.endpointInput);
         modelInput = view.findViewById(R.id.modelInput);
@@ -95,12 +97,12 @@ public class SettingFragment extends Fragment {
         adapter.setDropDownViewResource(R.layout.spinner_item);
         providerSpinner.setAdapter(adapter);
         providerSpinner.setSelection(AiProviders.indexForEndpoint(aiPrefs.getEndpoint()));
-        applyPreset(providerSpinner.getSelectedItemPosition());
+        applyPreset(providerSpinner.getSelectedItemPosition(), text(modelInput));
 
         providerSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(android.widget.AdapterView<?> parent, View itemView, int position, long id) {
-                applyPreset(position);
+                applyPreset(position, AiProviders.PRESETS[position].model);
             }
 
             @Override
@@ -122,15 +124,51 @@ public class SettingFragment extends Fragment {
     }
 
     /** Known providers fill in endpoint and model automatically; only Personalizado asks for them. */
-    private void applyPreset(int position) {
+    private void applyPreset(int position, String preferredModel) {
         AiProviders.Preset preset = AiProviders.PRESETS[position];
         boolean custom = position == AiProviders.CUSTOM_INDEX;
         endpointInputLayout.setVisibility(custom ? View.VISIBLE : View.GONE);
         if (!custom) {
             endpointInput.setText(preset.endpoint);
-            modelInput.setText(preset.model);
+            modelInput.setText(preferredModel);
         }
         modelHintText.setText(preset.hint);
+        setupModelSpinner(preset, preferredModel);
+    }
+
+    private void setupModelSpinner(AiProviders.Preset preset, String selectedModel) {
+        List<String> models = new ArrayList<>();
+        for (String model : preset.models) {
+            models.add(model);
+        }
+        models.add("Otro (escribir ID)");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_item, models);
+        adapter.setDropDownViewResource(R.layout.spinner_item);
+        modelSpinner.setOnItemSelectedListener(null);
+        modelSpinner.setAdapter(adapter);
+
+        int selection = models.size() - 1;
+        for (int i = 0; i < preset.models.length; i++) {
+            if (preset.models[i].equals(selectedModel)) {
+                selection = i;
+                break;
+            }
+        }
+        modelSpinner.setSelection(selection);
+
+        modelSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View itemView, int position, long id) {
+                if (position < preset.models.length) {
+                    modelInput.setText(preset.models[position]);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+            }
+        });
     }
 
     private String selectedEndpoint() {
