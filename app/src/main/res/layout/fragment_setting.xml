@@ -106,10 +106,25 @@
             android:orientation="vertical"
             android:visibility="gone">
 
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Proveedor"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="12sp" />
+
+            <Spinner
+                android:id="@+id/providerSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:spinnerMode="dialog" />
+
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/endpointInputLayout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 app:boxStrokeColor="?attr/colorOutline"
                 app:hintTextColor="?attr/colorOnSurfaceVariant">
 
@@ -141,6 +156,14 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <TextView
+                android:id="@+id/modelHintText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="12sp" />
+
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
@@ -170,6 +193,14 @@
                 android:textSize="14sp" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/testConnectionButton"
+                style="@style/Widget.Leelo.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Probar conexión"
+                android:textSize="13sp" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/clearApiKeyButton"
                 style="@style/Widget.Leelo.TextButton"
                 android:layout_width="match_parent"
@@ -189,7 +220,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="Endpoint compatible con OpenAI. Pega la URL base (ej. https://openrouter.ai/api/v1) o la URL completa. La clave se cifra en este dispositivo; también puedes editarla o borrarla."
+                android:text="Elige tu proveedor y pega su clave: Groq, OpenAI u OpenRouter rellenan el endpoint y el modelo por ti. Si usas otro, elige Personalizado. La clave se cifra en este dispositivo y puedes editarla o borrarla."
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="12sp" />
         </LinearLayout>

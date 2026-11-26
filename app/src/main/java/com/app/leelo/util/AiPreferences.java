@@ -15,8 +15,8 @@ public class AiPreferences {
     private static final String KEY_API_KEY = "api_key";
     private static final String KEY_MODEL = "model";
     private static final String KEY_ENDPOINT = "endpoint";
-    private static final String DEFAULT_MODEL = "gpt-4o-mini";
-    private static final String DEFAULT_ENDPOINT = "https://api.openai.com/v1/chat/completions";
+    private static final String DEFAULT_MODEL = "llama-3.3-70b-versatile";
+    private static final String DEFAULT_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
 
     private static volatile AiPreferences instance;
     private final SharedPreferences prefs;

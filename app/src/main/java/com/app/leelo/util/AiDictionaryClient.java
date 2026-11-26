@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 /** OpenAI-compatible dictionary lookup: English meaning + Spanish translation + context. */
 public final class AiDictionaryClient {
 
-    private static final String DEFAULT_ENDPOINT = "https://api.openai.com/v1/chat/completions";
+    private static final String DEFAULT_ENDPOINT = "https://api.groq.com/openai/v1/chat/completions";
     private static final int CONNECT_TIMEOUT_MS = 10_000;
     private static final int READ_TIMEOUT_MS = 20_000;
     private static final String SYSTEM_PROMPT =
@@ -41,24 +41,76 @@ public final class AiDictionaryClient {
         void onResult(Result result);
     }
 
+    public interface TestCallback {
+        void onResult(boolean ok, String message);
+    }
+
+    private static final class Reply {
+        final Result result;
+        final String error;
+
+        Reply(Result result, String error) {
+            this.result = result;
+            this.error = error;
+        }
+    }
+
     private AiDictionaryClient() {
     }
 
     public static void fetch(String word, String apiKey, String model, String endpoint, Callback callback) {
+        String url = normalizeEndpoint(endpoint);
+        Reply reply = request(word, apiKey, model, url, true);
+        if (needsFallback(reply.error)) {
+            reply = request(word, apiKey, model, url, false);
+        }
+        callback.onResult(reply.result);
+    }
+
+    /** Cheap sanity check used by Settings so users know their key works. */
+    public static void test(String apiKey, String model, String endpoint, TestCallback callback) {
+        String url = normalizeEndpoint(endpoint);
+        Reply reply = request("hello", apiKey, model, url, true);
+        if (needsFallback(reply.error)) {
+            reply = request("hello", apiKey, model, url, false);
+        }
+
+        if (reply.result != null) {
+            callback.onResult(true, "Conexión correcta. Ya puedes usar el modo IA.");
+        } else {
+            String error = reply.error == null ? "respuesta vacía del proveedor" : reply.error;
+            callback.onResult(false, "Error: " + error);
+        }
+    }
+
+    private static boolean needsFallback(String error) {
+        if (error == null) {
+            return false;
+        }
+        String lower = error.toLowerCase();
+        return lower.contains("response_format")
+                || lower.contains("json_object")
+                || lower.contains("http 400")
+                || lower.contains("respuesta inesperada");
+    }
+
+    private static Reply request(String word, String apiKey, String model,
+                                 String url, boolean jsonMode) {
         HttpURLConnection connection = null;
-        Result result = null;
         try {
             JSONObject body = new JSONObject();
             body.put("model", model);
             body.put("temperature", 0.1);
-            body.put("response_format", new JSONObject().put("type", "json_object"));
+            if (jsonMode) {
+                body.put("response_format", new JSONObject().put("type", "json_object"));
+            }
 
             JSONArray messages = new JSONArray();
             messages.put(new JSONObject().put("role", "system").put("content", SYSTEM_PROMPT));
             messages.put(new JSONObject().put("role", "user").put("content", "Word: " + word));
             body.put("messages", messages);
 
-            connection = (HttpURLConnection) new URL(normalizeEndpoint(endpoint)).openConnection();
+            connection = (HttpURLConnection) new URL(url).openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
             connection.setReadTimeout(READ_TIMEOUT_MS);
@@ -72,17 +124,33 @@ public final class AiDictionaryClient {
                 out.write(payload);
             }
 
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                result = parse(read(connection.getInputStream()));
+            int status = connection.getResponseCode();
+            if (status == HttpURLConnection.HTTP_OK) {
+                try {
+                    Result result = parse(read(connection.getInputStream()));
+                    if (result == null) {
+                        return new Reply(null, "respuesta inesperada del proveedor");
+                    }
+                    return new Reply(result, null);
+                } catch (Exception ignored) {
+                    return new Reply(null, "respuesta inesperada del proveedor");
+                }
             }
-        } catch (Exception ignored) {
-            result = null;
+
+            InputStream errorStream = connection.getErrorStream();
+            String detail = errorStream == null ? "" : read(errorStream).replaceAll("\\s+", " ").trim();
+            if (detail.length() > 180) {
+                detail = detail.substring(0, 180) + "…";
+            }
+            return new Reply(null, "HTTP " + status + (detail.isEmpty() ? "" : ": " + detail));
+        } catch (Exception e) {
+            String message = e.getMessage();
+            return new Reply(null, message == null ? "error de conexión" : message);
         } finally {
             if (connection != null) {
                 connection.disconnect();
             }
         }
-        callback.onResult(result);
     }
 
     /** Accepts either a base URL or a full /chat/completions URL. */
@@ -121,12 +189,10 @@ public final class AiDictionaryClient {
         }
 
         String content = message.optString("content", "").trim();
-        if (content.contains("```")) {
-            int start = content.indexOf('{');
-            int end = content.lastIndexOf('}');
-            if (start >= 0 && end > start) {
-                content = content.substring(start, end + 1);
-            }
+        int start = content.indexOf('{');
+        int end = content.lastIndexOf('}');
+        if (start >= 0 && end > start) {
+            content = content.substring(start, end + 1);
         }
 
         JSONObject data = new JSONObject(content);

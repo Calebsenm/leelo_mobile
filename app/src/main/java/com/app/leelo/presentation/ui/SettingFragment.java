@@ -4,19 +4,27 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
 import com.app.leelo.R;
+import com.app.leelo.util.AiDictionaryClient;
 import com.app.leelo.util.AiPreferences;
+import com.app.leelo.util.AiProviders;
+import com.app.leelo.util.AppExecutors;
 import com.app.leelo.util.ThemeManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class SettingFragment extends Fragment {
 
@@ -26,11 +34,15 @@ public class SettingFragment extends Fragment {
     private ImageView themeIcon;
     private RadioGroup modeRadioGroup;
     private View aiSettingsContainer;
+    private Spinner providerSpinner;
+    private View endpointInputLayout;
     private TextInputEditText endpointInput;
     private TextInputEditText modelInput;
     private TextInputEditText apiKeyInput;
-    private MaterialButton clearApiKeyButton;
+    private TextView modelHintText;
     private TextView aiStatusText;
+    private MaterialButton testConnectionButton;
+    private MaterialButton clearApiKeyButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,11 +54,15 @@ public class SettingFragment extends Fragment {
         themeIcon = view.findViewById(R.id.themeIcon);
         modeRadioGroup = view.findViewById(R.id.modeRadioGroup);
         aiSettingsContainer = view.findViewById(R.id.aiSettingsContainer);
+        providerSpinner = view.findViewById(R.id.providerSpinner);
+        endpointInputLayout = view.findViewById(R.id.endpointInputLayout);
         endpointInput = view.findViewById(R.id.endpointInput);
         modelInput = view.findViewById(R.id.modelInput);
         apiKeyInput = view.findViewById(R.id.apiKeyInput);
-        clearApiKeyButton = view.findViewById(R.id.clearApiKeyButton);
+        modelHintText = view.findViewById(R.id.modelHintText);
         aiStatusText = view.findViewById(R.id.aiStatusText);
+        testConnectionButton = view.findViewById(R.id.testConnectionButton);
+        clearApiKeyButton = view.findViewById(R.id.clearApiKeyButton);
 
         darkModeSwitch.setChecked(themeManager.isDarkMode());
         updateIcon(themeManager.isDarkMode());
@@ -71,8 +87,30 @@ public class SettingFragment extends Fragment {
         modelInput.setText(aiPrefs.getModel());
         apiKeyInput.setText(aiPrefs.getApiKey());
 
+        List<String> labels = new ArrayList<>();
+        for (AiProviders.Preset preset : AiProviders.PRESETS) {
+            labels.add(preset.label);
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), R.layout.spinner_item, labels);
+        adapter.setDropDownViewResource(R.layout.spinner_item);
+        providerSpinner.setAdapter(adapter);
+        providerSpinner.setSelection(AiProviders.indexForEndpoint(aiPrefs.getEndpoint()));
+        applyPreset(providerSpinner.getSelectedItemPosition());
+
+        providerSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(android.widget.AdapterView<?> parent, View itemView, int position, long id) {
+                applyPreset(position);
+            }
+
+            @Override
+            public void onNothingSelected(android.widget.AdapterView<?> parent) {
+            }
+        });
+
         view.<MaterialButton>findViewById(R.id.saveAiSettingsButton)
                 .setOnClickListener(v -> saveAiSettings());
+        testConnectionButton.setOnClickListener(v -> testConnection());
         clearApiKeyButton.setOnClickListener(v -> {
             aiPrefs.clearApiKey();
             apiKeyInput.setText("");
@@ -83,23 +121,81 @@ public class SettingFragment extends Fragment {
         return view;
     }
 
+    /** Known providers fill in endpoint and model automatically; only Personalizado asks for them. */
+    private void applyPreset(int position) {
+        AiProviders.Preset preset = AiProviders.PRESETS[position];
+        boolean custom = position == AiProviders.CUSTOM_INDEX;
+        endpointInputLayout.setVisibility(custom ? View.VISIBLE : View.GONE);
+        if (!custom) {
+            endpointInput.setText(preset.endpoint);
+            modelInput.setText(preset.model);
+        }
+        modelHintText.setText(preset.hint);
+    }
+
+    private String selectedEndpoint() {
+        if (providerSpinner.getSelectedItemPosition() == AiProviders.CUSTOM_INDEX) {
+            return text(endpointInput);
+        }
+        return AiProviders.PRESETS[providerSpinner.getSelectedItemPosition()].endpoint;
+    }
+
     private void saveAiSettings() {
+        String endpoint = selectedEndpoint();
+        String model = text(modelInput);
+        String key = text(apiKeyInput);
+
+        if (endpoint.isEmpty()) {
+            endpointInput.setError("Indica el endpoint");
+            return;
+        }
+        if (model.isEmpty()) {
+            modelInput.setError("Indica un modelo");
+            return;
+        }
+
+        aiPrefs.setEndpoint(endpoint);
+        aiPrefs.setModel(model);
+        aiPrefs.setApiKey(key);
+        updateAiStatus();
+    }
+
+    private void testConnection() {
+        String key = text(apiKeyInput);
+        if (key.isEmpty()) {
+            aiStatusText.setText("Pega tu clave API antes de probar.");
+            return;
+        }
         String model = text(modelInput);
         if (model.isEmpty()) {
             modelInput.setError("Indica un modelo");
             return;
         }
-        aiPrefs.setEndpoint(text(endpointInput));
-        aiPrefs.setModel(model);
-        aiPrefs.setApiKey(text(apiKeyInput));
-        updateAiStatus();
+
+        String endpoint = selectedEndpoint();
+        if (endpoint.isEmpty()) {
+            endpointInput.setError("Indica el endpoint");
+            return;
+        }
+
+        aiStatusText.setText("Probando conexión…");
+        testConnectionButton.setEnabled(false);
+        AppExecutors.getInstance().diskIO().execute(() ->
+                AiDictionaryClient.test(key, model, endpoint, (ok, message) -> {
+                    if (isAdded()) {
+                        requireActivity().runOnUiThread(() -> {
+                            aiStatusText.setText(message);
+                            testConnectionButton.setEnabled(true);
+                        });
+                    }
+                }));
     }
 
     private void updateAiStatus() {
         if (aiPrefs.hasApiKey()) {
             aiStatusText.setText("Clave guardada y cifrada en este dispositivo.");
         } else if (aiPrefs.isAiMode()) {
-            aiStatusText.setText("Modo IA activo. Añade tu clave y pulsa Guardar.");
+            aiStatusText.setText("Modo IA activo. Pega tu clave y pulsa Guardar.");
         } else {
             aiStatusText.setText("Sin clave guardada. Puedes añadirla cuando actives el modo IA.");
         }
