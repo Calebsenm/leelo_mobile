@@ -30,6 +30,7 @@ public class OnboardingActivity extends AppCompatActivity {
     private static final int[] PAGES = {
             R.layout.onboarding_page_read,
             R.layout.onboarding_page_modes,
+            R.layout.onboarding_page_add,
             R.layout.onboarding_page_generate
     };
 
@@ -58,7 +59,8 @@ public class OnboardingActivity extends AppCompatActivity {
         pageContainer = findViewById(R.id.pageContainer);
         nextButton = findViewById(R.id.nextButton);
         pageIndicator = findViewById(R.id.pageIndicator);
-        dots = new View[]{findViewById(R.id.dot1), findViewById(R.id.dot2), findViewById(R.id.dot3)};
+        dots = new View[]{findViewById(R.id.dot1), findViewById(R.id.dot2),
+                findViewById(R.id.dot3), findViewById(R.id.dot4)};
 
         nextButton.setOnClickListener(v -> {
             if (current == PAGES.length - 1) {
@@ -162,6 +164,12 @@ public class OnboardingActivity extends AppCompatActivity {
             revealInOrder(base + 160L, page.findViewById(R.id.aiLine1),
                     page.findViewById(R.id.aiLine2), page.findViewById(R.id.aiLine3));
         } else if (index == 2) {
+            revealInOrder(base + 100L,
+                    page.findViewById(R.id.addOption1),
+                    page.findViewById(R.id.addOption2),
+                    page.findViewById(R.id.addOption3),
+                    page.findViewById(R.id.addOption4));
+        } else if (index == 3) {
             View progress = page.findViewById(R.id.demoProgress);
             if (progress != null) {
                 progress.setPivotX(0f);

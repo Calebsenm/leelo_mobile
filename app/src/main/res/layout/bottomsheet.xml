@@ -33,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:text="Escribir texto"
+            android:text="Escribir texto simple"
             android:textColor="?attr/colorOnSurface"
             android:textSize="15sp" />
     </LinearLayout>
