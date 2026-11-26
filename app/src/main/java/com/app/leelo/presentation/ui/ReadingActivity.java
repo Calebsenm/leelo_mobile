@@ -698,7 +698,8 @@ public class ReadingActivity extends AppCompatActivity {
         if (!wordExists && aiPrefs.isAiMode() && !aiPrefs.getApiKey().isEmpty()) {
             String apiKey = aiPrefs.getApiKey();
             String model = aiPrefs.getModel();
-            executors.diskIO().execute(() -> AiDictionaryClient.fetch(selectedWord, apiKey, model, result ->
+            executors.diskIO().execute(() -> AiDictionaryClient.fetch(
+                    selectedWord, apiKey, model, aiPrefs.getEndpoint(), result ->
                     runOnUiThread(() -> {
                         if (!popupWindow.isShowing()) {
                             return;

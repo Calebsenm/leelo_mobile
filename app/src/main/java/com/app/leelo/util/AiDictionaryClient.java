@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
 /** OpenAI-compatible dictionary lookup: English meaning + Spanish translation + context. */
 public final class AiDictionaryClient {
 
-    private static final String ENDPOINT = "https://api.openai.com/v1/chat/completions";
+    private static final String DEFAULT_ENDPOINT = "https://api.openai.com/v1/chat/completions";
     private static final int CONNECT_TIMEOUT_MS = 10_000;
     private static final int READ_TIMEOUT_MS = 20_000;
     private static final String SYSTEM_PROMPT =
@@ -44,7 +44,7 @@ public final class AiDictionaryClient {
     private AiDictionaryClient() {
     }
 
-    public static void fetch(String word, String apiKey, String model, Callback callback) {
+    public static void fetch(String word, String apiKey, String model, String endpoint, Callback callback) {
         HttpURLConnection connection = null;
         Result result = null;
         try {
@@ -58,7 +58,7 @@ public final class AiDictionaryClient {
             messages.put(new JSONObject().put("role", "user").put("content", "Word: " + word));
             body.put("messages", messages);
 
-            connection = (HttpURLConnection) new URL(ENDPOINT).openConnection();
+            connection = (HttpURLConnection) new URL(normalizeEndpoint(endpoint)).openConnection();
             connection.setRequestMethod("POST");
             connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
             connection.setReadTimeout(READ_TIMEOUT_MS);
@@ -83,6 +83,19 @@ public final class AiDictionaryClient {
             }
         }
         callback.onResult(result);
+    }
+
+    /** Accepts either a base URL or a full /chat/completions URL. */
+    private static String normalizeEndpoint(String endpoint) {
+        String value = endpoint == null || endpoint.trim().isEmpty()
+                ? DEFAULT_ENDPOINT : endpoint.trim();
+        if (value.endsWith("/chat/completions")) {
+            return value;
+        }
+        while (value.endsWith("/")) {
+            value = value.substring(0, value.length() - 1);
+        }
+        return value + "/chat/completions";
     }
 
     private static String read(InputStream input) throws IOException {

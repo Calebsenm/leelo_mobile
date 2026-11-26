@@ -1,25 +1,22 @@
 package com.app.leelo.presentation.ui;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
 import com.app.leelo.R;
 import com.app.leelo.util.AiPreferences;
 import com.app.leelo.util.ThemeManager;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.textfield.TextInputEditText;
-
-import java.util.function.Consumer;
 
 public class SettingFragment extends Fragment {
 
@@ -29,6 +26,11 @@ public class SettingFragment extends Fragment {
     private ImageView themeIcon;
     private RadioGroup modeRadioGroup;
     private View aiSettingsContainer;
+    private TextInputEditText endpointInput;
+    private TextInputEditText modelInput;
+    private TextInputEditText apiKeyInput;
+    private MaterialButton clearApiKeyButton;
+    private TextView aiStatusText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -40,6 +42,11 @@ public class SettingFragment extends Fragment {
         themeIcon = view.findViewById(R.id.themeIcon);
         modeRadioGroup = view.findViewById(R.id.modeRadioGroup);
         aiSettingsContainer = view.findViewById(R.id.aiSettingsContainer);
+        endpointInput = view.findViewById(R.id.endpointInput);
+        modelInput = view.findViewById(R.id.modelInput);
+        apiKeyInput = view.findViewById(R.id.apiKeyInput);
+        clearApiKeyButton = view.findViewById(R.id.clearApiKeyButton);
+        aiStatusText = view.findViewById(R.id.aiStatusText);
 
         darkModeSwitch.setChecked(themeManager.isDarkMode());
         updateIcon(themeManager.isDarkMode());
@@ -57,33 +64,51 @@ public class SettingFragment extends Fragment {
             boolean isAi = checkedId == R.id.radioAiMode;
             aiPrefs.setAiMode(isAi);
             aiSettingsContainer.setVisibility(isAi ? View.VISIBLE : View.GONE);
+            updateAiStatus();
         });
 
-        TextInputEditText apiKeyInput = view.findViewById(R.id.apiKeyInput);
-        TextInputEditText modelInput = view.findViewById(R.id.modelInput);
-        apiKeyInput.setText(aiPrefs.getApiKey());
+        endpointInput.setText(aiPrefs.getEndpoint());
         modelInput.setText(aiPrefs.getModel());
-        autoSave(apiKeyInput, aiPrefs::setApiKey);
-        autoSave(modelInput, aiPrefs::setModel);
+        apiKeyInput.setText(aiPrefs.getApiKey());
 
+        view.<MaterialButton>findViewById(R.id.saveAiSettingsButton)
+                .setOnClickListener(v -> saveAiSettings());
+        clearApiKeyButton.setOnClickListener(v -> {
+            aiPrefs.clearApiKey();
+            apiKeyInput.setText("");
+            updateAiStatus();
+        });
+
+        updateAiStatus();
         return view;
     }
 
-    private void autoSave(EditText input, Consumer<String> saver) {
-        input.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
+    private void saveAiSettings() {
+        String model = text(modelInput);
+        if (model.isEmpty()) {
+            modelInput.setError("Indica un modelo");
+            return;
+        }
+        aiPrefs.setEndpoint(text(endpointInput));
+        aiPrefs.setModel(model);
+        aiPrefs.setApiKey(text(apiKeyInput));
+        updateAiStatus();
+    }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+    private void updateAiStatus() {
+        if (aiPrefs.hasApiKey()) {
+            aiStatusText.setText("Clave guardada y cifrada en este dispositivo.");
+        } else if (aiPrefs.isAiMode()) {
+            aiStatusText.setText("Modo IA activo. Añade tu clave y pulsa Guardar.");
+        } else {
+            aiStatusText.setText("Sin clave guardada. Puedes añadirla cuando actives el modo IA.");
+        }
+        clearApiKeyButton.setEnabled(aiPrefs.hasApiKey());
+    }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                saver.accept(s.toString());
-            }
-        });
+    private static String text(TextInputEditText input) {
+        CharSequence value = input.getText();
+        return value == null ? "" : value.toString().trim();
     }
 
     private void updateIcon(boolean isDark) {

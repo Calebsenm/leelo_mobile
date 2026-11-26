@@ -114,11 +114,11 @@
                 app:hintTextColor="?attr/colorOnSurfaceVariant">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/apiKeyInput"
+                    android:id="@+id/endpointInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Clave API"
-                    android:inputType="textPassword"
+                    android:hint="Endpoint"
+                    android:inputType="textUri"
                     android:textColor="?attr/colorOnSurface" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -141,11 +141,55 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:boxStrokeColor="?attr/colorOutline"
+                app:endIconMode="password_toggle"
+                app:hintTextColor="?attr/colorOnSurfaceVariant">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/apiKeyInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Clave API"
+                    android:inputType="textPassword"
+                    android:textColor="?attr/colorOnSurface" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/saveAiSettingsButton"
+                style="@style/Widget.Leelo.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="16dp"
+                android:text="Guardar"
+                android:textSize="14sp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/clearApiKeyButton"
+                style="@style/Widget.Leelo.TextButton"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="Borrar clave"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/aiStatusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="12sp" />
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="La clave se guarda solo en este dispositivo. Compatible con OpenAI (por defecto, gpt-4o-mini)."
+                android:text="Endpoint compatible con OpenAI. Pega la URL base (ej. https://openrouter.ai/api/v1) o la URL completa. La clave se cifra en este dispositivo; también puedes editarla o borrarla."
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="12sp" />
         </LinearLayout>

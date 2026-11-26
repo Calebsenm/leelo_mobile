@@ -44,6 +44,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.constraintlayout)
     implementation(libs.browser)
+    implementation(libs.securityCrypto)
     
     // Room database
     implementation("androidx.room:room-runtime:2.6.1")
