@@ -28,6 +28,7 @@ import com.google.android.material.button.MaterialButton;
 public class OnboardingActivity extends AppCompatActivity {
 
     private static final int[] PAGES = {
+            R.layout.onboarding_page_welcome,
             R.layout.onboarding_page_read,
             R.layout.onboarding_page_modes,
             R.layout.onboarding_page_add,
@@ -60,7 +61,7 @@ public class OnboardingActivity extends AppCompatActivity {
         nextButton = findViewById(R.id.nextButton);
         pageIndicator = findViewById(R.id.pageIndicator);
         dots = new View[]{findViewById(R.id.dot1), findViewById(R.id.dot2),
-                findViewById(R.id.dot3), findViewById(R.id.dot4)};
+                findViewById(R.id.dot3), findViewById(R.id.dot4), findViewById(R.id.dot5)};
 
         nextButton.setOnClickListener(v -> {
             if (current == PAGES.length - 1) {
@@ -149,13 +150,23 @@ public class OnboardingActivity extends AppCompatActivity {
             return;
         }
         long base = afterTransition ? duration + 40L : 60L;
-        revealInOrder(base, page.findViewById(R.id.pageTitle), page.findViewById(R.id.pageBody));
 
         if (index == 0) {
+            revealInOrder(base, page.findViewById(R.id.welcomeEyebrow));
+            revealInOrder(base + 60L, page.findViewById(R.id.pageTitle));
+            revealInOrder(base + 140L, page.findViewById(R.id.pageBody));
+            drawLine(page.findViewById(R.id.welcomeRule), base + 220L, duration);
+            drawLine(page.findViewById(R.id.welcomeUnderline), base + 400L, duration);
+            return;
+        }
+
+        revealInOrder(base, page.findViewById(R.id.pageTitle), page.findViewById(R.id.pageBody));
+
+        if (index == 1) {
             highlightWord(page.findViewById(R.id.demoSentence), "ticket");
             revealInOrder(base + 160L, page.findViewById(R.id.demoPopup));
             revealInOrder(base + 320L, page.findViewById(R.id.demoSavedChip));
-        } else if (index == 1) {
+        } else if (index == 2) {
             View aiCard = page.findViewById(R.id.aiCard);
             if (aiCard != null) {
                 aiCard.setAlpha(0.6f);
@@ -163,23 +174,26 @@ public class OnboardingActivity extends AppCompatActivity {
             }
             revealInOrder(base + 160L, page.findViewById(R.id.aiLine1),
                     page.findViewById(R.id.aiLine2), page.findViewById(R.id.aiLine3));
-        } else if (index == 2) {
+        } else if (index == 3) {
             revealInOrder(base + 100L,
                     page.findViewById(R.id.addOption1),
                     page.findViewById(R.id.addOption2),
                     page.findViewById(R.id.addOption3),
                     page.findViewById(R.id.addOption4));
-        } else if (index == 3) {
-            View progress = page.findViewById(R.id.demoProgress);
-            if (progress != null) {
-                progress.setPivotX(0f);
-                progress.setScaleX(0f);
-                progress.animate().scaleX(1f).setStartDelay(base + 80L)
-                        .setDuration(duration + 180L).start();
-            }
+        } else if (index == 4) {
+            drawLine(page.findViewById(R.id.demoProgress), base + 80L, duration + 180L);
             revealInOrder(base + 260L, page.findViewById(R.id.demoResult));
             revealInOrder(base + 420L, page.findViewById(R.id.demoSavedChip));
         }
+    }
+
+    private void drawLine(View view, long delay, long length) {
+        if (view == null) {
+            return;
+        }
+        view.setPivotX(0f);
+        view.setScaleX(0f);
+        view.animate().scaleX(1f).setStartDelay(delay).setDuration(length).start();
     }
 
     private void revealInOrder(long delay, View... views) {
