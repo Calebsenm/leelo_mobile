@@ -33,6 +33,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.collection.LruCache;
 import androidx.recyclerview.widget.RecyclerView;
@@ -102,6 +105,7 @@ public class ReadingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reading);
+        applySystemBarInsets(findViewById(R.id.readingRoot));
 
         textRepository = TextRepository.RepositoryProvider.getInstance(this);
         wordRepository = WordRepository.RepositoryProvider.getInstance(this);
@@ -1004,6 +1008,20 @@ public class ReadingActivity extends AppCompatActivity {
 
     private int dpToPx(int dp) {
         return Math.round(dp * getResources().getDisplayMetrics().density);
+    }
+
+    private void applySystemBarInsets(View root) {
+        ViewCompat.setOnApplyWindowInsetsListener(root, (view, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            view.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    systemBars.bottom
+            );
+            return insets;
+        });
+        ViewCompat.requestApplyInsets(root);
     }
 
     private void speakWord(String word) {

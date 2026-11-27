@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="Texts"
+    <item android:title="Textos"
           android:icon="@drawable/baseline_book_24"
           android:id="@+id/texts" />
-    <item android:title="Words"
+    <item android:title="Palabras"
           android:icon="@drawable/baseline_translate_24"
           android:id="@+id/words" />
-    <item android:title="Settings"
+    <item android:title="Ajustes"
           android:icon="@drawable/baseline_settings_24"
           android:id="@+id/settings"/>
 </menu>

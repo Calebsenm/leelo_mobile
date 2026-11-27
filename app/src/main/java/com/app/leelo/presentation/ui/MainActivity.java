@@ -1,7 +1,11 @@
 package com.app.leelo.presentation.ui;
 
 import android.os.Bundle;
+import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -26,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        applyStatusBarInset(binding.getRoot());
         
         if (savedInstanceState == null) {
             replaceFragment(new TextFragment());
@@ -60,5 +65,19 @@ public class MainActivity extends AppCompatActivity {
     public void navigateToTexts() {
         binding.bottomNavigationView.getMenu().findItem(R.id.texts).setChecked(true);
         replaceFragment(new TextFragment());
+    }
+
+    private void applyStatusBarInset(View root) {
+        ViewCompat.setOnApplyWindowInsetsListener(root, (view, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            view.setPadding(
+                    systemBars.left,
+                    systemBars.top,
+                    systemBars.right,
+                    view.getPaddingBottom()
+            );
+            return insets;
+        });
+        ViewCompat.requestApplyInsets(root);
     }
 }

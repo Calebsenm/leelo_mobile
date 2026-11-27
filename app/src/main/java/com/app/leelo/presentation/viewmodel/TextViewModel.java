@@ -38,19 +38,29 @@ public class TextViewModel extends ViewModel {
 
     // CREATE
     public void insertText(Text text) {
+        insertText(text, null);
+    }
+
+    public void insertText(Text text, TextRepository.OnOperationCallback callback) {
         isLoading.setValue(true);
         repository.insertText(text, (success, id) -> {
             isLoading.postValue(false);
             if (!success) error.postValue("Error al guardar el texto");
+            if (callback != null) callback.onComplete(success, id);
         });
     }
 
     // UPDATE
     public void updateText(Text text) {
+        updateText(text, null);
+    }
+
+    public void updateText(Text text, TextRepository.OnOperationCallback callback) {
         isLoading.setValue(true);
         repository.updateText(text, (success, id) -> {
             isLoading.postValue(false);
             if (!success) error.postValue("Error al actualizar el texto");
+            if (callback != null) callback.onComplete(success, id);
         });
     }
 

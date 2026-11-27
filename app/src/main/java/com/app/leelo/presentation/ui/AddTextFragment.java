@@ -1,6 +1,8 @@
 package com.app.leelo.presentation.ui;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +26,7 @@ import com.app.leelo.util.AiTextGenerator;
 import com.app.leelo.util.AppExecutors;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.textfield.TextInputLayout;
 
 public class AddTextFragment extends Fragment {
 
@@ -32,6 +35,7 @@ public class AddTextFragment extends Fragment {
             "B2 - Intermedio alto", "C1 - Avanzado"
     };
     private EditText titleEditText, contentEditText, topicInput;
+    private TextInputLayout titleInputLayout, contentInputLayout;
     private Button saveButton;
     private Spinner levelSpinner;
     private MaterialButton generateTextButton;
@@ -39,6 +43,7 @@ public class AddTextFragment extends Fragment {
     private TextView generationStatusText;
     private View aiGenerateContainer;
     private boolean isEditMode = false;
+    private boolean isSaving = false;
     private long editId = -1;
     private boolean generatedByAi = false;
     private String generatedTopic = "";
@@ -61,6 +66,10 @@ public class AddTextFragment extends Fragment {
 
         titleEditText = view.findViewById(R.id.inputTittle);
         contentEditText = view.findViewById(R.id.inputText);
+        titleInputLayout = view.findViewById(R.id.titleInputLayout);
+        contentInputLayout = view.findViewById(R.id.contentInputLayout);
+        clearErrorOnEdit(titleEditText, titleInputLayout);
+        clearErrorOnEdit(contentEditText, contentInputLayout);
         saveButton = view.findViewById(R.id.save_text_button);
         aiGenerateContainer = view.findViewById(R.id.aiGenerateContainer);
         topicInput = view.findViewById(R.id.topicInput);
@@ -146,11 +155,25 @@ public class AddTextFragment extends Fragment {
     }
 
     private void saveText() {
+        if (isSaving) {
+            return;
+        }
+
         String title = titleEditText.getText().toString().trim();
         String content = contentEditText.getText().toString().trim();
 
-        if (title.isEmpty() || content.isEmpty()) {
-            Toast.makeText(getContext(), "Completa todos los campos", Toast.LENGTH_SHORT).show();
+        boolean hasTitle = !title.isEmpty();
+        boolean hasContent = !content.isEmpty();
+        titleInputLayout.setError(hasTitle ? null : "Escribe un título");
+        contentInputLayout.setError(hasContent ? null : "Escribe el texto");
+
+        if (!hasTitle || !hasContent) {
+            Toast.makeText(requireContext(), "Completa el título y el texto", Toast.LENGTH_SHORT).show();
+            if (!hasTitle) {
+                titleEditText.requestFocus();
+            } else {
+                contentEditText.requestFocus();
+            }
             return;
         }
 
@@ -158,14 +181,34 @@ public class AddTextFragment extends Fragment {
         text.setTitle(title);
         text.setContent(content);
 
+        isSaving = true;
+        saveButton.setEnabled(false);
+        saveButton.setText("Guardando…");
+
+        TextRepository.OnOperationCallback callback = (success, id) -> {
+            if (!isAdded()) {
+                return;
+            }
+            if (!success) {
+                isSaving = false;
+                saveButton.setEnabled(true);
+                saveButton.setText("Guardar");
+                Toast.makeText(requireContext(), "No se pudo guardar. Inténtalo de nuevo.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            showSaveConfirmation(title);
+        };
+
         if (isEditMode) {
             text.setId(editId);
-            viewModel.updateText(text);
+            viewModel.updateText(text, callback);
         } else {
-            viewModel.insertText(text);
+            viewModel.insertText(text, callback);
         }
+    }
 
-        if (generatedByAi && isAdded()) {
+    private void showSaveConfirmation(String title) {
+        if (generatedByAi) {
             String levelLabel = generatedLevel.isEmpty() ? "—" : generatedLevel;
             new MaterialAlertDialogBuilder(requireContext())
                     .setTitle("Texto guardado")
@@ -173,7 +216,32 @@ public class AddTextFragment extends Fragment {
                     .setPositiveButton("Aceptar", (dialog, which) -> navigateBack())
                     .setOnCancelListener(dialog -> navigateBack())
                     .show();
+            return;
         }
+
+        Toast.makeText(
+                requireContext(),
+                isEditMode ? "Cambios guardados" : "Texto guardado",
+                Toast.LENGTH_SHORT
+        ).show();
+        navigateBack();
+    }
+
+    private void clearErrorOnEdit(EditText editText, TextInputLayout inputLayout) {
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                inputLayout.setError(null);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
     }
 
     private void loadTextForEditing(long id) {

@@ -20,6 +20,7 @@ import com.app.leelo.presentation.viewmodel.TextViewModel;
 import com.app.leelo.presentation.viewmodel.ViewModelFactory;
 import com.app.leelo.domain.repository.TextRepository;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import java.util.List;
 import com.app.leelo.presentation.ui.ReadingActivity;
 
@@ -201,10 +202,20 @@ public class TextFragment extends Fragment {
 
         delete.setOnClickListener(v -> {
             dialog.dismiss();
-            viewModel.deleteText(info.getId());
+            confirmDeleteText(info);
         });
 
         dialog.show();
+    }
+
+    private void confirmDeleteText(TextInfo info) {
+        String title = info.getTitle() != null ? info.getTitle() : "este texto";
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Eliminar texto")
+                .setMessage("¿Eliminar «" + title + "»? Esta acción no se puede deshacer.")
+                .setNegativeButton("Cancelar", null)
+                .setPositiveButton("Eliminar", (dialog, which) -> viewModel.deleteText(info.getId()))
+                .show();
     }
 
     private void editText(long id) {

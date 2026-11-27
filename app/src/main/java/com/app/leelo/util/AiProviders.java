@@ -30,9 +30,7 @@ public final class AiProviders {
                             "openai/gpt-oss-20b",
                             "openai/gpt-oss-120b"
                     },
-                    "Groq (chat): llama-3.1-8b-instant ~560 t/s · llama-3.3-70b-versatile ~280 t/s · "
-                            + "gpt-oss-20b $0.075/$0.30 · gpt-oss-120b $0.15/$0.60 por 1M tokens. "
-                            + "Whisper y prompt-guard no son modelos de chat."),
+                    "Groq: elige un modelo de la lista. El sugerido funciona bien para leer y generar textos."),
             new Preset(
                     "OpenAI",
                     "https://api.openai.com/v1",
